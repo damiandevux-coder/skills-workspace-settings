@@ -176,8 +176,8 @@ export default function SkillDetailPage() {
   const isInstalled = MOCK_INSTALLED_SKILLS.some((s) => s.id === skillId);
 
   return (
-    <div className="min-h-screen bg-[#070708]">
-      {/* Header */}
+    <div>
+      {/* Skill Header */}
       <div className="border-b border-[#222226] bg-[#0b0b0c]">
         <div className="mx-auto max-w-[1200px] px-4 sm:px-6 py-4">
           <button

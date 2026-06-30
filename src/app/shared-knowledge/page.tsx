@@ -12,21 +12,23 @@ import {
   MoreVertical,
   HardDrive,
   Bot,
-  ArrowLeft,
   Upload,
   FolderOpen,
   File,
+  Pencil,
+  Trash2,
 } from "lucide-react";
-import { useRouter } from "next/navigation";
 import { MOCK_SHARED_KNOWLEDGE } from "@/data/mock-shared-knowledge";
 import { KnowledgeItem, SharedKnowledge } from "@/types/skills";
 
 function KnowledgeTree({
   item,
   depth = 0,
+  onPreview,
 }: {
   item: KnowledgeItem;
   depth?: number;
+  onPreview?: (item: KnowledgeItem) => void;
 }) {
   const [expanded, setExpanded] = useState(false);
   const isFolder = item.type === "folder";
@@ -34,9 +36,9 @@ function KnowledgeTree({
   return (
     <div>
       <div
-        className="flex items-center gap-2 rounded-md py-1.5 px-2 hover:bg-[#151519] cursor-pointer transition-colors"
+        className="group flex items-center gap-2 rounded-md py-1.5 px-2 hover:bg-[#151519] cursor-pointer transition-colors"
         style={{ paddingLeft: `${8 + depth * 16}px` }}
-        onClick={() => isFolder && setExpanded(!expanded)}
+        onClick={() => (isFolder ? setExpanded(!expanded) : onPreview?.(item))}
       >
         {isFolder ? (
           expanded ? (
@@ -58,6 +60,15 @@ function KnowledgeTree({
         )}
         <span className="text-[13px] text-[#f5f5f5] min-w-0 flex-1 truncate">{item.name}</span>
         {item.size && <span className="text-[10px] text-[#85858e]">{item.size}</span>}
+        {/* Hover actions */}
+        <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+          <button className="p-1 rounded hover:bg-[#222226] text-[#85858e] hover:text-[#f5f5f5]">
+            <Pencil className="h-3 w-3" />
+          </button>
+          <button className="p-1 rounded hover:bg-[#222226] text-[#85858e] hover:text-[#ef4444]">
+            <Trash2 className="h-3 w-3" />
+          </button>
+        </div>
       </div>
       <AnimatePresence>
         {isFolder && expanded && item.children && (
@@ -69,7 +80,7 @@ function KnowledgeTree({
             className="overflow-hidden"
           >
             {item.children.map((child) => (
-              <KnowledgeTree key={child.id} item={child} depth={depth + 1} />
+              <KnowledgeTree key={child.id} item={child} depth={depth + 1} onPreview={onPreview} />
             ))}
           </motion.div>
         )}
@@ -78,7 +89,13 @@ function KnowledgeTree({
   );
 }
 
-function KnowledgeCard({ knowledge }: { knowledge: SharedKnowledge }) {
+function KnowledgeCard({
+  knowledge,
+  onPreview,
+}: {
+  knowledge: SharedKnowledge;
+  onPreview?: (item: KnowledgeItem) => void;
+}) {
   const [isExpanded, setIsExpanded] = useState(false);
 
   const fileCount = useMemo(() => {
@@ -170,7 +187,7 @@ function KnowledgeCard({ knowledge }: { knowledge: SharedKnowledge }) {
               </div>
               <div className="rounded-lg border border-[#222226] bg-[#101010]">
                 {knowledge.items.map((item) => (
-                  <KnowledgeTree key={item.id} item={item} />
+                  <KnowledgeTree key={item.id} item={item} onPreview={onPreview} />
                 ))}
               </div>
 
@@ -203,9 +220,85 @@ function KnowledgeCard({ knowledge }: { knowledge: SharedKnowledge }) {
   );
 }
 
+// ── File Preview Modal ────────────────────────────────────────────────────
+function FilePreviewModal({
+  item,
+  onClose,
+}: {
+  item: KnowledgeItem | null;
+  onClose: () => void;
+}) {
+  if (!item) return null;
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        className="absolute inset-0 bg-black/60 backdrop-blur-[3px]"
+        onClick={onClose}
+      />
+      <motion.div
+        initial={{ opacity: 0, scale: 0.95, y: 20 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        exit={{ opacity: 0, scale: 0.95, y: 20 }}
+        className="relative w-full max-w-[640px] max-h-[80vh] rounded-2xl border border-[#303036] bg-[#070708] shadow-2xl flex flex-col"
+      >
+        {/* Header */}
+        <div className="flex items-center justify-between border-b border-[#222226] px-5 py-3">
+          <div className="flex items-center gap-2.5">
+            <FileText className="h-4 w-4 text-[#85858e]" />
+            <span className="text-sm font-medium text-[#f5f5f5]">{item.name}</span>
+            {item.size && (
+              <span className="text-[11px] text-[#85858e]">{item.size}</span>
+            )}
+          </div>
+          <button
+            onClick={onClose}
+            className="flex h-7 w-7 items-center justify-center rounded-lg text-[#85858e] transition-colors hover:bg-[#151519] hover:text-[#f5f5f5]"
+          >
+            ×
+          </button>
+        </div>
+
+        {/* Content */}
+        <div className="flex-1 overflow-auto p-5">
+          {item.content ? (
+            <pre className="text-[13px] text-[#a7a7ad] font-mono whitespace-pre-wrap leading-relaxed">
+              {item.content}
+            </pre>
+          ) : (
+            <div className="flex flex-col items-center justify-center py-12 text-center">
+              <FileText className="h-8 w-8 text-[#85858e] mb-3" />
+              <p className="text-sm text-[#85858e]">Preview not available</p>
+              <p className="text-[11px] text-[#85858e] mt-1">
+                This file type cannot be previewed.
+              </p>
+            </div>
+          )}
+        </div>
+
+        {/* Footer */}
+        <div className="flex items-center justify-end gap-2 border-t border-[#222226] px-5 py-3">
+          <button
+            onClick={onClose}
+            className="rounded-lg border border-[#303036] px-3 py-1.5 text-[12px] text-[#a7a7ad] transition-colors hover:border-[#5a5a5e] hover:text-[#f5f5f5]"
+          >
+            Close
+          </button>
+          <button className="rounded-lg bg-[#f5f5f5] px-3 py-1.5 text-[12px] font-medium text-[#111111] transition-opacity hover:opacity-90">
+            Download
+          </button>
+        </div>
+      </motion.div>
+    </div>
+  );
+}
+
 export default function SharedKnowledgePage() {
-  const router = useRouter();
   const [searchQuery, setSearchQuery] = useState("");
+  const [previewItem, setPreviewItem] = useState<KnowledgeItem | null>(null);
 
   const filtered = useMemo(() => {
     if (!searchQuery.trim()) return MOCK_SHARED_KNOWLEDGE;
@@ -218,57 +311,57 @@ export default function SharedKnowledgePage() {
   }, [searchQuery]);
 
   return (
-    <div className="min-h-screen bg-[#070708]">
-      <div className="mx-auto max-w-[1200px] px-4 sm:px-6 py-10">
-        {/* Header */}
-        <div className="space-y-4 mb-8">
-          <button
-            onClick={() => router.push("/")}
-            className="inline-flex items-center gap-2 text-sm text-[#85858e] hover:text-[#f5f5f5] transition-colors"
-          >
-            <ArrowLeft className="h-4 w-4" />
-            Back to Skills
+    <div className="mx-auto max-w-[1200px] px-4 sm:px-6 py-8">
+      {/* Header */}
+      <div className="space-y-4 mb-8">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-xl font-semibold text-[#f5f5f5]">Shared Knowledge</h1>
+            <p className="text-sm text-[#85858e] mt-1">
+              Knowledge bases that agents can access and reference during conversations.
+            </p>
+          </div>
+          <button className="inline-flex items-center gap-2 rounded-lg bg-[#f5f5f5] px-4 py-2 text-sm font-medium text-[#111111] transition-opacity hover:opacity-90">
+            <Plus className="h-4 w-4" />
+            New Knowledge Base
           </button>
-
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-xl font-semibold text-[#f5f5f5]">Shared Knowledge</h1>
-              <p className="text-sm text-[#85858e] mt-1">
-                Knowledge bases that agents can access and reference during conversations.
-              </p>
-            </div>
-            <button className="inline-flex items-center gap-2 rounded-lg bg-[#f5f5f5] px-4 py-2 text-sm font-medium text-[#111111] transition-opacity hover:opacity-90">
-              <Plus className="h-4 w-4" />
-              New Knowledge Base
-            </button>
-          </div>
-
-          <div className="relative">
-            <Search className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-[#85858e]" />
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search knowledge bases..."
-              className="h-10 w-full rounded-lg border border-[#303036] bg-[#101010] pl-10 pr-4 text-sm text-[#f5f5f5] outline-none placeholder:text-[#85858e] focus:border-[#5a5a5e]"
-            />
-          </div>
         </div>
 
-        {/* Grid */}
-        <div className="space-y-3">
-          {filtered.map((knowledge) => (
-            <KnowledgeCard key={knowledge.id} knowledge={knowledge} />
-          ))}
+        <div className="relative">
+          <Search className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-[#85858e]" />
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Search knowledge bases..."
+            className="h-10 w-full rounded-lg border border-[#303036] bg-[#101010] pl-10 pr-4 text-sm text-[#f5f5f5] outline-none placeholder:text-[#85858e] focus:border-[#5a5a5e]"
+          />
         </div>
-
-        {filtered.length === 0 && (
-          <div className="rounded-xl border border-[#333333] bg-[#181818] px-5 py-12 text-center">
-            <HardDrive className="mx-auto mb-3 h-5 w-5 text-[#696969]" />
-            <p className="text-sm text-[#85858e]">No knowledge bases match your search.</p>
-          </div>
-        )}
       </div>
+
+      {/* Grid */}
+      <div className="space-y-3">
+        {filtered.map((knowledge) => (
+          <KnowledgeCard
+            key={knowledge.id}
+            knowledge={knowledge}
+            onPreview={setPreviewItem}
+          />
+        ))}
+      </div>
+
+      {filtered.length === 0 && (
+        <div className="rounded-xl border border-[#333333] bg-[#181818] px-5 py-12 text-center">
+          <HardDrive className="mx-auto mb-3 h-5 w-5 text-[#696969]" />
+          <p className="text-sm text-[#85858e]">No knowledge bases match your search.</p>
+        </div>
+      )}
+
+      <AnimatePresence>
+        {previewItem && (
+          <FilePreviewModal item={previewItem} onClose={() => setPreviewItem(null)} />
+        )}
+      </AnimatePresence>
     </div>
   );
 }
