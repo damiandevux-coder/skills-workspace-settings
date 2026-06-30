@@ -20,6 +20,7 @@ import {
 } from "lucide-react";
 import { MOCK_SHARED_KNOWLEDGE } from "@/data/mock-shared-knowledge";
 import { KnowledgeItem, SharedKnowledge } from "@/types/skills";
+import { NewKnowledgeBaseModal } from "@/components/NewKnowledgeBaseModal";
 
 function KnowledgeTree({
   item,
@@ -299,16 +300,18 @@ function FilePreviewModal({
 export default function SharedKnowledgePage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [previewItem, setPreviewItem] = useState<KnowledgeItem | null>(null);
+  const [isNewModalOpen, setIsNewModalOpen] = useState(false);
+  const [knowledgeBases, setKnowledgeBases] = useState(MOCK_SHARED_KNOWLEDGE);
 
   const filtered = useMemo(() => {
-    if (!searchQuery.trim()) return MOCK_SHARED_KNOWLEDGE;
+    if (!searchQuery.trim()) return knowledgeBases;
     const q = searchQuery.toLowerCase();
-    return MOCK_SHARED_KNOWLEDGE.filter(
+    return knowledgeBases.filter(
       (k) =>
         k.name.toLowerCase().includes(q) ||
         k.description.toLowerCase().includes(q)
     );
-  }, [searchQuery]);
+  }, [searchQuery, knowledgeBases]);
 
   return (
     <div className="mx-auto max-w-[1200px] px-4 sm:px-6 py-8">
@@ -321,7 +324,10 @@ export default function SharedKnowledgePage() {
               Knowledge bases that agents can access and reference during conversations.
             </p>
           </div>
-          <button className="inline-flex items-center gap-2 rounded-lg bg-[#f5f5f5] px-4 py-2 text-sm font-medium text-[#111111] transition-opacity hover:opacity-90">
+          <button
+            onClick={() => setIsNewModalOpen(true)}
+            className="inline-flex items-center gap-2 rounded-lg bg-[#f5f5f5] px-4 py-2 text-sm font-medium text-[#111111] transition-opacity hover:opacity-90"
+          >
             <Plus className="h-4 w-4" />
             New Knowledge Base
           </button>
@@ -360,6 +366,23 @@ export default function SharedKnowledgePage() {
       <AnimatePresence>
         {previewItem && (
           <FilePreviewModal item={previewItem} onClose={() => setPreviewItem(null)} />
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {isNewModalOpen && (
+          <NewKnowledgeBaseModal
+            isOpen={isNewModalOpen}
+            onClose={() => setIsNewModalOpen(false)}
+            onCreate={(data) => {
+              const newBase: SharedKnowledge = {
+                id: `kb-${Date.now()}`,
+                ...data,
+                items: [],
+              };
+              setKnowledgeBases((prev) => [newBase, ...prev]);
+            }}
+          />
         )}
       </AnimatePresence>
     </div>
