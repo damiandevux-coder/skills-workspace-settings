@@ -18,6 +18,7 @@ import {
   Cpu,
   HardDrive,
 } from "lucide-react";
+import { AgentCreationModal } from "./AgentCreationModal";
 
 interface NavItem {
   id: string;
@@ -79,6 +80,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const [sessionsExpanded, setSessionsExpanded] = useState(true);
   const [advancedExpanded, setAdvancedExpanded] = useState(false);
+  const [isAgentModalOpen, setIsAgentModalOpen] = useState(false);
 
   return (
     <div className="flex h-screen bg-[#070708]">
@@ -92,11 +94,14 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           <span className="text-sm font-semibold text-[#f5f5f5]">HyperCLI</span>
         </div>
 
-        {/* New Session */}
+        {/* New Agent */}
         <div className="px-3 pb-2">
-          <button className="flex w-full items-center gap-2 rounded-lg border border-[#303036] bg-[#151519] px-3 py-2 text-[13px] text-[#f5f5f5] transition-colors hover:border-[#5a5a5e]">
+          <button
+            onClick={() => setIsAgentModalOpen(true)}
+            className="flex w-full items-center gap-2 rounded-lg border border-[#303036] bg-[#151519] px-3 py-2 text-[13px] text-[#f5f5f5] transition-colors hover:border-[#5a5a5e]"
+          >
             <Plus className="h-3.5 w-3.5" />
-            New Session
+            New Agent
           </button>
         </div>
 
@@ -217,6 +222,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           {children}
         </main>
       </div>
+
+      <AgentCreationModal isOpen={isAgentModalOpen} onClose={() => setIsAgentModalOpen(false)} />
     </div>
   );
 }
