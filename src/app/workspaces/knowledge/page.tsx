@@ -9,7 +9,6 @@ import {
   FileText,
   ChevronRight,
   ChevronDown,
-  MoreVertical,
   HardDrive,
   Bot,
   Upload,
@@ -399,8 +398,13 @@ export default function WorkspaceKnowledgePage() {
   const knowledgeBases = activeWorkspace.knowledgeBases;
 
   // Deep link: /workspaces/knowledge?new=1 opens the creation modal on mount.
+  // Reads `window.location` (a platform API unavailable during SSR/static
+  // generation), so this must run post-mount in an effect rather than during
+  // render — the one-time setState here is the deliberate exception called
+  // out in the React docs for "synchronizing with an external system".
   useEffect(() => {
     if (new URLSearchParams(window.location.search).get("new") === "1") {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- one-time sync from window.location on mount, not a render-loop hazard
       setIsNewModalOpen(true);
     }
   }, []);
