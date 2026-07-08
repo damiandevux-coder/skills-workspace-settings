@@ -14,11 +14,14 @@ interface NewKnowledgeBaseModalProps {
     emoji: string;
     assignedAgents: string[];
   }) => void;
+  /** Agent names offered for assignment. Defaults to the classic mock list. */
+  agents?: string[];
 }
 
 const MOCK_AGENTS = ["claw-1", "claw-2", "claw-3", "dev-agent", "prod-agent"];
 
-export function NewKnowledgeBaseModal({ isOpen, onClose, onCreate }: NewKnowledgeBaseModalProps) {
+export function NewKnowledgeBaseModal({ isOpen, onClose, onCreate, agents }: NewKnowledgeBaseModalProps) {
+  const agentOptions = agents ?? MOCK_AGENTS;
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [emoji, setEmoji] = useState("📚");
@@ -183,7 +186,7 @@ export function NewKnowledgeBaseModal({ isOpen, onClose, onCreate }: NewKnowledg
               Select which agents can access this knowledge base
             </p>
             <div className="flex flex-wrap gap-1.5">
-              {MOCK_AGENTS.map((agent) => {
+              {agentOptions.map((agent) => {
                 const isSelected = selectedAgents.includes(agent);
                 return (
                   <button
