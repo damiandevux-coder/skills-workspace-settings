@@ -140,9 +140,11 @@ const CATEGORIES = ["General", "Development", "Research", "Support", "Creative"]
 export function AgentCreationModal({
   isOpen,
   onClose,
+  onCreated,
 }: {
   isOpen: boolean;
   onClose: () => void;
+  onCreated?: (agent: { name: string; role: string }) => void;
 }) {
   const [step, setStep] = useState<1 | 2>(1);
   const [selectedSpecialty, setSelectedSpecialty] = useState<string | null>(null);
@@ -153,6 +155,8 @@ export function AgentCreationModal({
   const selectedAgent = AGENT_SPECIALTIES.find((a) => a.id === selectedSpecialty);
 
   const handleCreate = () => {
+    const role = selectedAgent?.role ?? "Custom Agent";
+    onCreated?.({ name: name.trim() || role, role });
     onClose();
     setStep(1);
     setSelectedSpecialty(null);

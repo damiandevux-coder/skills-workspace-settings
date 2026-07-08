@@ -304,6 +304,7 @@ export function WorkspaceAppShell({ children }: { children: React.ReactNode }) {
       <AgentCreationModal
         isOpen={isAgentModalOpen}
         onClose={() => setIsAgentModalOpen(false)}
+        onCreated={(agent) => addAgent(agent.name)}
       />
     </div>
   );
