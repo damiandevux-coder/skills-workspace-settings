@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
-import { AppShell } from "@/components/AppShell";
+import { ShellGate } from "@/components/workspaces/ShellGate";
 
 const plusJakarta = Plus_Jakarta_Sans({
   variable: "--font-jakarta",
@@ -24,7 +24,7 @@ export default function RootLayout({
       <body
         className={`${plusJakarta.variable} font-sans antialiased h-screen overflow-hidden`}
       >
-        <AppShell>{children}</AppShell>
+        <ShellGate>{children}</ShellGate>
       </body>
     </html>
   );
