@@ -19,6 +19,7 @@ import {
   HardDrive,
 } from "lucide-react";
 import { AgentCreationModal } from "./AgentCreationModal";
+import { WorkspaceSwitcher } from "./workspaces/WorkspaceSwitcher";
 
 interface NavItem {
   id: string;
@@ -86,13 +87,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     <div className="flex h-screen bg-[#070708]">
       {/* Sidebar */}
       <aside className="flex w-[240px] shrink-0 flex-col border-r border-[#222226] bg-[#0b0b0c]">
-        {/* Logo */}
-        <div className="flex items-center gap-3 px-4 py-4">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#4ade80]">
-            <Cpu className="h-4 w-4 text-[#111111]" />
-          </div>
-          <span className="text-sm font-semibold text-[#f5f5f5]">HyperCLI</span>
-        </div>
+        {/* Workspace selector (always visible) */}
+        <WorkspaceSwitcher />
 
         {/* New Agent */}
         <div className="px-3 pb-2">

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
 import { ShellGate } from "@/components/workspaces/ShellGate";
+import { WorkspaceProvider } from "@/components/workspaces/WorkspaceProvider";
 
 const plusJakarta = Plus_Jakarta_Sans({
   variable: "--font-jakarta",
@@ -24,7 +25,9 @@ export default function RootLayout({
       <body
         className={`${plusJakarta.variable} font-sans antialiased h-screen overflow-hidden`}
       >
-        <ShellGate>{children}</ShellGate>
+        <WorkspaceProvider>
+          <ShellGate>{children}</ShellGate>
+        </WorkspaceProvider>
       </body>
     </html>
   );
