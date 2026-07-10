@@ -18,6 +18,7 @@ import {
   Cpu,
   HardDrive,
   Check,
+  Users,
 } from "lucide-react";
 import { AgentCreationModal } from "@/components/AgentCreationModal";
 import { NewWorkspaceModal } from "./NewWorkspaceModal";
@@ -32,6 +33,7 @@ interface NavItem {
 
 const NAV_ITEMS: NavItem[] = [
   { id: "home", label: "Workspace", href: "/workspaces", icon: LayoutGrid },
+  { id: "members", label: "Members", href: "/workspaces/members", icon: Users },
   { id: "knowledge", label: "Shared Knowledge", href: "/workspaces/knowledge", icon: HardDrive },
   { id: "files", label: "Files", href: "#", icon: FolderOpen },
   { id: "integrations", label: "Integrations", href: "#", icon: Puzzle },

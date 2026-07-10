@@ -1,7 +1,7 @@
 "use client";
 
 import React, { createContext, useContext, useState } from "react";
-import { Workspace, WorkspaceAgent } from "@/types/workspaces";
+import { Workspace, WorkspaceAgent, WorkspaceMember, WorkspaceMemberRole } from "@/types/workspaces";
 import { KnowledgeItem, SharedKnowledge } from "@/types/skills";
 import { MOCK_WORKSPACES } from "@/data/mock-workspaces";
 
@@ -18,6 +18,9 @@ interface WorkspaceContextValue {
     assignedAgents: string[];
   }) => void;
   retryFile: (knowledgeBaseId: string, fileId: string) => void;
+  inviteMember: (email: string, role: WorkspaceMemberRole) => void;
+  removeMember: (memberId: string) => void;
+  updateMemberRole: (memberId: string, role: WorkspaceMemberRole) => void;
 }
 
 const WorkspaceContext = createContext<WorkspaceContextValue | null>(null);
@@ -57,6 +60,7 @@ export function WorkspaceProvider({ children }: { children: React.ReactNode }) {
       color: data.color,
       agents: [],
       knowledgeBases: [],
+      members: [],
     };
     setWorkspaces((prev) => [...prev, ws]);
     setActiveWorkspaceId(ws.id);
@@ -106,6 +110,44 @@ export function WorkspaceProvider({ children }: { children: React.ReactNode }) {
     setTimeout(() => applyStatus("ready"), 1500);
   };
 
+  const inviteMember = (email: string, role: WorkspaceMemberRole) => {
+    const member: WorkspaceMember = {
+      id: `mem-${Date.now()}`,
+      email: email.trim(),
+      role,
+      status: "pending",
+      invitedAt: new Date().toISOString(),
+    };
+    setWorkspaces((prev) =>
+      prev.map((w) =>
+        w.id === activeWorkspace.id ? { ...w, members: [...w.members, member] } : w
+      )
+    );
+  };
+
+  const removeMember = (memberId: string) => {
+    setWorkspaces((prev) =>
+      prev.map((w) =>
+        w.id === activeWorkspace.id
+          ? { ...w, members: w.members.filter((m) => m.id !== memberId) }
+          : w
+      )
+    );
+  };
+
+  const updateMemberRole = (memberId: string, role: WorkspaceMemberRole) => {
+    setWorkspaces((prev) =>
+      prev.map((w) =>
+        w.id === activeWorkspace.id
+          ? {
+              ...w,
+              members: w.members.map((m) => (m.id === memberId ? { ...m, role } : m)),
+            }
+          : w
+      )
+    );
+  };
+
   return (
     <WorkspaceContext.Provider
       value={{
@@ -116,6 +158,9 @@ export function WorkspaceProvider({ children }: { children: React.ReactNode }) {
         addAgent,
         addKnowledgeBase,
         retryFile,
+        inviteMember,
+        removeMember,
+        updateMemberRole,
       }}
     >
       {children}

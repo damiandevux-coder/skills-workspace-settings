@@ -1,5 +1,18 @@
 import { SharedKnowledge } from "./skills";
 
+export type WorkspaceMemberRole = "admin" | "editor" | "member" | "viewer";
+
+export interface WorkspaceMember {
+  id: string;
+  email: string;
+  name?: string;
+  role: WorkspaceMemberRole;
+  status: "pending" | "active";
+  avatar?: string;
+  invitedAt: string;
+  joinedAt?: string;
+}
+
 export interface WorkspaceAgent {
   id: string;
   name: string;
@@ -13,6 +26,7 @@ export interface Workspace {
   color: string; // accent hex used to tint the switcher avatar
   agents: WorkspaceAgent[];
   knowledgeBases: SharedKnowledge[];
+  members: WorkspaceMember[];
 }
 
 export const WORKSPACE_EMOJI_OPTIONS = ["🟣", "🔵", "🟢", "🟠", "🎨", "🚀", "🧠", "📣"];

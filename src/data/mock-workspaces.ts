@@ -10,6 +10,11 @@ export const MOCK_WORKSPACES: Workspace[] = [
       { id: "agent-copywriter", name: "Copywriter", status: "ready" },
       { id: "agent-brand-analyst", name: "Brand Analyst", status: "busy" },
     ],
+    members: [
+      { id: "mem-1", email: "sarah@hypercli.com", name: "Sarah Chen", role: "admin", status: "active", invitedAt: "2026-06-01T10:00:00Z", joinedAt: "2026-06-01T10:05:00Z" },
+      { id: "mem-2", email: "mike@hypercli.com", name: "Mike Ross", role: "editor", status: "active", invitedAt: "2026-06-15T14:00:00Z", joinedAt: "2026-06-15T14:30:00Z" },
+      { id: "mem-3", email: "jessica@hypercli.com", name: "Jessica Pearson", role: "member", status: "pending", invitedAt: "2026-07-09T09:00:00Z" },
+    ],
     knowledgeBases: [
       {
         id: "kb-brand-assets",
@@ -55,6 +60,11 @@ export const MOCK_WORKSPACES: Workspace[] = [
       { id: "agent-product-owner", name: "Product Owner", status: "ready" },
       { id: "agent-code-reviewer", name: "Code Reviewer", status: "ready" },
       { id: "agent-sre", name: "SRE Agent", status: "offline" },
+    ],
+    members: [
+      { id: "mem-4", email: "damian@hypercli.com", name: "Damian Medinas", role: "admin", status: "active", invitedAt: "2026-05-01T08:00:00Z", joinedAt: "2026-05-01T08:10:00Z" },
+      { id: "mem-5", email: "francisco@hypercli.com", name: "Francisco Molina", role: "editor", status: "active", invitedAt: "2026-05-10T11:00:00Z", joinedAt: "2026-05-10T11:15:00Z" },
+      { id: "mem-6", email: "dylan@hypercli.com", name: "Dylan Allynder", role: "viewer", status: "pending", invitedAt: "2026-07-08T16:00:00Z" },
     ],
     knowledgeBases: [
       {
