@@ -15,6 +15,12 @@ export interface WorkspaceSkill {
   /** Lifecycle for created/imported skills. Bundled skills carry no status. */
   status?: "preview" | "active";
   origin?: "bundled" | "created" | "imported";
+  /** Relevancy weight (ClawHub-style download count); grids order by it descending. */
+  popularity?: number;
+  /** Registry metadata for library (ClawHub) entries. */
+  author?: string;
+  stars?: number;
+  downloads?: number;
   /** Markdown body for created/imported skills (used as detail overview). */
   instructions?: string;
   /** Proof recorded when the user confirms the skill worked in a session. */

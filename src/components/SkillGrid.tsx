@@ -3,7 +3,7 @@
 import React, { useMemo, useState } from "react";
 import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
-import { Search, Plus, Play, Upload, Library, Puzzle } from "lucide-react";
+import { Search, Plus, Play, Upload, Library, Puzzle, Layers, ChevronDown, Check, Star, Download } from "lucide-react";
 import { WorkspaceSkill } from "@/types/skills";
 import { useSkills } from "./skills/SkillsProvider";
 
@@ -17,6 +17,132 @@ interface SkillGridProps {
 
 type TabId = "installed" | "library";
 type StatusFilter = "all" | "active" | "inactive" | "preview";
+
+function formatCount(n: number): string {
+  return n >= 1000 ? `${Math.round(n / 100) / 10}k` : String(n);
+}
+
+/** ClawHub-style category filter: searchable multi-select dropdown. */
+function CategoryFilter({
+  categories,
+  selected,
+  onChange,
+}: {
+  categories: { name: string; count: number }[];
+  selected: Set<string>;
+  onChange: (next: Set<string>) => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const [query, setQuery] = useState("");
+
+  const visible = categories.filter((c) =>
+    c.name.toLowerCase().includes(query.toLowerCase())
+  );
+
+  const label =
+    selected.size === 0
+      ? "All categories"
+      : selected.size === 1
+      ? [...selected][0]
+      : `${selected.size} categories`;
+
+  return (
+    <div className="relative ml-auto">
+      <button
+        onClick={() => setOpen((o) => !o)}
+        className={`inline-flex h-9 items-center gap-2 rounded-full border px-4 text-sm font-medium transition-colors ${
+          selected.size > 0
+            ? "border-[#f5c45e]/50 bg-[#1c1507]/40 text-[#f5c45e]"
+            : "border-[#3d3d40] bg-[#151515] text-[#f5f5f5] hover:border-[#626266]"
+        }`}
+      >
+        <Layers className="h-3.5 w-3.5" />
+        {label}
+        <ChevronDown className={`h-3.5 w-3.5 transition-transform ${open ? "rotate-180" : ""}`} />
+      </button>
+
+      {open && (
+        <>
+          <div className="fixed inset-0 z-30" onClick={() => setOpen(false)} />
+          <div className="absolute right-0 top-11 z-40 w-[280px] overflow-hidden rounded-xl border border-[#303036] bg-[#0b0b0c] shadow-2xl">
+            <div className="border-b border-[#222226] p-2">
+              <div className="relative">
+                <Search className="absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-[#85858e]" />
+                <input
+                  type="text"
+                  value={query}
+                  onChange={(e) => setQuery(e.target.value)}
+                  placeholder="Search categories..."
+                  autoFocus
+                  className="h-8 w-full rounded-lg border border-[#303036] bg-[#101010] pl-8 pr-3 text-[12px] text-[#f5f5f5] outline-none placeholder:text-[#85858e] focus:border-[#5a5a5e]"
+                />
+              </div>
+            </div>
+            <div className="max-h-[280px] overflow-y-auto p-1.5">
+              <button
+                onClick={() => {
+                  onChange(new Set());
+                  setOpen(false);
+                }}
+                className={`flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-[13px] transition-colors ${
+                  selected.size === 0
+                    ? "bg-[#1a1a1e] text-[#f5f5f5]"
+                    : "text-[#a7a7ad] hover:bg-[#151519]"
+                }`}
+              >
+                <span
+                  className={`flex h-4 w-4 items-center justify-center rounded border ${
+                    selected.size === 0
+                      ? "border-[#f5c45e] bg-[#f5c45e]/20 text-[#f5c45e]"
+                      : "border-[#3d3d40]"
+                  }`}
+                >
+                  {selected.size === 0 && <Check className="h-3 w-3" />}
+                </span>
+                <Layers className="h-3.5 w-3.5 text-[#85858e]" />
+                All categories
+              </button>
+              {visible.map((c) => {
+                const isSelected = selected.has(c.name);
+                return (
+                  <button
+                    key={c.name}
+                    onClick={() => {
+                      const next = new Set(selected);
+                      if (isSelected) next.delete(c.name);
+                      else next.add(c.name);
+                      onChange(next);
+                    }}
+                    className={`flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-[13px] transition-colors ${
+                      isSelected ? "text-[#f5f5f5]" : "text-[#a7a7ad] hover:bg-[#151519]"
+                    }`}
+                  >
+                    <span
+                      className={`flex h-4 w-4 items-center justify-center rounded border ${
+                        isSelected
+                          ? "border-[#f5c45e] bg-[#f5c45e]/20 text-[#f5c45e]"
+                          : "border-[#3d3d40]"
+                      }`}
+                    >
+                      {isSelected && <Check className="h-3 w-3" />}
+                    </span>
+                    <span className="flex-1 text-left">{c.name}</span>
+                    <span className="text-[11px] text-[#85858e]">{c.count}</span>
+                  </button>
+                );
+              })}
+              {visible.length === 0 && (
+                <p className="px-3 py-4 text-center text-[12px] text-[#85858e]">
+                  No matching categories
+                </p>
+              )}
+            </div>
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
 
 function SkillCard({
   skill,
@@ -64,10 +190,25 @@ function SkillCard({
         </div>
       </div>
 
-      {/* Footer: actions only */}
+      {/* Footer: actions only (library cards lead with registry stats) */}
       <div className="mt-3 flex items-center justify-between">
-        {/* Enable/disable toggle (installed, non-preview) */}
-        {!isLibrary && !isPreview ? (
+        {isLibrary ? (
+          <div className="flex items-center gap-3 text-[10px] text-[#85858e]">
+            {skill.author && <span className="font-mono">@{skill.author}</span>}
+            {skill.stars !== undefined && (
+              <span className="inline-flex items-center gap-1">
+                <Star className="h-2.5 w-2.5" />
+                {formatCount(skill.stars)}
+              </span>
+            )}
+            {skill.downloads !== undefined && (
+              <span className="inline-flex items-center gap-1">
+                <Download className="h-2.5 w-2.5" />
+                {formatCount(skill.downloads)}
+              </span>
+            )}
+          </div>
+        ) : !isPreview ? (
           <button
             onClick={(e) => {
               e.stopPropagation();
@@ -127,11 +268,24 @@ export function SkillGrid({ installedSkills, librarySkills, onCreateSkill, onImp
   const [activeTab, setActiveTab] = useState<TabId>("installed");
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
   const [searchQuery, setSearchQuery] = useState("");
+  const [selectedCategories, setSelectedCategories] = useState<Set<string>>(new Set());
 
   const currentSkills = activeTab === "installed" ? installedSkills : librarySkills;
 
+  const categories = useMemo(() => {
+    const counts = new Map<string, number>();
+    for (const s of currentSkills) counts.set(s.category, (counts.get(s.category) ?? 0) + 1);
+    return [...counts.entries()]
+      .map(([name, count]) => ({ name, count }))
+      .sort((a, b) => b.count - a.count || a.name.localeCompare(b.name));
+  }, [currentSkills]);
+
   const filteredSkills = useMemo(() => {
     let skills = currentSkills;
+
+    if (selectedCategories.size > 0) {
+      skills = skills.filter((s) => selectedCategories.has(s.category));
+    }
 
     // Apply status filter for installed tab
     if (activeTab === "installed" && statusFilter !== "all") {
@@ -150,7 +304,7 @@ export function SkillGrid({ installedSkills, librarySkills, onCreateSkill, onImp
         s.description.toLowerCase().includes(q) ||
         s.category.toLowerCase().includes(q)
     );
-  }, [currentSkills, searchQuery, activeTab, statusFilter]);
+  }, [currentSkills, searchQuery, activeTab, statusFilter, selectedCategories]);
 
   const previewCount = installedSkills.filter((s) => s.status === "preview").length;
   const activeCount = installedSkills.filter((s) => s.status !== "preview" && !s.disabled).length;
@@ -266,6 +420,12 @@ export function SkillGrid({ installedSkills, librarySkills, onCreateSkill, onImp
               </button>
             </div>
           )}
+
+          <CategoryFilter
+            categories={categories}
+            selected={selectedCategories}
+            onChange={setSelectedCategories}
+          />
         </div>
       </div>
 

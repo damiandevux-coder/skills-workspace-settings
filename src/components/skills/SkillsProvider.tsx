@@ -2,7 +2,8 @@
 
 import React, { createContext, useCallback, useContext, useState } from "react";
 import { WorkspaceSkill, SkillFormData } from "@/types/skills";
-import { MOCK_INSTALLED_SKILLS, MOCK_LIBRARY_SKILLS } from "@/data/mock-skills";
+import { BUNDLED_SKILLS } from "@/data/bundled-skills";
+import { CLAWHUB_LIBRARY } from "@/data/clawhub-library";
 
 export const CURRENT_AGENT = { name: "Nova", status: "ready" as const };
 
@@ -25,8 +26,9 @@ interface SkillsContextValue {
 const SkillsContext = createContext<SkillsContextValue | null>(null);
 
 export function SkillsProvider({ children }: { children: React.ReactNode }) {
-  const [installedSkills, setInstalledSkills] = useState<WorkspaceSkill[]>(MOCK_INSTALLED_SKILLS);
-  const [librarySkills] = useState<WorkspaceSkill[]>(MOCK_LIBRARY_SKILLS);
+  // Bundled catalog arrives pre-sorted by relevancy; created skills prepend.
+  const [installedSkills, setInstalledSkills] = useState<WorkspaceSkill[]>(BUNDLED_SKILLS);
+  const [librarySkills] = useState<WorkspaceSkill[]>(CLAWHUB_LIBRARY);
 
   const getSkill = useCallback(
     (id: string) =>
