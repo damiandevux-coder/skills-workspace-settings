@@ -6,9 +6,10 @@ import { SkillGrid } from "@/components/SkillGrid";
 import { SkillCreationModal } from "@/components/SkillCreationModal";
 import { ImportSkillModal } from "@/components/ImportSkillModal";
 import { ToastContainer, type Toast } from "@/components/Toast";
-import { MOCK_INSTALLED_SKILLS, MOCK_LIBRARY_SKILLS } from "@/data/mock-skills";
+import { useSkills } from "@/components/skills/SkillsProvider";
 
 export default function Home() {
+  const { installedSkills, librarySkills } = useSkills();
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isImportModalOpen, setIsImportModalOpen] = useState(false);
   const [toasts, setToasts] = useState<Toast[]>([]);
@@ -25,8 +26,8 @@ export default function Home() {
   return (
     <div className="mx-auto max-w-[1200px] px-4 sm:px-6 py-8">
       <SkillGrid
-        installedSkills={MOCK_INSTALLED_SKILLS}
-        librarySkills={MOCK_LIBRARY_SKILLS}
+        installedSkills={installedSkills}
+        librarySkills={librarySkills}
         onCreateSkill={() => setIsCreateModalOpen(true)}
         onImportSkill={() => setIsImportModalOpen(true)}
       />

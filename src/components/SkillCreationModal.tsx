@@ -2,6 +2,7 @@
 
 import React, { useState, useCallback, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useRouter } from "next/navigation";
 import {
   X,
   Sparkles,
@@ -18,9 +19,11 @@ import {
   Eye,
   RotateCcw,
   ChevronRight,
+  Play,
 } from "lucide-react";
 import { SkillFormData, EMOJI_OPTIONS, OS_OPTIONS } from "@/types/skills";
 import { DescriptionQuality } from "./DescriptionQuality";
+import { useSkills, CURRENT_AGENT } from "./skills/SkillsProvider";
 
 interface SkillCreationModalProps {
   isOpen: boolean;
@@ -28,7 +31,7 @@ interface SkillCreationModalProps {
   onToast: (message: string, type?: "success" | "error" | "info") => void;
 }
 
-type CreationMode = "choose" | "form" | "ai" | "preview";
+type CreationMode = "choose" | "form" | "ai" | "preview" | "saved";
 type FormStep = 1 | 2 | 3;
 
 const INITIAL_FORM_DATA: SkillFormData = {
@@ -308,11 +311,13 @@ function FormWizard({
   onChange,
   onBack,
   onFinish,
+  isNameTaken,
 }: {
   data: SkillFormData;
   onChange: (patch: Partial<SkillFormData>) => void;
   onBack: () => void;
   onFinish: () => void;
+  isNameTaken: (name: string) => boolean;
 }) {
   const [step, setStep] = useState<FormStep>(1);
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -323,6 +328,7 @@ function FormWizard({
     if (s === 1) {
       if (!data.name.trim()) newErrors.name = "Name is required";
       else if (!/^[a-z0-9-]+$/.test(data.name)) newErrors.name = "Only lowercase letters, digits, and hyphens";
+      else if (isNameTaken(data.name)) newErrors.name = "A skill with this name already exists";
       if (!data.description.trim()) newErrors.description = "Description is required";
       else if (data.description.length < 10) newErrors.description = "At least 10 characters";
     }
@@ -899,14 +905,73 @@ ${data.instructions}`;
   );
 }
 
+// --- Saved Panel ---
+function SavedPanel({
+  skillName,
+  emoji,
+  onTryIt,
+  onDone,
+}: {
+  skillName: string;
+  emoji: string;
+  onTryIt: () => void;
+  onDone: () => void;
+}) {
+  return (
+    <div className="space-y-5 py-2">
+      <motion.div
+        initial={{ scale: 0.8, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        transition={{ type: "spring", stiffness: 300, damping: 20 }}
+        className="flex flex-col items-center text-center gap-3 py-4"
+      >
+        <div className="flex h-14 w-14 items-center justify-center rounded-2xl border border-[#4ade80]/30 bg-[#4ade80]/10">
+          <Check className="h-7 w-7 text-[#4ade80]" />
+        </div>
+        <div>
+          <h3 className="text-base font-semibold text-[#f5f5f5]">
+            {emoji} {skillName} saved as{" "}
+            <span className="text-[#f5c45e]">Preview</span>
+          </h3>
+          <p className="text-xs text-[#85858e] mt-1.5 max-w-[380px]">
+            Skills stay previews until they&apos;re proven in a session. Run it once with{" "}
+            {CURRENT_AGENT.name} and confirm it works to set it Active.
+          </p>
+        </div>
+      </motion.div>
+
+      <div className="flex flex-col gap-2">
+        <button
+          onClick={onTryIt}
+          autoFocus
+          className="inline-flex items-center justify-center gap-2 rounded-lg bg-[#4ade80] px-4 py-2.5 text-[13px] font-medium text-[#111111] transition-opacity hover:opacity-90"
+        >
+          <Play className="h-4 w-4" />
+          Try it with {CURRENT_AGENT.name}
+        </button>
+        <button
+          onClick={onDone}
+          className="rounded-lg border border-[#303036] px-4 py-2.5 text-[13px] text-[#a7a7ad] transition-colors hover:border-[#5a5a5e] hover:text-[#f5f5f5]"
+        >
+          Done for now
+        </button>
+      </div>
+    </div>
+  );
+}
+
 // --- Main Modal ---
 export function SkillCreationModal({ isOpen, onClose, onToast }: SkillCreationModalProps) {
+  const router = useRouter();
+  const { addSkill, hasSkill } = useSkills();
   const [mode, setMode] = useState<CreationMode>("choose");
   const [formData, setFormData] = useState<SkillFormData>(INITIAL_FORM_DATA);
+  const [savedSkillId, setSavedSkillId] = useState<string | null>(null);
 
   const handleClose = useCallback(() => {
     setMode("choose");
     setFormData(INITIAL_FORM_DATA);
+    setSavedSkillId(null);
     onClose();
   }, [onClose]);
 
@@ -925,8 +990,20 @@ export function SkillCreationModal({ isOpen, onClose, onToast }: SkillCreationMo
   };
 
   const handleSave = () => {
-    onToast(`Skill "${formData.name}" saved successfully`, "success");
+    if (hasSkill(formData.name)) {
+      onToast(`A skill named "${formData.name}" already exists`, "error");
+      return;
+    }
+    const skill = addSkill({ form: formData, origin: "created" });
+    setSavedSkillId(skill.id);
+    setMode("saved");
+    onToast(`Skill "${formData.name}" saved as preview`, "success");
+  };
+
+  const handleTryIt = () => {
+    const id = savedSkillId;
     handleClose();
+    if (id) router.push(`/session/new?skill=${encodeURIComponent(id)}`);
   };
 
   if (!isOpen) return null;
@@ -955,12 +1032,14 @@ export function SkillCreationModal({ isOpen, onClose, onToast }: SkillCreationMo
               {mode === "form" && "Structured Form"}
               {mode === "ai" && "Describe with AI"}
               {mode === "preview" && "Preview SKILL.md"}
+              {mode === "saved" && "Skill Saved"}
             </h2>
             <p className="text-xs text-[#85858e] mt-0.5">
               {mode === "choose" && "Choose your preferred creation method"}
               {mode === "form" && "Build step-by-step with full control"}
               {mode === "ai" && "Let AI generate the structure"}
               {mode === "preview" && "Review before saving"}
+              {mode === "saved" && "One step left: prove it in a session"}
             </p>
           </div>
           <button
@@ -997,6 +1076,7 @@ export function SkillCreationModal({ isOpen, onClose, onToast }: SkillCreationMo
                   onChange={(patch) => setFormData((prev) => ({ ...prev, ...patch }))}
                   onBack={() => setMode("choose")}
                   onFinish={handleFormFinish}
+                  isNameTaken={hasSkill}
                 />
               </motion.div>
             )}
@@ -1027,6 +1107,22 @@ export function SkillCreationModal({ isOpen, onClose, onToast }: SkillCreationMo
                   onBack={() => setMode("form")}
                   onSave={handleSave}
                   onToast={onToast}
+                />
+              </motion.div>
+            )}
+
+            {mode === "saved" && (
+              <motion.div
+                key="saved"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+              >
+                <SavedPanel
+                  skillName={formData.name}
+                  emoji={formData.emoji}
+                  onTryIt={handleTryIt}
+                  onDone={handleClose}
                 />
               </motion.div>
             )}

@@ -14,18 +14,17 @@ interface SkillGridProps {
 }
 
 type TabId = "installed" | "library";
-type StatusFilter = "all" | "active" | "inactive";
+type StatusFilter = "all" | "active" | "inactive" | "preview";
 
 function SkillCard({
   skill,
   isLibrary,
-  onAction,
 }: {
   skill: WorkspaceSkill;
   isLibrary?: boolean;
-  onAction?: () => void;
 }) {
   const router = useRouter();
+  const isPreview = skill.status === "preview";
   const toolIcons = [
     skill.hasScripts && <Wrench key="scripts" className="h-3 w-3 text-[#85858e]" />,
     skill.hasReferences && <FileText key="refs" className="h-3 w-3 text-[#85858e]" />,
@@ -40,10 +39,19 @@ function SkillCard({
     >
       {/* Status dot */}
       <div className="absolute top-3 right-3 flex items-center gap-1.5">
-        <div className={`h-1.5 w-1.5 rounded-full ${skill.disabled ? "bg-[#85858e]" : "bg-[#4ade80]"}`} />
-        <span className={`text-[10px] font-medium ${skill.disabled ? "text-[#85858e]" : "text-[#4ade80]"}`}>
-          {skill.disabled ? "Inactive" : "Active"}
-        </span>
+        {isPreview ? (
+          <>
+            <div className="h-1.5 w-1.5 rounded-full bg-[#f5c45e]" />
+            <span className="text-[10px] font-medium text-[#f5c45e]">Preview</span>
+          </>
+        ) : (
+          <>
+            <div className={`h-1.5 w-1.5 rounded-full ${skill.disabled ? "bg-[#85858e]" : "bg-[#4ade80]"}`} />
+            <span className={`text-[10px] font-medium ${skill.disabled ? "text-[#85858e]" : "text-[#4ade80]"}`}>
+              {skill.disabled ? "Inactive" : "Active"}
+            </span>
+          </>
+        )}
       </div>
 
       <div className="flex items-start gap-3">
@@ -65,16 +73,32 @@ function SkillCard({
           <span className="text-[10px] text-[#85858e] bg-[#151519] px-1.5 py-0.5 rounded">
             {skill.category}
           </span>
-          {isLibrary ? (
+          {isPreview ? (
             <button
-              onClick={onAction}
+              onClick={(e) => {
+                e.stopPropagation();
+                router.push(`/session/new?skill=${encodeURIComponent(skill.id)}`);
+              }}
               className="text-[10px] font-medium text-[#f5c45e] hover:underline"
             >
-              Add to agent
+              Try it →
+            </button>
+          ) : isLibrary ? (
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                router.push(`/session/new?skill=${encodeURIComponent(skill.id)}`);
+              }}
+              className="text-[10px] font-medium text-[#f5c45e] hover:underline"
+            >
+              Try with Nova
             </button>
           ) : (
             <button
-              onClick={onAction}
+              onClick={(e) => {
+                e.stopPropagation();
+                router.push(`/skill/${skill.id}`);
+              }}
               className="text-[10px] font-medium text-[#85858e] hover:text-[#f5f5f5] transition-colors"
             >
               Configure
@@ -98,9 +122,11 @@ export function SkillGrid({ installedSkills, librarySkills, onCreateSkill, onImp
 
     // Apply status filter for installed tab
     if (activeTab === "installed" && statusFilter !== "all") {
-      skills = skills.filter((s) =>
-        statusFilter === "active" ? !s.disabled : s.disabled
-      );
+      skills = skills.filter((s) => {
+        if (statusFilter === "preview") return s.status === "preview";
+        if (s.status === "preview") return false;
+        return statusFilter === "active" ? !s.disabled : s.disabled;
+      });
     }
 
     if (!searchQuery.trim()) return skills;
@@ -113,8 +139,9 @@ export function SkillGrid({ installedSkills, librarySkills, onCreateSkill, onImp
     );
   }, [currentSkills, searchQuery, activeTab, statusFilter]);
 
-  const activeCount = installedSkills.filter((s) => !s.disabled).length;
-  const inactiveCount = installedSkills.filter((s) => s.disabled).length;
+  const previewCount = installedSkills.filter((s) => s.status === "preview").length;
+  const activeCount = installedSkills.filter((s) => s.status !== "preview" && !s.disabled).length;
+  const inactiveCount = installedSkills.filter((s) => s.status !== "preview" && s.disabled).length;
 
   return (
     <div className="space-y-6">
@@ -213,6 +240,16 @@ export function SkillGrid({ installedSkills, librarySkills, onCreateSkill, onImp
                 }`}
               >
                 Inactive ({inactiveCount})
+              </button>
+              <button
+                onClick={() => setStatusFilter("preview")}
+                className={`h-7 rounded-full px-3 text-[11px] font-medium transition-colors ${
+                  statusFilter === "preview"
+                    ? "bg-[#f5c45e]/15 text-[#f5c45e]"
+                    : "text-[#85858e] hover:text-[#f5f5f5]"
+                }`}
+              >
+                Preview ({previewCount})
               </button>
             </div>
           )}

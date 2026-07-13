@@ -13,9 +13,11 @@ import {
   XCircle,
   Wrench,
   Settings,
+  Play,
 } from "lucide-react";
 import { MOCK_SKILL_DETAILS } from "@/data/mock-skill-details";
-import { MOCK_INSTALLED_SKILLS, MOCK_LIBRARY_SKILLS } from "@/data/mock-skills";
+import { useSkills } from "@/components/skills/SkillsProvider";
+import { SkillDetail } from "@/types/skills";
 
 // ── Markdown renderer ─────────────────────────────────────────────────────
 function renderMarkdown(raw: string): string {
@@ -146,9 +148,30 @@ export default function SkillDetailPage() {
   const params = useParams();
   const router = useRouter();
   const skillId = params.id as string;
+  const { installedSkills, librarySkills, getSkill, toggleSkillDisabled } = useSkills();
 
-  const detail = MOCK_SKILL_DETAILS[skillId];
-  const allSkills = [...MOCK_INSTALLED_SKILLS, ...MOCK_LIBRARY_SKILLS];
+  const liveSkill = getSkill(skillId);
+  const allSkills = useMemo(
+    () => [...installedSkills, ...librarySkills],
+    [installedSkills, librarySkills]
+  );
+
+  // Static mock detail when available; otherwise synthesize one from the live
+  // skill (created/imported/library skills have no mock-detail entry).
+  const detail: SkillDetail | undefined = useMemo(() => {
+    const mock = MOCK_SKILL_DETAILS[skillId];
+    if (mock && liveSkill) return { ...mock, ...liveSkill };
+    if (mock) return mock;
+    if (!liveSkill) return undefined;
+    return {
+      ...liveSkill,
+      overview:
+        liveSkill.instructions ??
+        `# ${liveSkill.name}\n\n${liveSkill.description}`,
+      files: [{ name: "SKILL.md", type: "skill", size: undefined }],
+      relatedSkills: [],
+    };
+  }, [skillId, liveSkill]);
 
   const [activeTab, setActiveTab] = useState<"overview" | "files">("overview");
 
@@ -156,6 +179,8 @@ export default function SkillDetailPage() {
     if (!detail) return [];
     return allSkills.filter((s) => detail.relatedSkills.includes(s.id));
   }, [detail, allSkills]);
+
+  const isPreview = detail?.status === "preview";
 
   if (!detail) {
     return (
@@ -173,7 +198,7 @@ export default function SkillDetailPage() {
     );
   }
 
-  const isInstalled = MOCK_INSTALLED_SKILLS.some((s) => s.id === skillId);
+  const isInstalled = installedSkills.some((s) => s.id === skillId);
 
   return (
     <div>
@@ -198,12 +223,19 @@ export default function SkillDetailPage() {
                   <h1 className="text-xl font-semibold text-[#f5f5f5]">{detail.name}</h1>
                   <span
                     className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-[11px] font-medium ${
-                      detail.disabled
+                      isPreview
+                        ? "bg-[#f5c45e]/15 text-[#f5c45e]"
+                        : detail.disabled
                         ? "bg-[#85858e]/15 text-[#85858e]"
                         : "bg-[#4ade80]/15 text-[#4ade80]"
                     }`}
                   >
-                    {detail.disabled ? (
+                    {isPreview ? (
+                      <>
+                        <Play className="h-3 w-3" />
+                        Preview
+                      </>
+                    ) : detail.disabled ? (
                       <>
                         <XCircle className="h-3 w-3" />
                         Inactive
@@ -230,15 +262,26 @@ export default function SkillDetailPage() {
               </div>
             </div>
 
-            <button
-              className={`shrink-0 rounded-lg px-5 py-2.5 text-sm font-medium transition-opacity hover:opacity-90 ${
-                detail.disabled
-                  ? "bg-[#f5c45e] text-[#111111]"
-                  : "border border-[#303036] text-[#f5f5f5] hover:bg-[#151519]"
-              }`}
-            >
-              {detail.disabled ? "Enable Skill" : "Configure"}
-            </button>
+            {isPreview ? (
+              <button
+                onClick={() => router.push(`/session/new?skill=${encodeURIComponent(skillId)}`)}
+                className="inline-flex shrink-0 items-center gap-2 rounded-lg bg-[#4ade80] px-5 py-2.5 text-sm font-medium text-[#111111] transition-opacity hover:opacity-90"
+              >
+                <Play className="h-4 w-4" />
+                Try it in a session
+              </button>
+            ) : (
+              <button
+                onClick={() => toggleSkillDisabled(skillId)}
+                className={`shrink-0 rounded-lg px-5 py-2.5 text-sm font-medium transition-opacity hover:opacity-90 ${
+                  detail.disabled
+                    ? "bg-[#f5c45e] text-[#111111]"
+                    : "border border-[#303036] text-[#f5f5f5] hover:bg-[#151519]"
+                }`}
+              >
+                {detail.disabled ? "Enable Skill" : "Disable Skill"}
+              </button>
+            )}
           </div>
         </div>
       </div>
@@ -351,6 +394,22 @@ export default function SkillDetailPage() {
 
           {/* Sidebar */}
           <div className="space-y-4">
+            {/* Confirmed use */}
+            {detail.confirmedUse && (
+              <div className="rounded-xl border border-[#4ade80]/25 bg-[#4ade80]/5 p-4">
+                <h3 className="text-xs font-semibold uppercase tracking-[0.18em] text-[#4ade80] mb-2">
+                  Confirmed in session
+                </h3>
+                <div className="flex items-start gap-2">
+                  <CheckCircle2 className="h-3.5 w-3.5 text-[#4ade80] mt-0.5 shrink-0" />
+                  <p className="text-[11px] text-[#a7a7ad]">
+                    Used by <span className="text-[#f5f5f5]">{detail.confirmedUse.agent}</span> —{" "}
+                    <em>&ldquo;{detail.confirmedUse.prompt}&rdquo;</em>
+                  </p>
+                </div>
+              </div>
+            )}
+
             {/* Setup Requirements */}
             <div className="rounded-xl border border-[#303036] bg-[#0b0b0c] p-4">
               <h3 className="text-xs font-semibold uppercase tracking-[0.18em] text-[#85858e] mb-3">

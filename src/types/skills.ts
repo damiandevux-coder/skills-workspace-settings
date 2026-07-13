@@ -12,6 +12,13 @@ export interface WorkspaceSkill {
   hasScripts: boolean;
   hasReferences: boolean;
   hasAssets: boolean;
+  /** Lifecycle for created/imported skills. Bundled skills carry no status. */
+  status?: "preview" | "active";
+  origin?: "bundled" | "created" | "imported";
+  /** Markdown body for created/imported skills (used as detail overview). */
+  instructions?: string;
+  /** Proof recorded when the user confirms the skill worked in a session. */
+  confirmedUse?: { agent: string; prompt: string } | null;
 }
 
 export interface SkillFormData {
