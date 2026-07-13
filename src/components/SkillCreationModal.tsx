@@ -22,7 +22,6 @@ import {
   Play,
 } from "lucide-react";
 import { SkillFormData, EMOJI_OPTIONS, OS_OPTIONS } from "@/types/skills";
-import { DescriptionQuality } from "./DescriptionQuality";
 import { useSkills, CURRENT_AGENT } from "./skills/SkillsProvider";
 
 interface SkillCreationModalProps {
@@ -431,8 +430,6 @@ function FormWizard({
                   <p className="mt-1 text-[10px] text-[#ff6b6b]">{errors.description}</p>
                 )}
               </div>
-
-              <DescriptionQuality description={data.description} />
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
