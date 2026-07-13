@@ -16,7 +16,7 @@ import {
   Play,
 } from "lucide-react";
 import { MOCK_SKILL_DETAILS } from "@/data/mock-skill-details";
-import { useSkills } from "@/components/skills/SkillsProvider";
+import { useSkills, CURRENT_AGENT } from "@/components/skills/SkillsProvider";
 import { EditSkillModal } from "@/components/EditSkillModal";
 import { ToastContainer, type Toast } from "@/components/Toast";
 import { SkillDetail } from "@/types/skills";
@@ -150,7 +150,7 @@ export default function SkillDetailPage() {
   const params = useParams();
   const router = useRouter();
   const skillId = params.id as string;
-  const { installedSkills, librarySkills, getSkill, toggleSkillDisabled } = useSkills();
+  const { installedSkills, librarySkills, getSkill, toggleSkillDisabled, confirmSkill } = useSkills();
 
   const liveSkill = getSkill(skillId);
   const allSkills = useMemo(
@@ -310,6 +310,38 @@ export default function SkillDetailPage() {
           </div>
         </div>
       </div>
+
+      {/* Confirmation banner for preview skills */}
+      {isPreview && liveSkill && (
+        <div className="border-b border-[#4ade80]/20 bg-[#4ade80]/5">
+          <div className="mx-auto flex max-w-[1200px] flex-wrap items-center justify-between gap-3 px-4 sm:px-6 py-3">
+            <p className="text-[13px] text-[#f5f5f5]">
+              <Play className="mr-2 inline h-3.5 w-3.5 text-[#f5c45e]" />
+              <strong className="font-semibold">{detail.name}</strong> is in{" "}
+              <span className="text-[#f5c45e]">Preview</span> — confirm it to activate on{" "}
+              {CURRENT_AGENT.name}, or run it in a session first.
+            </p>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => {
+                  confirmSkill(skillId);
+                  addToast(`${detail.name} is now Active on ${CURRENT_AGENT.name}`, "success");
+                }}
+                className="inline-flex items-center gap-1.5 rounded-lg bg-[#4ade80] px-4 py-2 text-[13px] font-medium text-[#111111] transition-opacity hover:opacity-90"
+              >
+                <CheckCircle2 className="h-4 w-4" />
+                Confirm &amp; activate
+              </button>
+              <button
+                onClick={() => router.push(`/session/new?skill=${encodeURIComponent(skillId)}`)}
+                className="rounded-lg border border-[#4ade80]/40 px-4 py-2 text-[13px] font-medium text-[#4ade80] transition-colors hover:bg-[#4ade80]/10"
+              >
+                Test in a session
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Tabs */}
       <div className="border-b border-[#222226] bg-[#0b0b0c]">

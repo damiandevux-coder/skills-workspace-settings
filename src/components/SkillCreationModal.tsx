@@ -913,7 +913,7 @@ export function SkillConfirmPanel({
 }: {
   skillName: string;
   emoji: string;
-  verb?: "saved" | "imported";
+  verb?: "saved" | "imported" | "updated";
   onConfirm: () => void;
   onTryIt: () => void;
   onKeepPreview: () => void;

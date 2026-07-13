@@ -86,9 +86,13 @@ export function SkillsProvider({ children }: { children: React.ReactNode }) {
     );
   }, []);
 
+  // Editing changes behavior, so the skill returns to preview and its old
+  // session proof no longer applies — the user re-confirms (with or without a test).
   const updateSkillInstructions = useCallback((id: string, instructions: string) => {
     setInstalledSkills((prev) =>
-      prev.map((s) => (s.id === id ? { ...s, instructions } : s))
+      prev.map((s) =>
+        s.id === id ? { ...s, instructions, status: "preview", confirmedUse: null } : s
+      )
     );
   }, []);
 

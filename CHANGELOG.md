@@ -33,6 +33,8 @@ Feedback round on the grid:
 ### Reinforced skill confirmation
 
 - Creation and import now end in an explicit **Confirm Skill** step: **"✓ Confirm & activate"** (no test required), "Test it in a session first", or "Keep as preview" — confirmation no longer depends on running a session
+- **Configure joins the flow**: saving SKILL.md edits returns the skill to Preview (its old session proof no longer applies) and the same Confirm Skill step appears in the modal
+- **Skill overview** shows a standing confirmation banner for any Preview skill — "Confirm & activate" / "Test in a session" — so an unconfirmed skill is always one click from Active
 - In sessions, the confirmation banner appears for preview skills after **any** agent reply (including setup guidance), with copy adapting to whether a real run happened
 - Removed the Description Quality meter from the creation form
 
