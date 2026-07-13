@@ -3,26 +3,22 @@
 import React, { useMemo, useState } from "react";
 import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
-import { Search, Plus, Play, Upload, Library, Puzzle, Layers, ChevronDown, Check, Star, Download } from "lucide-react";
+import { Search, Plus, Play, Upload, Puzzle, Layers, ChevronDown, Check } from "lucide-react";
 import { WorkspaceSkill } from "@/types/skills";
 import { useSkills } from "./skills/SkillsProvider";
+import { useDialogEscape } from "@/lib/use-dialog";
 
 interface SkillGridProps {
-  installedSkills: WorkspaceSkill[];
-  librarySkills: WorkspaceSkill[];
+  skills: WorkspaceSkill[];
   onCreateSkill: () => void;
   onImportSkill: () => void;
   onConfigureSkill: (skill: WorkspaceSkill) => void;
+  onToast: (message: string, type?: "success" | "error" | "info") => void;
 }
 
-type TabId = "installed" | "library";
-type StatusFilter = "all" | "active" | "inactive" | "preview";
+type StatusFilter = "all" | "active" | "disabled" | "preview";
 
-function formatCount(n: number): string {
-  return n >= 1000 ? `${Math.round(n / 100) / 10}k` : String(n);
-}
-
-/** ClawHub-style category filter: searchable multi-select dropdown. */
+/** Searchable multi-select category filter (dropdown pattern referenced from ClawHub). */
 function CategoryFilter({
   categories,
   selected,
@@ -34,6 +30,8 @@ function CategoryFilter({
 }) {
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
+
+  useDialogEscape(() => setOpen(false), open);
 
   const visible = categories.filter((c) =>
     c.name.toLowerCase().includes(query.toLowerCase())
@@ -50,6 +48,8 @@ function CategoryFilter({
     <div className="relative ml-auto">
       <button
         onClick={() => setOpen((o) => !o)}
+        aria-haspopup="listbox"
+        aria-expanded={open}
         className={`inline-flex h-9 items-center gap-2 rounded-full border px-4 text-sm font-medium transition-colors ${
           selected.size > 0
             ? "border-[#f5c45e]/50 bg-[#1c1507]/40 text-[#f5c45e]"
@@ -64,7 +64,11 @@ function CategoryFilter({
       {open && (
         <>
           <div className="fixed inset-0 z-30" onClick={() => setOpen(false)} />
-          <div className="absolute right-0 top-11 z-40 w-[280px] overflow-hidden rounded-xl border border-[#303036] bg-[#0b0b0c] shadow-2xl">
+          <div
+            role="listbox"
+            aria-label="Filter by category"
+            className="absolute right-0 top-11 z-40 w-[280px] max-w-[calc(100vw-2rem)] overflow-hidden rounded-xl border border-[#303036] bg-[#0b0b0c] shadow-2xl"
+          >
             <div className="border-b border-[#222226] p-2">
               <div className="relative">
                 <Search className="absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-[#85858e]" />
@@ -146,12 +150,12 @@ function CategoryFilter({
 
 function SkillCard({
   skill,
-  isLibrary,
   onConfigure,
+  onToast,
 }: {
   skill: WorkspaceSkill;
-  isLibrary?: boolean;
   onConfigure: (skill: WorkspaceSkill) => void;
+  onToast: SkillGridProps["onToast"];
 }) {
   const router = useRouter();
   const { toggleSkillDisabled } = useSkills();
@@ -163,7 +167,7 @@ function SkillCard({
       onClick={() => router.push(`/skill/${skill.id}`)}
       className="group relative rounded-xl border border-[#303036] bg-[#0b0b0c] p-4 transition-colors hover:border-[#3d3d40] cursor-pointer"
     >
-      {/* Status dot */}
+      {/* Status dot: Active / Disabled / Preview */}
       <div className="absolute top-3 right-3 flex items-center gap-1.5">
         {isPreview ? (
           <>
@@ -174,7 +178,7 @@ function SkillCard({
           <>
             <div className={`h-1.5 w-1.5 rounded-full ${skill.disabled ? "bg-[#85858e]" : "bg-[#4ade80]"}`} />
             <span className={`text-[10px] font-medium ${skill.disabled ? "text-[#85858e]" : "text-[#4ade80]"}`}>
-              {skill.disabled ? "Inactive" : "Active"}
+              {skill.disabled ? "Disabled" : "Active"}
             </span>
           </>
         )}
@@ -190,32 +194,22 @@ function SkillCard({
         </div>
       </div>
 
-      {/* Footer: actions only (library cards lead with registry stats) */}
+      {/* Footer: actions only */}
       <div className="mt-3 flex items-center justify-between">
-        {isLibrary ? (
-          <div className="flex items-center gap-3 text-[10px] text-[#85858e]">
-            {skill.author && <span className="font-mono">@{skill.author}</span>}
-            {skill.stars !== undefined && (
-              <span className="inline-flex items-center gap-1">
-                <Star className="h-2.5 w-2.5" />
-                {formatCount(skill.stars)}
-              </span>
-            )}
-            {skill.downloads !== undefined && (
-              <span className="inline-flex items-center gap-1">
-                <Download className="h-2.5 w-2.5" />
-                {formatCount(skill.downloads)}
-              </span>
-            )}
-          </div>
-        ) : !isPreview ? (
+        {/* Enable/disable switch (non-preview skills) */}
+        {!isPreview ? (
           <button
             onClick={(e) => {
               e.stopPropagation();
               toggleSkillDisabled(skill.id);
+              onToast(
+                skill.disabled ? `${skill.name} enabled` : `${skill.name} disabled`,
+                "success"
+              );
             }}
             title={skill.disabled ? "Enable skill" : "Disable skill"}
-            className="flex items-center gap-1.5"
+            aria-label={skill.disabled ? `Enable ${skill.name}` : `Disable ${skill.name}`}
+            className="flex items-center"
           >
             <span
               className={`flex h-[16px] w-[28px] items-center rounded-full p-[2px] transition-colors ${
@@ -227,9 +221,6 @@ function SkillCard({
                   skill.disabled ? "" : "translate-x-3"
                 }`}
               />
-            </span>
-            <span className="text-[10px] font-medium text-[#85858e]">
-              {skill.disabled ? "Disabled" : "Enabled"}
             </span>
           </button>
         ) : (
@@ -247,68 +238,82 @@ function SkillCard({
             <Play className="h-2.5 w-2.5" />
             Test
           </button>
-          {!isLibrary && (
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                onConfigure(skill);
-              }}
-              className="text-[10px] font-medium text-[#85858e] hover:text-[#f5f5f5] transition-colors"
-            >
-              Configure
-            </button>
-          )}
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              onConfigure(skill);
+            }}
+            className="text-[10px] font-medium text-[#85858e] hover:text-[#f5f5f5] transition-colors"
+          >
+            Configure
+          </button>
         </div>
       </div>
     </motion.div>
   );
 }
 
-export function SkillGrid({ installedSkills, librarySkills, onCreateSkill, onImportSkill, onConfigureSkill }: SkillGridProps) {
-  const [activeTab, setActiveTab] = useState<TabId>("installed");
+export function SkillGrid({ skills, onCreateSkill, onImportSkill, onConfigureSkill, onToast }: SkillGridProps) {
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategories, setSelectedCategories] = useState<Set<string>>(new Set());
 
-  const currentSkills = activeTab === "installed" ? installedSkills : librarySkills;
-
   const categories = useMemo(() => {
     const counts = new Map<string, number>();
-    for (const s of currentSkills) counts.set(s.category, (counts.get(s.category) ?? 0) + 1);
+    for (const s of skills) counts.set(s.category, (counts.get(s.category) ?? 0) + 1);
     return [...counts.entries()]
       .map(([name, count]) => ({ name, count }))
       .sort((a, b) => b.count - a.count || a.name.localeCompare(b.name));
-  }, [currentSkills]);
+  }, [skills]);
 
   const filteredSkills = useMemo(() => {
-    let skills = currentSkills;
+    let result = skills;
 
     if (selectedCategories.size > 0) {
-      skills = skills.filter((s) => selectedCategories.has(s.category));
+      result = result.filter((s) => selectedCategories.has(s.category));
     }
 
-    // Apply status filter for installed tab
-    if (activeTab === "installed" && statusFilter !== "all") {
-      skills = skills.filter((s) => {
+    if (statusFilter !== "all") {
+      result = result.filter((s) => {
         if (statusFilter === "preview") return s.status === "preview";
         if (s.status === "preview") return false;
         return statusFilter === "active" ? !s.disabled : s.disabled;
       });
     }
 
-    if (!searchQuery.trim()) return skills;
+    if (!searchQuery.trim()) return result;
     const q = searchQuery.toLowerCase();
-    return skills.filter(
+    return result.filter(
       (s) =>
         s.name.toLowerCase().includes(q) ||
         s.description.toLowerCase().includes(q) ||
         s.category.toLowerCase().includes(q)
     );
-  }, [currentSkills, searchQuery, activeTab, statusFilter, selectedCategories]);
+  }, [skills, searchQuery, statusFilter, selectedCategories]);
 
-  const previewCount = installedSkills.filter((s) => s.status === "preview").length;
-  const activeCount = installedSkills.filter((s) => s.status !== "preview" && !s.disabled).length;
-  const inactiveCount = installedSkills.filter((s) => s.status !== "preview" && s.disabled).length;
+  const previewCount = skills.filter((s) => s.status === "preview").length;
+  const activeCount = skills.filter((s) => s.status !== "preview" && !s.disabled).length;
+  const disabledCount = skills.filter((s) => s.status !== "preview" && s.disabled).length;
+
+  const hasActiveFilters =
+    statusFilter !== "all" || selectedCategories.size > 0 || searchQuery.trim() !== "";
+
+  const clearFilters = () => {
+    setStatusFilter("all");
+    setSelectedCategories(new Set());
+    setSearchQuery("");
+  };
+
+  const statusChip = (value: StatusFilter, label: string, activeClasses: string) => (
+    <button
+      onClick={() => setStatusFilter(value)}
+      className={`h-7 rounded-full px-3 text-[11px] font-medium transition-colors ${
+        statusFilter === value ? activeClasses : "text-[#85858e] hover:text-[#f5f5f5]"
+      }`}
+    >
+      {label}
+    </button>
+  );
 
   return (
     <div className="space-y-6">
@@ -351,75 +356,12 @@ export function SkillGrid({ installedSkills, librarySkills, onCreateSkill, onImp
           />
         </div>
 
-        {/* Tabs */}
-        <div className="flex flex-wrap items-center gap-2">
-          <button
-            onClick={() => setActiveTab("installed")}
-            className={`h-9 rounded-full border px-4 text-sm font-medium transition-colors ${
-              activeTab === "installed"
-                ? "border-[#f5f5f5] bg-[#f5f5f5] text-[#111111]"
-                : "border-[#3d3d40] bg-[#151515] text-[#f5f5f5] hover:border-[#626266]"
-            }`}
-          >
-            Installed ({installedSkills.length})
-          </button>
-          <button
-            onClick={() => setActiveTab("library")}
-            className={`h-9 rounded-full border px-4 text-sm font-medium transition-colors ${
-              activeTab === "library"
-                ? "border-[#f5f5f5] bg-[#f5f5f5] text-[#111111]"
-                : "border-[#3d3d40] bg-[#151515] text-[#f5f5f5] hover:border-[#626266]"
-            }`}
-          >
-            <Library className="h-3.5 w-3.5 inline mr-1.5" />
-            Library ({librarySkills.length})
-          </button>
-
-          {/* Status filters for installed tab */}
-          {activeTab === "installed" && (
-            <div className="flex items-center gap-1.5 ml-2 pl-3 border-l border-[#303036]">
-              <button
-                onClick={() => setStatusFilter("all")}
-                className={`h-7 rounded-full px-3 text-[11px] font-medium transition-colors ${
-                  statusFilter === "all"
-                    ? "bg-[#303036] text-[#f5f5f5]"
-                    : "text-[#85858e] hover:text-[#f5f5f5]"
-                }`}
-              >
-                All
-              </button>
-              <button
-                onClick={() => setStatusFilter("active")}
-                className={`h-7 rounded-full px-3 text-[11px] font-medium transition-colors ${
-                  statusFilter === "active"
-                    ? "bg-[#4ade80]/15 text-[#4ade80]"
-                    : "text-[#85858e] hover:text-[#f5f5f5]"
-                }`}
-              >
-                Active ({activeCount})
-              </button>
-              <button
-                onClick={() => setStatusFilter("inactive")}
-                className={`h-7 rounded-full px-3 text-[11px] font-medium transition-colors ${
-                  statusFilter === "inactive"
-                    ? "bg-[#85858e]/15 text-[#85858e]"
-                    : "text-[#85858e] hover:text-[#f5f5f5]"
-                }`}
-              >
-                Inactive ({inactiveCount})
-              </button>
-              <button
-                onClick={() => setStatusFilter("preview")}
-                className={`h-7 rounded-full px-3 text-[11px] font-medium transition-colors ${
-                  statusFilter === "preview"
-                    ? "bg-[#f5c45e]/15 text-[#f5c45e]"
-                    : "text-[#85858e] hover:text-[#f5f5f5]"
-                }`}
-              >
-                Preview ({previewCount})
-              </button>
-            </div>
-          )}
+        {/* Filters */}
+        <div className="flex flex-wrap items-center gap-1.5">
+          {statusChip("all", `All (${skills.length})`, "bg-[#303036] text-[#f5f5f5]")}
+          {statusChip("active", `Active (${activeCount})`, "bg-[#4ade80]/15 text-[#4ade80]")}
+          {statusChip("disabled", `Disabled (${disabledCount})`, "bg-[#85858e]/15 text-[#85858e]")}
+          {statusChip("preview", `Preview (${previewCount})`, "bg-[#f5c45e]/15 text-[#f5c45e]")}
 
           <CategoryFilter
             categories={categories}
@@ -433,11 +375,15 @@ export function SkillGrid({ installedSkills, librarySkills, onCreateSkill, onImp
       {filteredSkills.length === 0 ? (
         <div className="rounded-xl border border-[#333333] bg-[#181818] px-5 py-12 text-center">
           <Puzzle className="mx-auto mb-3 h-5 w-5 text-[#696969]" />
-          <p className="text-sm text-[#85858e]">
-            {activeTab === "installed"
-              ? "No skills match your filters."
-              : "Library is empty. Import or create skills to share across agents."}
-          </p>
+          <p className="text-sm text-[#85858e]">No skills match your filters.</p>
+          {hasActiveFilters && (
+            <button
+              onClick={clearFilters}
+              className="mt-3 text-sm text-[#f5c45e] hover:underline"
+            >
+              Clear filters
+            </button>
+          )}
         </div>
       ) : (
         <div className="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3">
@@ -445,8 +391,8 @@ export function SkillGrid({ installedSkills, librarySkills, onCreateSkill, onImp
             <SkillCard
               key={skill.id}
               skill={skill}
-              isLibrary={activeTab === "library"}
               onConfigure={onConfigureSkill}
+              onToast={onToast}
             />
           ))}
         </div>

@@ -3,7 +3,6 @@
 import React, { createContext, useCallback, useContext, useState } from "react";
 import { WorkspaceSkill, SkillFormData } from "@/types/skills";
 import { BUNDLED_SKILLS } from "@/data/bundled-skills";
-import { CLAWHUB_LIBRARY } from "@/data/clawhub-library";
 
 export const CURRENT_AGENT = { name: "Nova", status: "ready" as const };
 
@@ -14,7 +13,6 @@ export interface NewSkillInput {
 
 interface SkillsContextValue {
   installedSkills: WorkspaceSkill[];
-  librarySkills: WorkspaceSkill[];
   getSkill: (id: string) => WorkspaceSkill | undefined;
   hasSkill: (id: string) => boolean;
   addSkill: (input: NewSkillInput) => WorkspaceSkill;
@@ -29,12 +27,10 @@ const SkillsContext = createContext<SkillsContextValue | null>(null);
 export function SkillsProvider({ children }: { children: React.ReactNode }) {
   // Bundled catalog arrives pre-sorted by relevancy; created skills prepend.
   const [installedSkills, setInstalledSkills] = useState<WorkspaceSkill[]>(BUNDLED_SKILLS);
-  const [librarySkills] = useState<WorkspaceSkill[]>(CLAWHUB_LIBRARY);
 
   const getSkill = useCallback(
-    (id: string) =>
-      installedSkills.find((s) => s.id === id) ?? librarySkills.find((s) => s.id === id),
-    [installedSkills, librarySkills]
+    (id: string) => installedSkills.find((s) => s.id === id),
+    [installedSkills]
   );
 
   const hasSkill = useCallback((id: string) => getSkill(id) !== undefined, [getSkill]);
@@ -86,13 +82,10 @@ export function SkillsProvider({ children }: { children: React.ReactNode }) {
     );
   }, []);
 
-  // Editing changes behavior, so the skill returns to preview and its old
-  // session proof no longer applies — the user re-confirms (with or without a test).
+  // Frictionless edits: instructions apply immediately; status and proof untouched.
   const updateSkillInstructions = useCallback((id: string, instructions: string) => {
     setInstalledSkills((prev) =>
-      prev.map((s) =>
-        s.id === id ? { ...s, instructions, status: "preview", confirmedUse: null } : s
-      )
+      prev.map((s) => (s.id === id ? { ...s, instructions } : s))
     );
   }, []);
 
@@ -100,7 +93,6 @@ export function SkillsProvider({ children }: { children: React.ReactNode }) {
     <SkillsContext.Provider
       value={{
         installedSkills,
-        librarySkills,
         getSkill,
         hasSkill,
         addSkill,

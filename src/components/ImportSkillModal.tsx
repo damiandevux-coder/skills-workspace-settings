@@ -7,6 +7,7 @@ import { X, Upload, FileText, Check } from "lucide-react";
 import { SkillFormData } from "@/types/skills";
 import { useSkills, CURRENT_AGENT } from "./skills/SkillsProvider";
 import { SkillConfirmPanel } from "./SkillCreationModal";
+import { useDialogEscape } from "@/lib/use-dialog";
 
 interface ImportSkillModalProps {
   isOpen: boolean;
@@ -168,6 +169,8 @@ export function ImportSkillModal({ isOpen, onClose, onToast }: ImportSkillModalP
     onClose();
   };
 
+  useDialogEscape(handleClose, isOpen);
+
   if (!isOpen) return null;
 
   return (
@@ -180,6 +183,9 @@ export function ImportSkillModal({ isOpen, onClose, onToast }: ImportSkillModalP
         onClick={handleClose}
       />
       <motion.div
+        role="dialog"
+        aria-modal="true"
+        aria-label="Import Skill"
         initial={{ opacity: 0, scale: 0.95, y: 20 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.95, y: 20 }}

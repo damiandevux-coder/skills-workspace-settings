@@ -23,6 +23,7 @@ import {
 } from "lucide-react";
 import { SkillFormData, EMOJI_OPTIONS, OS_OPTIONS } from "@/types/skills";
 import { useSkills, CURRENT_AGENT } from "./skills/SkillsProvider";
+import { useDialogEscape } from "@/lib/use-dialog";
 
 interface SkillCreationModalProps {
   isOpen: boolean;
@@ -954,7 +955,7 @@ export function SkillConfirmPanel({
           className="inline-flex items-center justify-center gap-2 rounded-lg border border-[#303036] px-4 py-2.5 text-[13px] font-medium text-[#f5f5f5] transition-colors hover:border-[#5a5a5e] hover:bg-[#151519]"
         >
           <Play className="h-4 w-4" />
-          Test it in a session first
+          Test in a session first
         </button>
         <button
           onClick={onKeepPreview}
@@ -981,6 +982,8 @@ export function SkillCreationModal({ isOpen, onClose, onToast }: SkillCreationMo
     setSavedSkillId(null);
     onClose();
   }, [onClose]);
+
+  useDialogEscape(handleClose, isOpen);
 
   const handleModeSelect = (selectedMode: "form" | "ai") => {
     setMode(selectedMode);
@@ -1033,6 +1036,9 @@ export function SkillCreationModal({ isOpen, onClose, onToast }: SkillCreationMo
         onClick={handleClose}
       />
       <motion.div
+        role="dialog"
+        aria-modal="true"
+        aria-label="Create Skill"
         initial={{ opacity: 0, scale: 0.95, y: 20 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.95, y: 20 }}

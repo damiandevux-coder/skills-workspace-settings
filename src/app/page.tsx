@@ -11,7 +11,7 @@ import { useSkills } from "@/components/skills/SkillsProvider";
 import type { WorkspaceSkill } from "@/types/skills";
 
 export default function Home() {
-  const { installedSkills, librarySkills } = useSkills();
+  const { installedSkills } = useSkills();
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isImportModalOpen, setIsImportModalOpen] = useState(false);
   const [configureSkill, setConfigureSkill] = useState<WorkspaceSkill | null>(null);
@@ -29,11 +29,11 @@ export default function Home() {
   return (
     <div className="mx-auto max-w-[1200px] px-4 sm:px-6 py-8">
       <SkillGrid
-        installedSkills={installedSkills}
-        librarySkills={librarySkills}
+        skills={installedSkills}
         onCreateSkill={() => setIsCreateModalOpen(true)}
         onImportSkill={() => setIsImportModalOpen(true)}
         onConfigureSkill={setConfigureSkill}
+        onToast={addToast}
       />
 
       <AnimatePresence>

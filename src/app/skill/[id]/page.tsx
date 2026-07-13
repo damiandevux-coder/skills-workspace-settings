@@ -122,7 +122,8 @@ function renderMarkdown(raw: string): string {
 }
 
 function inlineFmt(text: string): string {
-  return text
+  // Escape first: user/imported content must never inject raw HTML.
+  return escapeHtml(text)
     .replace(/\*\*(.+?)\*\*/g, '<strong class="text-[#f5f5f5]">$1</strong>')
     .replace(/\*(.+?)\*/g, "<em>$1</em>");
 }
@@ -150,13 +151,10 @@ export default function SkillDetailPage() {
   const params = useParams();
   const router = useRouter();
   const skillId = params.id as string;
-  const { installedSkills, librarySkills, getSkill, toggleSkillDisabled, confirmSkill } = useSkills();
+  const { installedSkills, getSkill, toggleSkillDisabled, confirmSkill } = useSkills();
 
   const liveSkill = getSkill(skillId);
-  const allSkills = useMemo(
-    () => [...installedSkills, ...librarySkills],
-    [installedSkills, librarySkills]
-  );
+  const allSkills = installedSkills;
 
   // Static mock detail when available; otherwise synthesize one from the live
   // skill (created/imported/library skills have no mock-detail entry). Edited
@@ -213,7 +211,6 @@ export default function SkillDetailPage() {
     );
   }
 
-  const isInstalled = installedSkills.some((s) => s.id === skillId);
 
   return (
     <div>
@@ -253,7 +250,7 @@ export default function SkillDetailPage() {
                     ) : detail.disabled ? (
                       <>
                         <XCircle className="h-3 w-3" />
-                        Inactive
+                        Disabled
                       </>
                     ) : (
                       <>
@@ -268,16 +265,11 @@ export default function SkillDetailPage() {
                   <span className="text-[11px] text-[#85858e] bg-[#151519] px-2 py-0.5 rounded">
                     {detail.category}
                   </span>
-                  {isInstalled && (
-                    <span className="text-[11px] text-[#4ade80] bg-[#4ade80]/10 px-2 py-0.5 rounded">
-                      Installed
-                    </span>
-                  )}
                 </div>
               </div>
             </div>
 
-            <div className="flex shrink-0 items-center gap-2">
+            <div className="flex flex-wrap items-center gap-2">
               {liveSkill && (
                 <button
                   onClick={() => setIsEditOpen(true)}
@@ -296,7 +288,15 @@ export default function SkillDetailPage() {
               </button>
               {!isPreview && liveSkill && (
                 <button
-                  onClick={() => toggleSkillDisabled(skillId)}
+                  onClick={() => {
+                    toggleSkillDisabled(skillId);
+                    addToast(
+                      liveSkill.disabled
+                        ? `${detail.name} enabled`
+                        : `${detail.name} disabled`,
+                      "success"
+                    );
+                  }}
                   className={`rounded-lg px-4 py-2.5 text-sm font-medium transition-opacity hover:opacity-90 ${
                     detail.disabled
                       ? "bg-[#f5c45e] text-[#111111]"

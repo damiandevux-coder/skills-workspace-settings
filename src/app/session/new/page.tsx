@@ -103,7 +103,7 @@ function TypingText({ text, onDone }: { text: string; onDone: () => void }) {
 
 function SessionChat({ skill }: { skill: WorkspaceSkill }) {
   const router = useRouter();
-  const { confirmSkillUsed, getSkill } = useSkills();
+  const { confirmSkill, confirmSkillUsed, getSkill } = useSkills();
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState("");
   const [phase, setPhase] = useState<"idle" | "thinking" | "invoking" | "typing">("idle");
@@ -112,6 +112,7 @@ function SessionChat({ skill }: { skill: WorkspaceSkill }) {
   // Missing bins/env → the first exchange is setup guidance instead of a run
   const [setupShown, setSetupShown] = useState(false);
   const [ranSuccessfully, setRanSuccessfully] = useState(false);
+  const [lastRunPrompt, setLastRunPrompt] = useState<string>("");
   const [pendingKind, setPendingKind] = useState<"setup" | "run">("run");
   const [toasts, setToasts] = useState<Toast[]>([]);
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -151,6 +152,7 @@ function SessionChat({ skill }: { skill: WorkspaceSkill }) {
 
     const runSetupFirst = needsSetup && !setupShown;
     setPendingKind(runSetupFirst ? "setup" : "run");
+    if (!runSetupFirst) setLastRunPrompt(text.trim());
     const reply = runSetupFirst ? setupReply(liveSkill) : skillReply(liveSkill, text.trim());
 
     setTimeout(() => setPhase("invoking"), 700);
@@ -170,20 +172,26 @@ function SessionChat({ skill }: { skill: WorkspaceSkill }) {
   };
 
   // Offer confirmation for preview skills after ANY completed reply — the user
-  // can always confirm explicitly, tested or not. Setup replies still don't
-  // count as a successful run (copy adapts).
+  // can always confirm explicitly, tested or not. Setup replies don't count as
+  // a run and won't resurface a dismissed banner; successful runs do.
   const handleTypingDone = useCallback(() => {
     setPhase("idle");
     if (pendingKind === "setup") {
       setSetupShown(true);
+      if (isPreview) setBannerState((prev) => (prev === "hidden" ? "offer" : prev));
     } else {
       setRanSuccessfully(true);
+      if (isPreview) setBannerState((prev) => (prev === "confirmed" ? prev : "offer"));
     }
-    if (isPreview) setBannerState((prev) => (prev === "hidden" ? "offer" : prev));
   }, [isPreview, pendingKind]);
 
+  // Proof integrity: only record session proof when the skill actually ran.
   const handleConfirm = () => {
-    confirmSkillUsed(skill.id, { prompt: firstPrompt });
+    if (ranSuccessfully) {
+      confirmSkillUsed(skill.id, { prompt: lastRunPrompt || firstPrompt });
+    } else {
+      confirmSkill(skill.id);
+    }
     setBannerState("confirmed");
     addToast(`${skill.name} is now Active on ${CURRENT_AGENT.name}`, "success");
   };
@@ -259,7 +267,7 @@ function SessionChat({ skill }: { skill: WorkspaceSkill }) {
                   className="inline-flex items-center gap-1.5 rounded-lg bg-[#4ade80] px-4 py-2 text-[13px] font-medium text-[#111111] transition-opacity hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-[#4ade80]/50"
                 >
                   <Check className="h-4 w-4" />
-                  {ranSuccessfully ? "Looks good — set Active" : "Confirm — set Active"}
+                  Confirm &amp; activate
                 </button>
                 <button
                   onClick={() => setBannerState("dismissed")}

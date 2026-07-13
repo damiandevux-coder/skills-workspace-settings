@@ -1,5 +1,19 @@
 # Changelog
 
+## 2026-07-13 (evening) — UX audit round
+
+A 28-issue fresh-eyes UX audit, executed with a demo-readiness + consistency lens:
+
+- **Library tab removed entirely** — the skill universe is bundled + created/imported only (ClawHub was design reference for the category filter, not a product direction). Kills the registry dead-ends the audit flagged (uninstallable library, false "Active" badges, no-op Configure/Disable on library detail). `clawhub-library.ts` deleted.
+- **Frictionless edits** — Configure's "Save & apply" applies SKILL.md changes immediately: no demotion to Preview, no reconfirmation, proof intact (reverses the previous behavior; also fixes the orphaned disabled-Preview state).
+- **One vocabulary: Active / Disabled / Preview** — card dots, detail badges, and filter chips all agree; the card toggle is a plain switch (aria-labeled); confirm buttons say **"Confirm & activate"** everywhere; test buttons are "Test" (cards) / "Test in a session" (long form).
+- **Modal accessibility** — ESC closes all modals and the category dropdown (`useDialogEscape`); `role="dialog"` + `aria-modal` + labels added.
+- **Session banner fixes** — "Keep as preview" no longer permanently kills confirmation (a later successful run re-offers it); confirming without a real run activates **without** recording fabricated session proof (proof now records the actual successful prompt).
+- **Feedback & filters** — enable/disable now toasts; empty state gains a "Clear filters" action; category dropdown clamps to viewport; detail action row wraps on narrow screens.
+- **Hardening** — imported/user markdown is HTML-escaped before rendering (XSS hole in the overview renderer closed); redundant "Installed" chip removed.
+
+Known gap (out of scope): the app shell's fixed sidebar is not responsive — phone-width layouts overflow at the shell level; skills surfaces themselves wrap correctly.
+
 ## 2026-07-13
 
 ### Skill flow, end to end (`9a9fa26`)
