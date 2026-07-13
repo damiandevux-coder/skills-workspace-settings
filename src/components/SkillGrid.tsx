@@ -3,14 +3,16 @@
 import React, { useMemo, useState } from "react";
 import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
-import { Search, Plus, FileText, Zap, Wrench, Upload, Library, Puzzle } from "lucide-react";
+import { Search, Plus, Play, Upload, Library, Puzzle } from "lucide-react";
 import { WorkspaceSkill } from "@/types/skills";
+import { useSkills } from "./skills/SkillsProvider";
 
 interface SkillGridProps {
   installedSkills: WorkspaceSkill[];
   librarySkills: WorkspaceSkill[];
   onCreateSkill: () => void;
   onImportSkill: () => void;
+  onConfigureSkill: (skill: WorkspaceSkill) => void;
 }
 
 type TabId = "installed" | "library";
@@ -19,17 +21,15 @@ type StatusFilter = "all" | "active" | "inactive" | "preview";
 function SkillCard({
   skill,
   isLibrary,
+  onConfigure,
 }: {
   skill: WorkspaceSkill;
   isLibrary?: boolean;
+  onConfigure: (skill: WorkspaceSkill) => void;
 }) {
   const router = useRouter();
+  const { toggleSkillDisabled } = useSkills();
   const isPreview = skill.status === "preview";
-  const toolIcons = [
-    skill.hasScripts && <Wrench key="scripts" className="h-3 w-3 text-[#85858e]" />,
-    skill.hasReferences && <FileText key="refs" className="h-3 w-3 text-[#85858e]" />,
-    skill.hasAssets && <Zap key="assets" className="h-3 w-3 text-[#85858e]" />,
-  ].filter(Boolean);
 
   return (
     <motion.div
@@ -64,40 +64,53 @@ function SkillCard({
         </div>
       </div>
 
-      {/* Footer */}
+      {/* Footer: actions only */}
       <div className="mt-3 flex items-center justify-between">
-        <div className="flex items-center gap-1.5">
-          {toolIcons.length > 0 ? toolIcons : <span className="text-[10px] text-[#85858e]">Instruction-only</span>}
-        </div>
-        <div className="flex items-center gap-2">
-          <span className="text-[10px] text-[#85858e] bg-[#151519] px-1.5 py-0.5 rounded">
-            {skill.category}
-          </span>
-          {isPreview ? (
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                router.push(`/session/new?skill=${encodeURIComponent(skill.id)}`);
-              }}
-              className="text-[10px] font-medium text-[#f5c45e] hover:underline"
+        {/* Enable/disable toggle (installed, non-preview) */}
+        {!isLibrary && !isPreview ? (
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              toggleSkillDisabled(skill.id);
+            }}
+            title={skill.disabled ? "Enable skill" : "Disable skill"}
+            className="flex items-center gap-1.5"
+          >
+            <span
+              className={`flex h-[16px] w-[28px] items-center rounded-full p-[2px] transition-colors ${
+                skill.disabled ? "bg-[#303036]" : "bg-[#4ade80]"
+              }`}
             >
-              Try it →
-            </button>
-          ) : isLibrary ? (
+              <span
+                className={`h-3 w-3 rounded-full bg-[#f5f5f5] transition-transform ${
+                  skill.disabled ? "" : "translate-x-3"
+                }`}
+              />
+            </span>
+            <span className="text-[10px] font-medium text-[#85858e]">
+              {skill.disabled ? "Disabled" : "Enabled"}
+            </span>
+          </button>
+        ) : (
+          <span />
+        )}
+
+        <div className="flex items-center gap-3">
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              router.push(`/session/new?skill=${encodeURIComponent(skill.id)}`);
+            }}
+            className="inline-flex items-center gap-1 text-[10px] font-medium text-[#f5c45e] hover:underline"
+          >
+            <Play className="h-2.5 w-2.5" />
+            Test
+          </button>
+          {!isLibrary && (
             <button
               onClick={(e) => {
                 e.stopPropagation();
-                router.push(`/session/new?skill=${encodeURIComponent(skill.id)}`);
-              }}
-              className="text-[10px] font-medium text-[#f5c45e] hover:underline"
-            >
-              Try with Nova
-            </button>
-          ) : (
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                router.push(`/skill/${skill.id}`);
+                onConfigure(skill);
               }}
               className="text-[10px] font-medium text-[#85858e] hover:text-[#f5f5f5] transition-colors"
             >
@@ -110,7 +123,7 @@ function SkillCard({
   );
 }
 
-export function SkillGrid({ installedSkills, librarySkills, onCreateSkill, onImportSkill }: SkillGridProps) {
+export function SkillGrid({ installedSkills, librarySkills, onCreateSkill, onImportSkill, onConfigureSkill }: SkillGridProps) {
   const [activeTab, setActiveTab] = useState<TabId>("installed");
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
   const [searchQuery, setSearchQuery] = useState("");
@@ -273,6 +286,7 @@ export function SkillGrid({ installedSkills, librarySkills, onCreateSkill, onImp
               key={skill.id}
               skill={skill}
               isLibrary={activeTab === "library"}
+              onConfigure={onConfigureSkill}
             />
           ))}
         </div>

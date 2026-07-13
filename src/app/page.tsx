@@ -5,13 +5,16 @@ import { AnimatePresence } from "framer-motion";
 import { SkillGrid } from "@/components/SkillGrid";
 import { SkillCreationModal } from "@/components/SkillCreationModal";
 import { ImportSkillModal } from "@/components/ImportSkillModal";
+import { EditSkillModal } from "@/components/EditSkillModal";
 import { ToastContainer, type Toast } from "@/components/Toast";
 import { useSkills } from "@/components/skills/SkillsProvider";
+import type { WorkspaceSkill } from "@/types/skills";
 
 export default function Home() {
   const { installedSkills, librarySkills } = useSkills();
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isImportModalOpen, setIsImportModalOpen] = useState(false);
+  const [configureSkill, setConfigureSkill] = useState<WorkspaceSkill | null>(null);
   const [toasts, setToasts] = useState<Toast[]>([]);
 
   const addToast = useCallback((message: string, type: Toast["type"] = "info") => {
@@ -30,6 +33,7 @@ export default function Home() {
         librarySkills={librarySkills}
         onCreateSkill={() => setIsCreateModalOpen(true)}
         onImportSkill={() => setIsImportModalOpen(true)}
+        onConfigureSkill={setConfigureSkill}
       />
 
       <AnimatePresence>
@@ -47,6 +51,17 @@ export default function Home() {
           <ImportSkillModal
             isOpen={isImportModalOpen}
             onClose={() => setIsImportModalOpen(false)}
+            onToast={addToast}
+          />
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {configureSkill && (
+          <EditSkillModal
+            isOpen={configureSkill !== null}
+            skill={configureSkill}
+            onClose={() => setConfigureSkill(null)}
             onToast={addToast}
           />
         )}

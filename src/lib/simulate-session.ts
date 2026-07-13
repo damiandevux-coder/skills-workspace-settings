@@ -83,6 +83,30 @@ const SPECIFIC_REPLIES: Record<string, (prompt: string) => SkillReply> = {
   }),
 };
 
+/** True when the skill declares bins/env the pod may be missing. */
+export function skillNeedsSetup(skill: WorkspaceSkill): boolean {
+  return skill.requiresBins.length > 0 || skill.requiresEnv.length > 0;
+}
+
+/** First-run guidance when requirements are missing: the agent walks the user through setup. */
+export function setupReply(skill: WorkspaceSkill): SkillReply {
+  const parts: string[] = [
+    `Before I can run **${skill.name}**, I checked its requirements — a couple of things are missing:`,
+    "",
+  ];
+  for (const bin of skill.requiresBins) {
+    parts.push(`- \`${bin}\` isn't on my PATH. Install it with your package manager, e.g. \`sudo apt install ${bin}\` or \`brew install ${bin}\`.`);
+  }
+  for (const env of skill.requiresEnv) {
+    parts.push(`- The \`${env}\` environment variable isn't set. Add it to my environment (Settings → Environment) with your key.`);
+  }
+  parts.push("", "Tell me once that's in place and I'll run it right away.");
+  return {
+    action: `Checking requirements for ${skill.name}`,
+    text: parts.join("\n"),
+  };
+}
+
 export function skillReply(skill: WorkspaceSkill, prompt: string): SkillReply {
   const specific = SPECIFIC_REPLIES[skill.id];
   if (specific) return specific(prompt);

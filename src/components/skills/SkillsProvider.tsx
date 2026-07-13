@@ -19,6 +19,7 @@ interface SkillsContextValue {
   addSkill: (input: NewSkillInput) => WorkspaceSkill;
   confirmSkillUsed: (id: string, proof: { prompt: string }) => void;
   toggleSkillDisabled: (id: string) => void;
+  updateSkillInstructions: (id: string, instructions: string) => void;
 }
 
 const SkillsContext = createContext<SkillsContextValue | null>(null);
@@ -75,6 +76,12 @@ export function SkillsProvider({ children }: { children: React.ReactNode }) {
     );
   }, []);
 
+  const updateSkillInstructions = useCallback((id: string, instructions: string) => {
+    setInstalledSkills((prev) =>
+      prev.map((s) => (s.id === id ? { ...s, instructions } : s))
+    );
+  }, []);
+
   return (
     <SkillsContext.Provider
       value={{
@@ -85,6 +92,7 @@ export function SkillsProvider({ children }: { children: React.ReactNode }) {
         addSkill,
         confirmSkillUsed,
         toggleSkillDisabled,
+        updateSkillInstructions,
       }}
     >
       {children}

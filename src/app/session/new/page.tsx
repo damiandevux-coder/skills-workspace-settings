@@ -14,7 +14,7 @@ import {
 } from "lucide-react";
 import { useSkills, CURRENT_AGENT } from "@/components/skills/SkillsProvider";
 import { ToastContainer, type Toast } from "@/components/Toast";
-import { suggestedPrompts, skillReply } from "@/lib/simulate-session";
+import { suggestedPrompts, skillReply, skillNeedsSetup, setupReply } from "@/lib/simulate-session";
 import { WorkspaceSkill } from "@/types/skills";
 
 interface ChatMessage {
@@ -23,12 +23,16 @@ interface ChatMessage {
   text: string;
   /** Tool-invocation chip line shown above agent text. */
   action?: string;
+  /** "setup" = requirements guidance, "run" = actual skill invocation. */
+  kind?: "setup" | "run";
 }
 
 /** Minimal inline markdown: **bold**, `code`, and "- " bullets. */
 function renderMessageText(text: string): React.ReactNode {
   return text.split("\n").map((line, i) => {
-    const parts = line
+    const isBullet = line.startsWith("- ");
+    const content = isBullet ? line.slice(2) : line;
+    const parts = content
       .split(/(\*\*[^*]+\*\*|`[^`]+`)/g)
       .filter(Boolean)
       .map((part, j) => {
@@ -49,11 +53,11 @@ function renderMessageText(text: string): React.ReactNode {
         return part;
       });
 
-    if (line.startsWith("- ")) {
+    if (isBullet) {
       return (
         <div key={i} className="flex gap-2 pl-1">
           <span className="text-[#85858e]">•</span>
-          <span>{parts.length === 1 && typeof parts[0] === "string" ? parts[0].slice(2) : parts}</span>
+          <span>{parts}</span>
         </div>
       );
     }
@@ -105,6 +109,10 @@ function SessionChat({ skill }: { skill: WorkspaceSkill }) {
   const [phase, setPhase] = useState<"idle" | "thinking" | "invoking" | "typing">("idle");
   const [bannerState, setBannerState] = useState<"hidden" | "offer" | "confirmed" | "dismissed">("hidden");
   const [firstPrompt, setFirstPrompt] = useState<string>("");
+  // Missing bins/env → the first exchange is setup guidance instead of a run
+  const [setupShown, setSetupShown] = useState(false);
+  const [ranSuccessfully, setRanSuccessfully] = useState(false);
+  const [pendingKind, setPendingKind] = useState<"setup" | "run">("run");
   const [toasts, setToasts] = useState<Toast[]>([]);
   const scrollRef = useRef<HTMLDivElement>(null);
   const confirmButtonRef = useRef<HTMLButtonElement>(null);
@@ -112,6 +120,7 @@ function SessionChat({ skill }: { skill: WorkspaceSkill }) {
   // Live skill state (status flips to active after confirm)
   const liveSkill = getSkill(skill.id) ?? skill;
   const isPreview = liveSkill.status === "preview";
+  const needsSetup = skillNeedsSetup(liveSkill);
 
   const addToast = useCallback((message: string, type: Toast["type"] = "info") => {
     const id = Math.random().toString(36).slice(2);
@@ -140,23 +149,37 @@ function SessionChat({ skill }: { skill: WorkspaceSkill }) {
     setInput("");
     setPhase("thinking");
 
-    const reply = skillReply(liveSkill, text.trim());
+    const runSetupFirst = needsSetup && !setupShown;
+    setPendingKind(runSetupFirst ? "setup" : "run");
+    const reply = runSetupFirst ? setupReply(liveSkill) : skillReply(liveSkill, text.trim());
 
     setTimeout(() => setPhase("invoking"), 700);
     setTimeout(() => {
       setMessages((prev) => [
         ...prev,
-        { id: `a-${prev.length}`, role: "agent", text: reply.text, action: reply.action },
+        {
+          id: `a-${prev.length}`,
+          role: "agent",
+          text: reply.text,
+          action: reply.action,
+          kind: runSetupFirst ? "setup" : "run",
+        },
       ]);
       setPhase("typing");
     }, 2000);
   };
 
   // After the first completed skill run on a preview skill, offer confirmation.
+  // Setup-guidance replies don't count as a run.
   const handleTypingDone = useCallback(() => {
     setPhase("idle");
+    if (pendingKind === "setup") {
+      setSetupShown(true);
+      return;
+    }
+    setRanSuccessfully(true);
     if (isPreview) setBannerState((prev) => (prev === "hidden" ? "offer" : prev));
-  }, [isPreview]);
+  }, [isPreview, pendingKind]);
 
   const handleConfirm = () => {
     confirmSkillUsed(skill.id, { prompt: firstPrompt });
@@ -278,6 +301,13 @@ function SessionChat({ skill }: { skill: WorkspaceSkill }) {
                   ? " Send a prompt to see it in action, then confirm it works."
                   : " Send a prompt to see it in action."}
               </p>
+              {needsSetup && (
+                <p className="mx-auto mt-2 max-w-[420px] text-[12px] text-[#f5c45e]/80">
+                  This skill needs{" "}
+                  {[...liveSkill.requiresBins.map((b) => `\`${b}\``), ...liveSkill.requiresEnv].join(", ")} —{" "}
+                  {CURRENT_AGENT.name} will guide you through setup on the first run.
+                </p>
+              )}
               <div className="mt-5 flex flex-wrap justify-center gap-2">
                 {prompts.map((p) => (
                   <button
@@ -316,9 +346,11 @@ function SessionChat({ skill }: { skill: WorkspaceSkill }) {
                     <div className="inline-flex items-center gap-2 rounded-lg border border-[#f5c45e]/25 bg-[#1c1507]/40 px-3 py-1.5">
                       <Check className="h-3 w-3 text-[#4ade80]" />
                       <span className="font-mono text-[11px] text-[#f5c45e]">
-                        Used skill: {liveSkill.id}
+                        {msg.kind === "setup" ? msg.action : `Used skill: ${liveSkill.id}`}
                       </span>
-                      <span className="text-[11px] text-[#85858e]">· {msg.action}</span>
+                      {msg.kind !== "setup" && (
+                        <span className="text-[11px] text-[#85858e]">· {msg.action}</span>
+                      )}
                     </div>
                   )}
                   <div className="rounded-2xl rounded-bl-md border border-[#222226] bg-[#151519] px-4 py-3 text-[13px] leading-relaxed text-[#a7a7ad]">
@@ -333,6 +365,22 @@ function SessionChat({ skill }: { skill: WorkspaceSkill }) {
             )
           )}
 
+          {/* Retry chip after setup guidance */}
+          {setupShown && !ranSuccessfully && phase === "idle" && (
+            <motion.div
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="flex justify-center pt-1"
+            >
+              <button
+                onClick={() => sendMessage(firstPrompt || "All set — try again now")}
+                className="rounded-full border border-[#4ade80]/40 bg-[#4ade80]/10 px-4 py-2 text-[12px] font-medium text-[#4ade80] transition-colors hover:bg-[#4ade80]/20"
+              >
+                ✓ Done — try again now
+              </button>
+            </motion.div>
+          )}
+
           {(phase === "thinking" || phase === "invoking") && (
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex justify-start">
               <div className="space-y-2">
@@ -340,7 +388,9 @@ function SessionChat({ skill }: { skill: WorkspaceSkill }) {
                   <div className="inline-flex items-center gap-2 rounded-lg border border-[#f5c45e]/25 bg-[#1c1507]/40 px-3 py-1.5">
                     <Loader2 className="h-3 w-3 animate-spin text-[#f5c45e]" />
                     <span className="font-mono text-[11px] text-[#f5c45e]">
-                      Using skill: {liveSkill.id}…
+                      {pendingKind === "setup"
+                        ? "Checking skill requirements…"
+                        : `Using skill: ${liveSkill.id}…`}
                     </span>
                   </div>
                 )}

@@ -1,8 +1,8 @@
 "use client";
 
-import React, { useMemo, useState } from "react";
+import React, { useCallback, useMemo, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   ArrowLeft,
   FileText,
@@ -17,6 +17,8 @@ import {
 } from "lucide-react";
 import { MOCK_SKILL_DETAILS } from "@/data/mock-skill-details";
 import { useSkills } from "@/components/skills/SkillsProvider";
+import { EditSkillModal } from "@/components/EditSkillModal";
+import { ToastContainer, type Toast } from "@/components/Toast";
 import { SkillDetail } from "@/types/skills";
 
 // ── Markdown renderer ─────────────────────────────────────────────────────
@@ -157,10 +159,12 @@ export default function SkillDetailPage() {
   );
 
   // Static mock detail when available; otherwise synthesize one from the live
-  // skill (created/imported/library skills have no mock-detail entry).
+  // skill (created/imported/library skills have no mock-detail entry). Edited
+  // instructions always win over the mock overview.
   const detail: SkillDetail | undefined = useMemo(() => {
     const mock = MOCK_SKILL_DETAILS[skillId];
-    if (mock && liveSkill) return { ...mock, ...liveSkill };
+    if (mock && liveSkill)
+      return { ...mock, ...liveSkill, overview: liveSkill.instructions ?? mock.overview };
     if (mock) return mock;
     if (!liveSkill) return undefined;
     return {
@@ -174,6 +178,17 @@ export default function SkillDetailPage() {
   }, [skillId, liveSkill]);
 
   const [activeTab, setActiveTab] = useState<"overview" | "files">("overview");
+  const [isEditOpen, setIsEditOpen] = useState(false);
+  const [toasts, setToasts] = useState<Toast[]>([]);
+
+  const addToast = useCallback((message: string, type: Toast["type"] = "info") => {
+    const id = Math.random().toString(36).slice(2);
+    setToasts((prev) => [...prev, { id, message, type }]);
+  }, []);
+
+  const removeToast = useCallback((id: string) => {
+    setToasts((prev) => prev.filter((t) => t.id !== id));
+  }, []);
 
   const related = useMemo(() => {
     if (!detail) return [];
@@ -262,26 +277,36 @@ export default function SkillDetailPage() {
               </div>
             </div>
 
-            {isPreview ? (
+            <div className="flex shrink-0 items-center gap-2">
+              {liveSkill && (
+                <button
+                  onClick={() => setIsEditOpen(true)}
+                  className="inline-flex items-center gap-2 rounded-lg border border-[#303036] px-4 py-2.5 text-sm font-medium text-[#f5f5f5] transition-colors hover:bg-[#151519]"
+                >
+                  <Settings className="h-4 w-4" />
+                  Configure
+                </button>
+              )}
               <button
                 onClick={() => router.push(`/session/new?skill=${encodeURIComponent(skillId)}`)}
-                className="inline-flex shrink-0 items-center gap-2 rounded-lg bg-[#4ade80] px-5 py-2.5 text-sm font-medium text-[#111111] transition-opacity hover:opacity-90"
+                className="inline-flex items-center gap-2 rounded-lg bg-[#4ade80] px-4 py-2.5 text-sm font-medium text-[#111111] transition-opacity hover:opacity-90"
               >
                 <Play className="h-4 w-4" />
-                Try it in a session
+                Test in a session
               </button>
-            ) : (
-              <button
-                onClick={() => toggleSkillDisabled(skillId)}
-                className={`shrink-0 rounded-lg px-5 py-2.5 text-sm font-medium transition-opacity hover:opacity-90 ${
-                  detail.disabled
-                    ? "bg-[#f5c45e] text-[#111111]"
-                    : "border border-[#303036] text-[#f5f5f5] hover:bg-[#151519]"
-                }`}
-              >
-                {detail.disabled ? "Enable Skill" : "Disable Skill"}
-              </button>
-            )}
+              {!isPreview && liveSkill && (
+                <button
+                  onClick={() => toggleSkillDisabled(skillId)}
+                  className={`rounded-lg px-4 py-2.5 text-sm font-medium transition-opacity hover:opacity-90 ${
+                    detail.disabled
+                      ? "bg-[#f5c45e] text-[#111111]"
+                      : "border border-[#303036] text-[#85858e] hover:bg-[#151519] hover:text-[#f5f5f5]"
+                  }`}
+                >
+                  {detail.disabled ? "Enable" : "Disable"}
+                </button>
+              )}
+            </div>
           </div>
         </div>
       </div>
@@ -516,6 +541,19 @@ export default function SkillDetailPage() {
           </div>
         </div>
       </div>
+
+      <AnimatePresence>
+        {isEditOpen && liveSkill && (
+          <EditSkillModal
+            isOpen={isEditOpen}
+            skill={liveSkill}
+            onClose={() => setIsEditOpen(false)}
+            onToast={addToast}
+          />
+        )}
+      </AnimatePresence>
+
+      <ToastContainer toasts={toasts} onRemove={removeToast} />
     </div>
   );
 }
