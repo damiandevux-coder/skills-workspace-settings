@@ -169,15 +169,16 @@ function SessionChat({ skill }: { skill: WorkspaceSkill }) {
     }, 2000);
   };
 
-  // After the first completed skill run on a preview skill, offer confirmation.
-  // Setup-guidance replies don't count as a run.
+  // Offer confirmation for preview skills after ANY completed reply — the user
+  // can always confirm explicitly, tested or not. Setup replies still don't
+  // count as a successful run (copy adapts).
   const handleTypingDone = useCallback(() => {
     setPhase("idle");
     if (pendingKind === "setup") {
       setSetupShown(true);
-      return;
+    } else {
+      setRanSuccessfully(true);
     }
-    setRanSuccessfully(true);
     if (isPreview) setBannerState((prev) => (prev === "hidden" ? "offer" : prev));
   }, [isPreview, pendingKind]);
 
@@ -236,8 +237,19 @@ function SessionChat({ skill }: { skill: WorkspaceSkill }) {
               <div className="flex items-center gap-2.5">
                 <Sparkles className="h-4 w-4 shrink-0 text-[#4ade80]" />
                 <p className="text-[13px] text-[#f5f5f5]">
-                  <strong className="font-semibold">{liveSkill.name}</strong> ran successfully. Confirm it
-                  works to set it <span className="text-[#4ade80]">Active</span> on {CURRENT_AGENT.name}.
+                  {ranSuccessfully ? (
+                    <>
+                      <strong className="font-semibold">{liveSkill.name}</strong> ran successfully.
+                      Confirm it works to set it{" "}
+                      <span className="text-[#4ade80]">Active</span> on {CURRENT_AGENT.name}.
+                    </>
+                  ) : (
+                    <>
+                      Confirm <strong className="font-semibold">{liveSkill.name}</strong> to set it{" "}
+                      <span className="text-[#4ade80]">Active</span> on {CURRENT_AGENT.name} — or
+                      finish setup and run it first.
+                    </>
+                  )}
                 </p>
               </div>
               <div className="flex items-center gap-2">
@@ -247,7 +259,7 @@ function SessionChat({ skill }: { skill: WorkspaceSkill }) {
                   className="inline-flex items-center gap-1.5 rounded-lg bg-[#4ade80] px-4 py-2 text-[13px] font-medium text-[#111111] transition-opacity hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-[#4ade80]/50"
                 >
                   <Check className="h-4 w-4" />
-                  Looks good — set Active
+                  {ranSuccessfully ? "Looks good — set Active" : "Confirm — set Active"}
                 </button>
                 <button
                   onClick={() => setBannerState("dismissed")}

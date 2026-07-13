@@ -902,17 +902,21 @@ ${data.instructions}`;
   );
 }
 
-// --- Saved Panel ---
-function SavedPanel({
+// --- Confirmation Panel (terminal step: confirm, test-first, or keep as preview) ---
+export function SkillConfirmPanel({
   skillName,
   emoji,
+  verb = "saved",
+  onConfirm,
   onTryIt,
-  onDone,
+  onKeepPreview,
 }: {
   skillName: string;
   emoji: string;
+  verb?: "saved" | "imported";
+  onConfirm: () => void;
   onTryIt: () => void;
-  onDone: () => void;
+  onKeepPreview: () => void;
 }) {
   return (
     <div className="space-y-5 py-2">
@@ -927,30 +931,36 @@ function SavedPanel({
         </div>
         <div>
           <h3 className="text-base font-semibold text-[#f5f5f5]">
-            {emoji} {skillName} saved as{" "}
-            <span className="text-[#f5c45e]">Preview</span>
+            {emoji} {skillName} {verb} — confirm to activate
           </h3>
-          <p className="text-xs text-[#85858e] mt-1.5 max-w-[380px]">
-            Skills stay previews until they&apos;re proven in a session. Run it once with{" "}
-            {CURRENT_AGENT.name} and confirm it works to set it Active.
+          <p className="text-xs text-[#85858e] mt-1.5 max-w-[400px]">
+            Activate it on {CURRENT_AGENT.name} now, or run it once in a session first —
+            unconfirmed skills stay as <span className="text-[#f5c45e]">Preview</span>.
           </p>
         </div>
       </motion.div>
 
       <div className="flex flex-col gap-2">
         <button
-          onClick={onTryIt}
+          onClick={onConfirm}
           autoFocus
-          className="inline-flex items-center justify-center gap-2 rounded-lg bg-[#4ade80] px-4 py-2.5 text-[13px] font-medium text-[#111111] transition-opacity hover:opacity-90"
+          className="inline-flex items-center justify-center gap-2 rounded-lg bg-[#4ade80] px-4 py-2.5 text-[13px] font-medium text-[#111111] transition-opacity hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-[#4ade80]/50"
         >
-          <Play className="h-4 w-4" />
-          Try it with {CURRENT_AGENT.name}
+          <Check className="h-4 w-4" />
+          Confirm &amp; activate on {CURRENT_AGENT.name}
         </button>
         <button
-          onClick={onDone}
-          className="rounded-lg border border-[#303036] px-4 py-2.5 text-[13px] text-[#a7a7ad] transition-colors hover:border-[#5a5a5e] hover:text-[#f5f5f5]"
+          onClick={onTryIt}
+          className="inline-flex items-center justify-center gap-2 rounded-lg border border-[#303036] px-4 py-2.5 text-[13px] font-medium text-[#f5f5f5] transition-colors hover:border-[#5a5a5e] hover:bg-[#151519]"
         >
-          Done for now
+          <Play className="h-4 w-4" />
+          Test it in a session first
+        </button>
+        <button
+          onClick={onKeepPreview}
+          className="rounded-lg px-4 py-2 text-[12px] text-[#85858e] transition-colors hover:text-[#f5f5f5]"
+        >
+          Keep as preview for now
         </button>
       </div>
     </div>
@@ -960,7 +970,7 @@ function SavedPanel({
 // --- Main Modal ---
 export function SkillCreationModal({ isOpen, onClose, onToast }: SkillCreationModalProps) {
   const router = useRouter();
-  const { addSkill, hasSkill } = useSkills();
+  const { addSkill, hasSkill, confirmSkill } = useSkills();
   const [mode, setMode] = useState<CreationMode>("choose");
   const [formData, setFormData] = useState<SkillFormData>(INITIAL_FORM_DATA);
   const [savedSkillId, setSavedSkillId] = useState<string | null>(null);
@@ -1003,6 +1013,14 @@ export function SkillCreationModal({ isOpen, onClose, onToast }: SkillCreationMo
     if (id) router.push(`/session/new?skill=${encodeURIComponent(id)}`);
   };
 
+  const handleConfirm = () => {
+    if (savedSkillId) {
+      confirmSkill(savedSkillId);
+      onToast(`${formData.name} is now Active on ${CURRENT_AGENT.name}`, "success");
+    }
+    handleClose();
+  };
+
   if (!isOpen) return null;
 
   return (
@@ -1029,14 +1047,14 @@ export function SkillCreationModal({ isOpen, onClose, onToast }: SkillCreationMo
               {mode === "form" && "Structured Form"}
               {mode === "ai" && "Describe with AI"}
               {mode === "preview" && "Preview SKILL.md"}
-              {mode === "saved" && "Skill Saved"}
+              {mode === "saved" && "Confirm Skill"}
             </h2>
             <p className="text-xs text-[#85858e] mt-0.5">
               {mode === "choose" && "Choose your preferred creation method"}
               {mode === "form" && "Build step-by-step with full control"}
               {mode === "ai" && "Let AI generate the structure"}
               {mode === "preview" && "Review before saving"}
-              {mode === "saved" && "One step left: prove it in a session"}
+              {mode === "saved" && "Activate now, or test it first"}
             </p>
           </div>
           <button
@@ -1115,11 +1133,13 @@ export function SkillCreationModal({ isOpen, onClose, onToast }: SkillCreationMo
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
               >
-                <SavedPanel
+                <SkillConfirmPanel
                   skillName={formData.name}
                   emoji={formData.emoji}
+                  verb="saved"
+                  onConfirm={handleConfirm}
                   onTryIt={handleTryIt}
-                  onDone={handleClose}
+                  onKeepPreview={handleClose}
                 />
               </motion.div>
             )}

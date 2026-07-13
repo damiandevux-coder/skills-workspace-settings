@@ -3,9 +3,10 @@
 import React, { useState, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useRouter } from "next/navigation";
-import { X, Upload, FileText, Check, Play } from "lucide-react";
+import { X, Upload, FileText, Check } from "lucide-react";
 import { SkillFormData } from "@/types/skills";
 import { useSkills, CURRENT_AGENT } from "./skills/SkillsProvider";
+import { SkillConfirmPanel } from "./SkillCreationModal";
 
 interface ImportSkillModalProps {
   isOpen: boolean;
@@ -67,7 +68,7 @@ function parseImportedSkill(fileName: string, content: string): { form: SkillFor
 
 export function ImportSkillModal({ isOpen, onClose, onToast }: ImportSkillModalProps) {
   const router = useRouter();
-  const { addSkill, hasSkill } = useSkills();
+  const { addSkill, hasSkill, confirmSkill } = useSkills();
   const [dragActive, setDragActive] = useState(false);
   const [fileName, setFileName] = useState<string | null>(null);
   const [fileContent, setFileContent] = useState<string | null>(null);
@@ -150,6 +151,14 @@ export function ImportSkillModal({ isOpen, onClose, onToast }: ImportSkillModalP
     if (id) router.push(`/session/new?skill=${encodeURIComponent(id)}`);
   };
 
+  const handleConfirm = () => {
+    if (savedSkill) {
+      confirmSkill(savedSkill.id);
+      onToast(`${savedSkill.name} is now Active on ${CURRENT_AGENT.name}`, "success");
+    }
+    handleClose();
+  };
+
   const handleClose = () => {
     setFileName(null);
     setFileContent(null);
@@ -180,10 +189,10 @@ export function ImportSkillModal({ isOpen, onClose, onToast }: ImportSkillModalP
         <div className="flex items-center justify-between border-b border-[#222226] px-6 py-4">
           <div>
             <h2 className="text-base font-semibold text-[#f5f5f5]">
-              {savedSkill ? "Skill Imported" : "Import Skill"}
+              {savedSkill ? "Confirm Skill" : "Import Skill"}
             </h2>
             <p className="text-xs text-[#85858e] mt-0.5">
-              {savedSkill ? "One step left: prove it in a session" : "Upload an existing SKILL.md file"}
+              {savedSkill ? "Activate now, or test it first" : "Upload an existing SKILL.md file"}
             </p>
           </div>
           <button
@@ -203,45 +212,15 @@ export function ImportSkillModal({ isOpen, onClose, onToast }: ImportSkillModalP
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                className="space-y-5 py-2"
               >
-                <motion.div
-                  initial={{ scale: 0.8, opacity: 0 }}
-                  animate={{ scale: 1, opacity: 1 }}
-                  transition={{ type: "spring", stiffness: 300, damping: 20 }}
-                  className="flex flex-col items-center text-center gap-3 py-4"
-                >
-                  <div className="flex h-14 w-14 items-center justify-center rounded-2xl border border-[#4ade80]/30 bg-[#4ade80]/10">
-                    <Check className="h-7 w-7 text-[#4ade80]" />
-                  </div>
-                  <div>
-                    <h3 className="text-base font-semibold text-[#f5f5f5]">
-                      {savedSkill.emoji} {savedSkill.name} imported as{" "}
-                      <span className="text-[#f5c45e]">Preview</span>
-                    </h3>
-                    <p className="text-xs text-[#85858e] mt-1.5 max-w-[360px]">
-                      Skills stay previews until they&apos;re proven in a session. Run it once with{" "}
-                      {CURRENT_AGENT.name} and confirm it works to set it Active.
-                    </p>
-                  </div>
-                </motion.div>
-
-                <div className="flex flex-col gap-2">
-                  <button
-                    onClick={handleTryIt}
-                    autoFocus
-                    className="inline-flex items-center justify-center gap-2 rounded-lg bg-[#4ade80] px-4 py-2.5 text-[13px] font-medium text-[#111111] transition-opacity hover:opacity-90"
-                  >
-                    <Play className="h-4 w-4" />
-                    Try it with {CURRENT_AGENT.name}
-                  </button>
-                  <button
-                    onClick={handleClose}
-                    className="rounded-lg border border-[#303036] px-4 py-2.5 text-[13px] text-[#a7a7ad] transition-colors hover:border-[#5a5a5e] hover:text-[#f5f5f5]"
-                  >
-                    Done for now
-                  </button>
-                </div>
+                <SkillConfirmPanel
+                  skillName={savedSkill.name}
+                  emoji={savedSkill.emoji}
+                  verb="imported"
+                  onConfirm={handleConfirm}
+                  onTryIt={handleTryIt}
+                  onKeepPreview={handleClose}
+                />
               </motion.div>
             ) : !fileName ? (
               <motion.div

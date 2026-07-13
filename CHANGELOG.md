@@ -30,6 +30,12 @@ Feedback round on the grid:
 - **ClawHub-style category filter** — searchable multi-select dropdown with per-category counts, composing with search and status filters on both tabs
 - **Library tab is a ClawHub registry view** — the real top-10 (Self-improving agent 468k ⬇, Skill Vetter 264k ⬇, ontology, Gog, SkillScan, …) with author handles, stars, and downloads
 
+### Reinforced skill confirmation
+
+- Creation and import now end in an explicit **Confirm Skill** step: **"✓ Confirm & activate"** (no test required), "Test it in a session first", or "Keep as preview" — confirmation no longer depends on running a session
+- In sessions, the confirmation banner appears for preview skills after **any** agent reply (including setup guidance), with copy adapting to whether a real run happened
+- Removed the Description Quality meter from the creation form
+
 ### Verification & deployment
 
 - Every round verified by a scripted browser E2E (puppeteer-core + Chrome for Testing) driving the full journey — create, import, session, guided setup, confirm, toggle, Configure edit, unknown-skill guard — plus `npm run lint` / `npm run build`

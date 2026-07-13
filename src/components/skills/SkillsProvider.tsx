@@ -18,6 +18,7 @@ interface SkillsContextValue {
   getSkill: (id: string) => WorkspaceSkill | undefined;
   hasSkill: (id: string) => boolean;
   addSkill: (input: NewSkillInput) => WorkspaceSkill;
+  confirmSkill: (id: string) => void;
   confirmSkillUsed: (id: string, proof: { prompt: string }) => void;
   toggleSkillDisabled: (id: string) => void;
   updateSkillInstructions: (id: string, instructions: string) => void;
@@ -62,6 +63,13 @@ export function SkillsProvider({ children }: { children: React.ReactNode }) {
     return skill;
   }, []);
 
+  /** Explicit user confirmation without a session run (no proof recorded). */
+  const confirmSkill = useCallback((id: string) => {
+    setInstalledSkills((prev) =>
+      prev.map((s) => (s.id === id ? { ...s, status: "active", disabled: false } : s))
+    );
+  }, []);
+
   const confirmSkillUsed = useCallback((id: string, proof: { prompt: string }) => {
     setInstalledSkills((prev) =>
       prev.map((s) =>
@@ -92,6 +100,7 @@ export function SkillsProvider({ children }: { children: React.ReactNode }) {
         getSkill,
         hasSkill,
         addSkill,
+        confirmSkill,
         confirmSkillUsed,
         toggleSkillDisabled,
         updateSkillInstructions,
