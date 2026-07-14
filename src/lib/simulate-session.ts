@@ -1,8 +1,8 @@
 import { WorkspaceSkill } from "@/types/skills";
 
 export interface SkillReply {
-  /** Short line shown in the tool-invocation chip while "running". */
-  action: string;
+  /** Short line shown in the tool-invocation chip while "running"; absent for generic replies. */
+  action?: string;
   /** The agent's reply text, typed out in the UI. */
   text: string;
 }
@@ -115,5 +115,26 @@ export function skillReply(skill: WorkspaceSkill, prompt: string): SkillReply {
   return {
     action: `Invoking ${skill.name}`,
     text: `I ran that through the **${skill.name}** skill:\n\n- Followed the skill's instructions end to end\n- Completed without errors and captured the output\n- Logged the result in the workspace\n\nWant me to walk through what it did step by step?`,
+  };
+}
+
+/** Skill-less sessions: generic assistant prompts. */
+export function genericPrompts(): string[] {
+  return [
+    "Summarize unread emails from this morning",
+    "Find the latest Next.js 16 changelog",
+    "Help me prep for my meetings tomorrow",
+  ];
+}
+
+/** Skill-less sessions: a plausible generic reply with no tool chip. */
+export function genericReply(prompt: string): SkillReply {
+  return {
+    text:
+      `Here's what I found for **${prompt.slice(0, 60)}${prompt.length > 60 ? "…" : ""}**\n\n` +
+      "- Pulled the three most relevant sources and cross-checked them\n" +
+      "- Drafted a short summary with the key numbers highlighted\n" +
+      "- Flagged one item that needs your decision before I continue\n\n" +
+      "Want me to go deeper on any of these, or turn this into a doc?",
   };
 }

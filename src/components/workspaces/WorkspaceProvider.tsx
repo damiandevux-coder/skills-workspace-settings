@@ -1,16 +1,34 @@
 "use client";
 
 import React, { createContext, useContext, useState } from "react";
-import { Workspace, WorkspaceAgent, WorkspaceMember, WorkspaceMemberRole } from "@/types/workspaces";
+import {
+  AgentSession,
+  Workspace,
+  WorkspaceAgent,
+  WorkspaceMember,
+  WorkspaceMemberRole,
+} from "@/types/workspaces";
 import { KnowledgeItem, SharedKnowledge } from "@/types/skills";
 import { MOCK_WORKSPACES } from "@/data/mock-workspaces";
+
+export interface NewAgentInput {
+  name: string;
+  role?: string;
+  specialtyId?: string;
+  features?: { desktop: boolean; memory: boolean };
+}
 
 interface WorkspaceContextValue {
   workspaces: Workspace[];
   activeWorkspace: Workspace;
+  /** The selected agent of the active workspace (remembered per workspace). */
+  activeAgent: WorkspaceAgent | null;
+  selectAgent: (agentId: string) => void;
+  addSession: (agentId: string, data?: { title?: string; skillId?: string }) => AgentSession;
+  renameSession: (agentId: string, sessionId: string, title: string) => void;
   switchWorkspace: (id: string) => void;
   createWorkspace: (data: { name: string; emoji: string; color: string }) => Workspace;
-  addAgent: (name: string) => void;
+  addAgent: (input: NewAgentInput) => void;
   addKnowledgeBase: (data: {
     name: string;
     description: string;
@@ -51,9 +69,69 @@ function setFileStatus(
 export function WorkspaceProvider({ children }: { children: React.ReactNode }) {
   const [workspaces, setWorkspaces] = useState<Workspace[]>(MOCK_WORKSPACES);
   const [activeWorkspaceId, setActiveWorkspaceId] = useState<string>(MOCK_WORKSPACES[0].id);
+  // workspaceId → selected agentId, so switching workspaces remembers your agent.
+  const [activeAgentIds, setActiveAgentIds] = useState<Record<string, string>>({});
 
   const activeWorkspace =
     workspaces.find((w) => w.id === activeWorkspaceId) ?? workspaces[0];
+
+  const activeAgent =
+    activeWorkspace.agents.find((a) => a.id === activeAgentIds[activeWorkspace.id]) ??
+    activeWorkspace.agents[0] ??
+    null;
+
+  const selectAgent = (agentId: string) =>
+    setActiveAgentIds((prev) => ({ ...prev, [activeWorkspace.id]: agentId }));
+
+  const addSession = (
+    agentId: string,
+    data?: { title?: string; skillId?: string }
+  ): AgentSession => {
+    const session: AgentSession = {
+      id: `sess-${Date.now()}`,
+      title: data?.title?.trim() || "New Session",
+      skillId: data?.skillId,
+      createdAt: new Date().toISOString(),
+      lastActiveAt: new Date().toISOString(),
+    };
+    setWorkspaces((prev) =>
+      prev.map((w) =>
+        w.id === activeWorkspace.id
+          ? {
+              ...w,
+              agents: w.agents.map((a) =>
+                a.id === agentId ? { ...a, sessions: [session, ...a.sessions] } : a
+              ),
+            }
+          : w
+      )
+    );
+    return session;
+  };
+
+  const renameSession = (agentId: string, sessionId: string, title: string) => {
+    setWorkspaces((prev) =>
+      prev.map((w) =>
+        w.id === activeWorkspace.id
+          ? {
+              ...w,
+              agents: w.agents.map((a) =>
+                a.id === agentId
+                  ? {
+                      ...a,
+                      sessions: a.sessions.map((s) =>
+                        s.id === sessionId
+                          ? { ...s, title, lastActiveAt: new Date().toISOString() }
+                          : s
+                      ),
+                    }
+                  : a
+              ),
+            }
+          : w
+      )
+    );
+  };
 
   const switchWorkspace = (id: string) => setActiveWorkspaceId(id);
 
@@ -72,11 +150,26 @@ export function WorkspaceProvider({ children }: { children: React.ReactNode }) {
     return ws;
   };
 
-  const addAgent = (name: string) => {
-    const agent: WorkspaceAgent = { id: `agent-${Date.now()}`, name, status: "ready" };
+  const addAgent = (input: NewAgentInput) => {
+    const agent: WorkspaceAgent = {
+      id: `agent-${Date.now()}`,
+      name: input.name,
+      status: "ready",
+      role: input.role,
+      specialtyId: input.specialtyId,
+      features: input.features,
+      sessions: [
+        {
+          id: `sess-${Date.now()}`,
+          title: "Main Session",
+          createdAt: new Date().toISOString(),
+        },
+      ],
+    };
     setWorkspaces((prev) =>
       prev.map((w) => (w.id === activeWorkspace.id ? { ...w, agents: [...w.agents, agent] } : w))
     );
+    setActiveAgentIds((prev) => ({ ...prev, [activeWorkspace.id]: agent.id }));
   };
 
   const addKnowledgeBase = (data: {
@@ -192,6 +285,10 @@ export function WorkspaceProvider({ children }: { children: React.ReactNode }) {
       value={{
         workspaces,
         activeWorkspace,
+        activeAgent,
+        selectAgent,
+        addSession,
+        renameSession,
         switchWorkspace,
         createWorkspace,
         addAgent,

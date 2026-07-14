@@ -10,8 +10,7 @@ import { useWorkspace } from "./workspaces/WorkspaceProvider";
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  const { activeWorkspace } = useWorkspace();
-  const agentName = activeWorkspace.agents[0]?.name ?? "Main Agent";
+  const { activeAgent } = useWorkspace();
 
   return (
     <div className="flex h-screen bg-[#070708]">
@@ -19,11 +18,11 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       <WorkspaceSettingsSidebar />
 
       {/* Agent sidebar */}
-      <AgentSidebar sessions={["Main Session", "Claw Dev"]} />
+      <AgentSidebar />
 
       {/* Main area */}
       <div className="flex flex-1 flex-col min-w-0">
-        <ShellHeader title={agentName} />
+        <ShellHeader title={activeAgent?.name ?? "No agents"} />
 
         {/* Content */}
         <main className="flex-1 overflow-y-auto">

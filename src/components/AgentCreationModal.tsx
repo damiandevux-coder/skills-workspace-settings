@@ -23,7 +23,12 @@ export function AgentCreationModal({
 }: {
   isOpen: boolean;
   onClose: () => void;
-  onCreated?: (agent: { name: string; role: string }) => void;
+  onCreated?: (agent: {
+    name: string;
+    role: string;
+    specialtyId?: string;
+    features: { desktop: boolean; memory: boolean };
+  }) => void;
   /** Pre-select a specialty and jump to the configure step (marketplace "Hire" flow). */
   initialSpecialty?: string;
 }) {
@@ -45,7 +50,12 @@ export function AgentCreationModal({
 
   const handleCreate = () => {
     const role = selectedAgent?.role ?? "Custom Agent";
-    onCreated?.({ name: name.trim() || role, role });
+    onCreated?.({
+      name: name.trim() || role,
+      role,
+      specialtyId: selectedAgent?.id,
+      features,
+    });
     onClose();
     setStep(1);
     setSelectedSpecialty(null);

@@ -16,7 +16,7 @@ export function WorkspaceAppShell({ children }: { children: React.ReactNode }) {
       <WorkspaceSettingsSidebar />
 
       {/* Agent sidebar */}
-      <AgentSidebar sessions={["Main Session"]} />
+      <AgentSidebar />
 
       {/* Main area */}
       <div className="flex flex-1 flex-col min-w-0">

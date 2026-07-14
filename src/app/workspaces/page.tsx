@@ -254,7 +254,7 @@ export default function WorkspaceHomePage() {
           setIsAgentModalOpen(false);
           setHireSpecialty(undefined);
         }}
-        onCreated={(agent) => addAgent(agent.name)}
+        onCreated={(agent) => addAgent(agent)}
         initialSpecialty={hireSpecialty}
       />
       <InviteMemberModal

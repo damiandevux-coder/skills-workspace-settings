@@ -7,9 +7,38 @@ export const MOCK_WORKSPACES: Workspace[] = [
     emoji: "🟣",
     color: "#a78bfa",
     agents: [
-      { id: "agent-campaign-analyst", name: "Campaign Analyst", status: "ready" },
-      { id: "agent-creative-performance", name: "Creative Performance Agent", status: "busy" },
-      { id: "agent-launch-calendar", name: "Launch Calendar Agent", status: "ready" },
+      {
+        id: "agent-campaign-analyst",
+        name: "Campaign Analyst",
+        status: "ready",
+        role: "Data Analyst",
+        specialtyId: "data-analyst",
+        sessions: [
+          { id: "sess-ca-main", title: "Main Session", createdAt: "2026-07-01T09:00:00Z", lastActiveAt: "2026-07-14T08:12:00Z" },
+          { id: "sess-ca-q3", title: "Q3 spend deep-dive", createdAt: "2026-07-12T14:30:00Z", lastActiveAt: "2026-07-13T10:05:00Z" },
+        ],
+      },
+      {
+        id: "agent-creative-performance",
+        name: "Creative Performance Agent",
+        status: "busy",
+        role: "UX Researcher",
+        specialtyId: "ux-researcher",
+        sessions: [
+          { id: "sess-cp-main", title: "Main Session", createdAt: "2026-06-20T11:00:00Z", lastActiveAt: "2026-07-14T07:40:00Z" },
+          { id: "sess-cp-banners", title: "Banner A/B readout", createdAt: "2026-07-10T16:00:00Z" },
+        ],
+      },
+      {
+        id: "agent-launch-calendar",
+        name: "Launch Calendar Agent",
+        status: "ready",
+        role: "Product Owner",
+        specialtyId: "product-owner",
+        sessions: [
+          { id: "sess-lc-main", title: "Main Session", createdAt: "2026-07-05T08:00:00Z", lastActiveAt: "2026-07-11T15:22:00Z" },
+        ],
+      },
     ],
     members: [
       { id: "mem-1", email: "sarah@hypercli.com", name: "Sarah Chen", role: "admin", status: "active", invitedAt: "2026-06-01T10:00:00Z", joinedAt: "2026-06-01T10:05:00Z" },
@@ -58,9 +87,37 @@ export const MOCK_WORKSPACES: Workspace[] = [
     emoji: "🔵",
     color: "#60a5fa",
     agents: [
-      { id: "agent-product-owner", name: "Product Owner", status: "ready" },
-      { id: "agent-code-reviewer", name: "Code Reviewer", status: "ready" },
-      { id: "agent-sre", name: "SRE Agent", status: "offline" },
+      {
+        id: "agent-product-owner",
+        name: "Product Owner",
+        status: "ready",
+        role: "Product Owner",
+        specialtyId: "product-owner",
+        sessions: [
+          { id: "sess-po-main", title: "Main Session", createdAt: "2026-05-02T09:00:00Z", lastActiveAt: "2026-07-14T06:55:00Z" },
+          { id: "sess-po-roadmap", title: "H2 roadmap draft", createdAt: "2026-07-08T13:00:00Z", lastActiveAt: "2026-07-09T09:30:00Z" },
+        ],
+      },
+      {
+        id: "agent-code-reviewer",
+        name: "Code Reviewer",
+        status: "ready",
+        role: "Full-Stack Developer",
+        specialtyId: "fullstack-dev",
+        sessions: [
+          { id: "sess-cr-main", title: "Main Session", createdAt: "2026-05-12T10:00:00Z", lastActiveAt: "2026-07-13T18:20:00Z" },
+        ],
+      },
+      {
+        id: "agent-sre",
+        name: "SRE Agent",
+        status: "offline",
+        role: "DevOps Engineer",
+        specialtyId: "devops-engineer",
+        sessions: [
+          { id: "sess-sre-main", title: "Main Session", createdAt: "2026-06-01T07:00:00Z", lastActiveAt: "2026-07-02T22:10:00Z" },
+        ],
+      },
     ],
     members: [
       { id: "mem-4", email: "damian@hypercli.com", name: "Damian Medinas", role: "admin", status: "active", invitedAt: "2026-05-01T08:00:00Z", joinedAt: "2026-05-01T08:10:00Z" },

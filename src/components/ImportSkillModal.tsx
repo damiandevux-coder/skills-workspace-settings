@@ -16,7 +16,8 @@ import {
   Loader2,
 } from "lucide-react";
 import { SkillFormData, WorkspaceSkill } from "@/types/skills";
-import { useSkills, CURRENT_AGENT } from "./skills/SkillsProvider";
+import { useSkills } from "./skills/SkillsProvider";
+import { useWorkspace } from "@/components/workspaces/WorkspaceProvider";
 import { SkillConfirmPanel } from "./SkillCreationModal";
 import { useDialogEscape } from "@/lib/use-dialog";
 
@@ -152,6 +153,8 @@ type ScanState =
 export function ImportSkillModal({ isOpen, onClose, onToast }: ImportSkillModalProps) {
   const router = useRouter();
   const { addSkill, hasSkill, confirmSkill } = useSkills();
+  const { activeAgent } = useWorkspace();
+  const agentName = activeAgent?.name ?? "Agent";
   const [dragActive, setDragActive] = useState(false);
   const [staged, setStaged] = useState<StagedImport | null>(null);
   const [scan, setScan] = useState<ScanState>({ status: "idle" });
@@ -367,7 +370,7 @@ export function ImportSkillModal({ isOpen, onClose, onToast }: ImportSkillModalP
   const handleConfirm = () => {
     if (savedSkill) {
       confirmSkill(savedSkill.id);
-      onToast(`${savedSkill.name} is now Active on ${CURRENT_AGENT.name}`, "success");
+      onToast(`${savedSkill.name} is now Active on ${agentName}`, "success");
     }
     handleClose();
   };

@@ -2,7 +2,7 @@
 
 import React, { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   PanelRight,
@@ -105,14 +105,42 @@ function MenuItem({
   );
 }
 
-function AgentItem({ name }: { name: string }) {
+const AGENT_STATUS_DOT: Record<string, string> = {
+  ready: "bg-[#4ade80]",
+  busy: "bg-[#f5c45e]",
+  offline: "bg-[#737373]",
+};
+
+function AgentItem({
+  agent,
+  active,
+  onSelect,
+}: {
+  agent: { id: string; name: string; status: string };
+  active: boolean;
+  onSelect: () => void;
+}) {
   return (
-    <button className="flex w-full items-center gap-2 rounded-full p-1 text-left transition-colors hover:bg-[#ffffff08]">
-      <span className="flex size-6 shrink-0 items-center justify-center rounded-full border border-[#ffffff1a]">
+    <button
+      onClick={onSelect}
+      className={`flex w-full items-center gap-2 rounded-full p-1 text-left transition-colors ${
+        active ? "bg-[#ffffff0d]" : "hover:bg-[#ffffff08]"
+      }`}
+    >
+      <span className="relative flex size-6 shrink-0 items-center justify-center rounded-full border border-[#ffffff1a]">
         <Command className="h-3 w-3 text-[#fafafa]" />
+        <span
+          className={`absolute -bottom-px -right-px h-2 w-2 rounded-full border-2 border-[#0b0b0c] ${
+            AGENT_STATUS_DOT[agent.status] ?? "bg-[#737373]"
+          }`}
+        />
       </span>
-      <span className="min-w-0 flex-1 truncate text-[14px] leading-none text-[#fafafa]">
-        {name}
+      <span
+        className={`min-w-0 flex-1 truncate text-[14px] leading-none text-[#fafafa] ${
+          active ? "font-medium" : ""
+        }`}
+      >
+        {agent.name}
       </span>
     </button>
   );
@@ -213,7 +241,8 @@ function WorkspacePopover() {
 
 export function WorkspaceSettingsSidebar() {
   const pathname = usePathname() ?? "";
-  const { activeWorkspace, addAgent } = useWorkspace();
+  const router = useRouter();
+  const { activeWorkspace, activeAgent, selectAgent, addAgent } = useWorkspace();
   const [collapsed, setCollapsed] = useState(false);
   const [agentsExpanded, setAgentsExpanded] = useState(false);
   const [isAgentModalOpen, setIsAgentModalOpen] = useState(false);
@@ -308,7 +337,15 @@ export function WorkspaceSettingsSidebar() {
               </span>
             </button>
             {visibleAgents.map((agent) => (
-              <AgentItem key={agent.id} name={agent.name} />
+              <AgentItem
+                key={agent.id}
+                agent={agent}
+                active={agent.id === activeAgent?.id}
+                onSelect={() => {
+                  selectAgent(agent.id);
+                  router.push(`/agents/${agent.id}`);
+                }}
+              />
             ))}
             {(hiddenCount > 0 || agentsExpanded) && (
               <button
@@ -399,7 +436,7 @@ export function WorkspaceSettingsSidebar() {
       <AgentCreationModal
         isOpen={isAgentModalOpen}
         onClose={() => setIsAgentModalOpen(false)}
-        onCreated={(agent) => addAgent(agent.name)}
+        onCreated={(agent) => addAgent(agent)}
       />
     </motion.aside>
   );

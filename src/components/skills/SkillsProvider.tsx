@@ -3,8 +3,7 @@
 import React, { createContext, useCallback, useContext, useState } from "react";
 import { WorkspaceSkill, SkillFormData } from "@/types/skills";
 import { BUNDLED_SKILLS } from "@/data/bundled-skills";
-
-export const CURRENT_AGENT = { name: "Nova", status: "ready" as const };
+import { useWorkspace } from "@/components/workspaces/WorkspaceProvider";
 
 export interface NewSkillInput {
   form: SkillFormData;
@@ -29,6 +28,8 @@ const SkillsContext = createContext<SkillsContextValue | null>(null);
 export function SkillsProvider({ children }: { children: React.ReactNode }) {
   // Bundled catalog arrives pre-sorted by relevancy; created skills prepend.
   const [installedSkills, setInstalledSkills] = useState<WorkspaceSkill[]>(BUNDLED_SKILLS);
+  const { activeAgent } = useWorkspace();
+  const agentName = activeAgent?.name ?? "Agent";
 
   const getSkill = useCallback(
     (id: string) => installedSkills.find((s) => s.id === id),
@@ -69,15 +70,18 @@ export function SkillsProvider({ children }: { children: React.ReactNode }) {
     );
   }, []);
 
-  const confirmSkillUsed = useCallback((id: string, proof: { prompt: string }) => {
-    setInstalledSkills((prev) =>
-      prev.map((s) =>
-        s.id === id
-          ? { ...s, status: "active", disabled: false, confirmedUse: { agent: CURRENT_AGENT.name, prompt: proof.prompt } }
-          : s
-      )
-    );
-  }, []);
+  const confirmSkillUsed = useCallback(
+    (id: string, proof: { prompt: string }) => {
+      setInstalledSkills((prev) =>
+        prev.map((s) =>
+          s.id === id
+            ? { ...s, status: "active", disabled: false, confirmedUse: { agent: agentName, prompt: proof.prompt } }
+            : s
+        )
+      );
+    },
+    [agentName]
+  );
 
   const toggleSkillDisabled = useCallback((id: string) => {
     setInstalledSkills((prev) =>

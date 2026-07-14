@@ -90,14 +90,20 @@ function SidebarItem({ item, isActive }: { item: NavItem; isActive: boolean }) {
   );
 }
 
-export function AgentSidebar({ sessions }: { sessions: string[] }) {
+const AGENT_STATUS_DOT: Record<string, string> = {
+  ready: "bg-[#4ade80]",
+  busy: "bg-[#f5c45e]",
+  offline: "bg-[#737373]",
+};
+
+export function AgentSidebar() {
   const pathname = usePathname() ?? "";
-  const { activeWorkspace } = useWorkspace();
+  const { activeWorkspace, activeAgent } = useWorkspace();
   const [collapsed, setCollapsed] = useState(false);
   const [sessionsExpanded, setSessionsExpanded] = useState(true);
   const [advancedExpanded, setAdvancedExpanded] = useState(false);
 
-  const agentName = activeWorkspace.agents[0]?.name ?? "Main Agent";
+  const sessions = activeAgent?.sessions ?? [];
   const usage = getWorkspaceUsage(activeWorkspace.id);
 
   const isItemActive = (item: NavItem) => {
@@ -125,7 +131,18 @@ export function AgentSidebar({ sessions }: { sessions: string[] }) {
     <aside className="flex w-[240px] shrink-0 flex-col border-r border-[#232323] bg-[#0b0b0c]">
       {/* Header: agent name + collapse */}
       <div className="flex items-center justify-between px-4 py-3">
-        <span className="truncate text-sm font-medium text-[#fafafa]">{agentName}</span>
+        <span className="flex min-w-0 items-center gap-2">
+          {activeAgent && (
+            <span
+              className={`h-2 w-2 shrink-0 rounded-full ${
+                AGENT_STATUS_DOT[activeAgent.status] ?? "bg-[#737373]"
+              }`}
+            />
+          )}
+          <span className="truncate text-sm font-medium text-[#fafafa]">
+            {activeAgent?.name ?? "No agents"}
+          </span>
+        </span>
         <button
           onClick={() => setCollapsed(true)}
           aria-label="Collapse agent sidebar"
@@ -156,21 +173,28 @@ export function AgentSidebar({ sessions }: { sessions: string[] }) {
             )}
           </button>
           {sessionsExpanded &&
-            sessions.map((name, i) => (
-              <div
-                key={name}
-                className={`relative flex cursor-pointer items-center rounded-lg px-3 py-2 text-[13px] transition-colors ${
-                  i === 0
-                    ? "text-[#fafafa]"
-                    : "text-[#737373] hover:bg-[#151519] hover:text-[#a7a7ad]"
-                }`}
-              >
-                {i === 0 && (
-                  <div className="absolute left-0 top-1/2 h-5 w-[2px] -translate-y-1/2 rounded-r-full bg-[#fafafa]/60" />
-                )}
-                <span className="truncate pl-1">{name}</span>
-              </div>
-            ))}
+            sessions.map((session) => {
+              const active = pathname === `/session/${session.id}`;
+              return (
+                <Link
+                  key={session.id}
+                  href={`/session/${session.id}`}
+                  className={`relative flex items-center rounded-lg px-3 py-2 text-[13px] transition-colors ${
+                    active
+                      ? "text-[#fafafa]"
+                      : "text-[#737373] hover:bg-[#151519] hover:text-[#a7a7ad]"
+                  }`}
+                >
+                  {active && (
+                    <div className="absolute left-0 top-1/2 h-5 w-[2px] -translate-y-1/2 rounded-r-full bg-[#fafafa]/60" />
+                  )}
+                  <span className="truncate pl-1">{session.title}</span>
+                </Link>
+              );
+            })}
+          {sessionsExpanded && sessions.length === 0 && (
+            <p className="px-3 py-2 text-[11px] text-[#737373]">No sessions yet</p>
+          )}
         </div>
       </nav>
 

@@ -16,7 +16,8 @@ import {
   Play,
 } from "lucide-react";
 import { MOCK_SKILL_DETAILS } from "@/data/mock-skill-details";
-import { useSkills, CURRENT_AGENT } from "@/components/skills/SkillsProvider";
+import { useSkills } from "@/components/skills/SkillsProvider";
+import { useWorkspace } from "@/components/workspaces/WorkspaceProvider";
 import { EditSkillModal } from "@/components/EditSkillModal";
 import { ToastContainer, type Toast } from "@/components/Toast";
 import { SkillDetail } from "@/types/skills";
@@ -152,6 +153,8 @@ export default function SkillDetailPage() {
   const router = useRouter();
   const skillId = params.id as string;
   const { installedSkills, getSkill, confirmSkill } = useSkills();
+  const { activeAgent } = useWorkspace();
+  const agentName = activeAgent?.name ?? "Agent";
 
   const liveSkill = getSkill(skillId);
   const allSkills = installedSkills;
@@ -299,13 +302,13 @@ export default function SkillDetailPage() {
               <Play className="mr-2 inline h-3.5 w-3.5 text-[#f5c45e]" />
               <strong className="font-semibold">{detail.name}</strong> is in{" "}
               <span className="text-[#f5c45e]">Preview</span> — confirm it to activate on{" "}
-              {CURRENT_AGENT.name}, or run it in a session first.
+              {agentName}, or run it in a session first.
             </p>
             <div className="flex items-center gap-2">
               <button
                 onClick={() => {
                   confirmSkill(skillId);
-                  addToast(`${detail.name} is now Active on ${CURRENT_AGENT.name}`, "success");
+                  addToast(`${detail.name} is now Active on ${agentName}`, "success");
                 }}
                 className="inline-flex items-center gap-1.5 rounded-lg bg-[#4ade80] px-4 py-2 text-[13px] font-medium text-[#111111] transition-opacity hover:opacity-90"
               >

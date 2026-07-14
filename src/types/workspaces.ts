@@ -13,10 +13,22 @@ export interface WorkspaceMember {
   joinedAt?: string;
 }
 
+export interface AgentSession {
+  id: string;
+  title: string;
+  skillId?: string;
+  createdAt: string;
+  lastActiveAt?: string;
+}
+
 export interface WorkspaceAgent {
   id: string;
   name: string;
   status: "ready" | "busy" | "offline";
+  role?: string;
+  specialtyId?: string;
+  features?: { desktop: boolean; memory: boolean };
+  sessions: AgentSession[];
 }
 
 export interface Workspace {

@@ -22,7 +22,8 @@ import {
   Play,
 } from "lucide-react";
 import { SkillFormData, EMOJI_OPTIONS, OS_OPTIONS } from "@/types/skills";
-import { useSkills, CURRENT_AGENT } from "./skills/SkillsProvider";
+import { useSkills } from "./skills/SkillsProvider";
+import { useWorkspace } from "@/components/workspaces/WorkspaceProvider";
 import { useDialogEscape } from "@/lib/use-dialog";
 
 interface SkillCreationModalProps {
@@ -919,6 +920,8 @@ export function SkillConfirmPanel({
   onTryIt: () => void;
   onKeepPreview: () => void;
 }) {
+  const { activeAgent } = useWorkspace();
+  const agentName = activeAgent?.name ?? "Agent";
   return (
     <div className="space-y-5 py-2">
       <motion.div
@@ -935,7 +938,7 @@ export function SkillConfirmPanel({
             {emoji} {skillName} {verb} — confirm to activate
           </h3>
           <p className="text-xs text-[#737373] mt-1.5 max-w-[400px]">
-            Activate it on {CURRENT_AGENT.name} now, or run it once in a session first —
+            Activate it on {agentName} now, or run it once in a session first —
             unconfirmed skills stay as <span className="text-[#f5c45e]">Preview</span>.
           </p>
         </div>
@@ -948,7 +951,7 @@ export function SkillConfirmPanel({
           className="inline-flex items-center justify-center gap-2 rounded-lg bg-[#4ade80] px-4 py-2.5 text-[13px] font-medium text-[#111111] transition-opacity hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-[#4ade80]/50"
         >
           <Check className="h-4 w-4" />
-          Confirm &amp; activate on {CURRENT_AGENT.name}
+          Confirm &amp; activate on {agentName}
         </button>
         <button
           onClick={onTryIt}
@@ -972,6 +975,8 @@ export function SkillConfirmPanel({
 export function SkillCreationModal({ isOpen, onClose, onToast }: SkillCreationModalProps) {
   const router = useRouter();
   const { addSkill, hasSkill, confirmSkill } = useSkills();
+  const { activeAgent } = useWorkspace();
+  const agentName = activeAgent?.name ?? "Agent";
   const [mode, setMode] = useState<CreationMode>("choose");
   const [formData, setFormData] = useState<SkillFormData>(INITIAL_FORM_DATA);
   const [savedSkillId, setSavedSkillId] = useState<string | null>(null);
@@ -1019,7 +1024,7 @@ export function SkillCreationModal({ isOpen, onClose, onToast }: SkillCreationMo
   const handleConfirm = () => {
     if (savedSkillId) {
       confirmSkill(savedSkillId);
-      onToast(`${formData.name} is now Active on ${CURRENT_AGENT.name}`, "success");
+      onToast(`${formData.name} is now Active on ${agentName}`, "success");
     }
     handleClose();
   };
