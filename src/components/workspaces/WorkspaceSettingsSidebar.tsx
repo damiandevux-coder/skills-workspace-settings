@@ -7,7 +7,6 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   PanelRight,
   PanelLeft,
-  ChevronDown,
   ChevronsUpDown,
   Check,
   Command,
@@ -246,18 +245,8 @@ export function WorkspaceSettingsSidebar() {
               </button>
             </div>
 
-            {/* Org + workspace switcher card */}
+            {/* Workspace switcher card */}
             <div className="flex w-full flex-col gap-1 rounded-[14px] border border-[#ffffff1a] bg-[#0a0a0a] p-[10px] shadow-[0_1px_2px_rgba(0,0,0,0.4)]">
-              <button className="flex items-center gap-2 rounded-[10px] px-1.5 py-2 transition-colors hover:bg-[#ffffff08]">
-                <span className="flex h-6 shrink-0 items-center justify-center rounded-[6px] bg-[#297eff] px-1">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src="/org-playstation.svg" alt="" className="h-4 w-4" />
-                </span>
-                <span className="truncate text-[14px] font-semibold leading-5 text-[#fafafa]">
-                  PlayStation
-                </span>
-                <ChevronDown className="h-4 w-4 shrink-0 text-[#fafafa] opacity-50" />
-              </button>
               <WorkspacePopover />
             </div>
           </div>

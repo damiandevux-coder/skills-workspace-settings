@@ -67,6 +67,17 @@ so the rail matches the Figma frame; existing Sessions lists render the same nam
 Org switching, Controls/Activity/Usage/Settings pages, phone-width responsiveness
 (pre-existing known gap).
 
+## Revision (2026-07-14, post-review)
+
+Consolidation pass from Damian's annotated screenshot: the org ("PlayStation") row
+is removed from the rail's switcher card (workspace row only); the agent sidebars
+in both shells drop everything the rail now owns — workspace switcher, New Agent
+button, Workspace/Home nav item, Shared Knowledge, and (workspace shell) Members —
+leaving only agent-scoped items: Files, Integrations, Skills, Scheduled, Sessions,
+and the bottom Advanced/tokens/Upgrade block. Workspace-level destinations live
+ONLY in the rail's Administration group. `WorkspaceSwitcher.tsx` and
+`org-playstation.svg` deleted as unused.
+
 ## Verification
 
 Dev server + puppeteer-core screenshot of `/workspaces/members` (Members active

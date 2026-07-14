@@ -5,8 +5,6 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  LayoutGrid,
-  Plus,
   FolderOpen,
   Puzzle,
   Wrench,
@@ -16,10 +14,7 @@ import {
   Settings,
   Zap,
   Cpu,
-  HardDrive,
 } from "lucide-react";
-import { AgentCreationModal } from "./AgentCreationModal";
-import { WorkspaceSwitcher } from "./workspaces/WorkspaceSwitcher";
 import { WorkspaceSettingsSidebar } from "./workspaces/WorkspaceSettingsSidebar";
 
 interface NavItem {
@@ -30,7 +25,6 @@ interface NavItem {
 }
 
 const NAV_ITEMS: NavItem[] = [
-  { id: "workspace", label: "Workspace", href: "/", icon: LayoutGrid },
   { id: "files", label: "Files", href: "#", icon: FolderOpen },
   { id: "integrations", label: "Integrations", href: "#", icon: Puzzle },
   { id: "skills", label: "Skills", href: "/", icon: Wrench },
@@ -82,7 +76,6 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const [sessionsExpanded, setSessionsExpanded] = useState(true);
   const [advancedExpanded, setAdvancedExpanded] = useState(false);
-  const [isAgentModalOpen, setIsAgentModalOpen] = useState(false);
 
   return (
     <div className="flex h-screen bg-[#070708]">
@@ -91,22 +84,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
       {/* Sidebar */}
       <aside className="flex w-[240px] shrink-0 flex-col border-r border-[#222226] bg-[#0b0b0c]">
-        {/* Workspace selector (always visible) */}
-        <WorkspaceSwitcher />
-
-        {/* New Agent */}
-        <div className="px-3 pb-2">
-          <button
-            onClick={() => setIsAgentModalOpen(true)}
-            className="flex w-full items-center gap-2 rounded-lg border border-[#303036] bg-[#151519] px-3 py-2 text-[13px] text-[#f5f5f5] transition-colors hover:border-[#5a5a5e]"
-          >
-            <Plus className="h-3.5 w-3.5" />
-            New Agent
-          </button>
-        </div>
-
         {/* Nav */}
-        <nav className="flex-1 space-y-0.5 px-3 py-2 overflow-y-auto">
+        <nav className="flex-1 space-y-0.5 px-3 py-3 overflow-y-auto">
           {NAV_ITEMS.map((item) => (
             <SidebarItem
               key={item.id}
@@ -114,25 +93,6 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               isActive={pathname === item.href || (item.id === "skills" && pathname?.startsWith("/skill"))}
             />
           ))}
-
-          {/* Shared Knowledge link */}
-          <Link
-            href="/shared-knowledge"
-            className={`group relative flex items-center gap-3 rounded-lg px-3 py-2 text-[13px] transition-colors ${
-              pathname === "/shared-knowledge"
-                ? "bg-[#1a1a1e] text-[#f5f5f5]"
-                : "text-[#85858e] hover:bg-[#151519] hover:text-[#a7a7ad]"
-            }`}
-          >
-            {pathname === "/shared-knowledge" && (
-              <motion.div
-                layoutId="sidebarActive"
-                className="absolute left-0 top-1/2 h-5 w-[3px] -translate-y-1/2 rounded-r-full bg-[#4ade80]"
-              />
-            )}
-            <HardDrive className="h-4 w-4 shrink-0" />
-            <span className="truncate">Shared Knowledge</span>
-          </Link>
 
           {/* Sessions */}
           <div className="pt-4">
@@ -222,8 +182,6 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           {children}
         </main>
       </div>
-
-      <AgentCreationModal isOpen={isAgentModalOpen} onClose={() => setIsAgentModalOpen(false)} />
     </div>
   );
 }
