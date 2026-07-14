@@ -5,9 +5,14 @@ import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   ArrowLeft,
+  CalendarDays,
   Check,
   CheckCircle2,
   Loader2,
+  Mail,
+  Mic,
+  Paperclip,
+  Search,
   Send,
   Sparkles,
   Zap,
@@ -24,6 +29,9 @@ import {
   genericReply,
 } from "@/lib/simulate-session";
 import { WorkspaceSkill } from "@/types/skills";
+
+/** Icons for the generic "Try these" suggestions, matched by position. */
+const GENERIC_PROMPT_ICONS = [Mail, Search, CalendarDays];
 
 interface ChatMessage {
   id: string;
@@ -346,28 +354,46 @@ export function SessionChat({
       {/* Messages */}
       <div ref={scrollRef} className="flex-1 overflow-y-auto">
         <div className="mx-auto max-w-[860px] space-y-4 px-4 py-6 sm:px-6">
-          {messages.length === 0 && (
+          {messages.length === 0 && !liveSkill && (
+            <div className="flex min-h-[55vh] items-center">
+              <div className="mx-auto w-full max-w-[560px]">
+                <h2 className="text-2xl font-semibold text-[#fafafa]">Try these</h2>
+                <div className="mt-5 space-y-3">
+                  {prompts.map((p, i) => {
+                    const Icon = GENERIC_PROMPT_ICONS[i % GENERIC_PROMPT_ICONS.length];
+                    return (
+                      <button
+                        key={p}
+                        onClick={() => sendMessage(p)}
+                        className="flex w-full items-center gap-3 rounded-xl border border-[#303036] bg-[#0b0b0c] px-4 py-3 text-left transition-colors hover:border-[#5a5a5e] hover:bg-[#101010]"
+                      >
+                        <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-[#303036] bg-[#151519]">
+                          <Icon className="h-4 w-4 text-[#a7a7ad]" />
+                        </span>
+                        <span className="text-[13px] text-[#fafafa]">{p}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {messages.length === 0 && liveSkill && (
             <div className="py-10 text-center">
               <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-2xl border border-[#303036] bg-[#151519]">
-                <span className="text-xl">{liveSkill ? liveSkill.emoji : "💬"}</span>
+                <span className="text-xl">{liveSkill.emoji}</span>
               </div>
               <h2 className="text-base font-semibold text-[#fafafa]">
                 New session with {agentName}
               </h2>
               <p className="mx-auto mt-1 max-w-[420px] text-[13px] text-[#737373]">
-                {liveSkill ? (
-                  <>
-                    The <strong className="text-[#a7a7ad]">{liveSkill.name}</strong> skill is
-                    attached.
-                    {isPreview
-                      ? " Send a prompt to see it in action, then confirm it works."
-                      : " Send a prompt to see it in action."}
-                  </>
-                ) : (
-                  "Ask anything — or try one of these to get going."
-                )}
+                The <strong className="text-[#a7a7ad]">{liveSkill.name}</strong> skill is attached.
+                {isPreview
+                  ? " Send a prompt to see it in action, then confirm it works."
+                  : " Send a prompt to see it in action."}
               </p>
-              {liveSkill && needsSetup && (
+              {needsSetup && (
                 <p className="mx-auto mt-2 max-w-[420px] text-[12px] text-[#f5c45e]/80">
                   This skill needs{" "}
                   {[...liveSkill.requiresBins.map((b) => `\`${b}\``), ...liveSkill.requiresEnv].join(", ")} —{" "}
@@ -481,18 +507,36 @@ export function SessionChat({
             }}
             className="flex items-center gap-2"
           >
-            <input
-              type="text"
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              placeholder={`Message ${agentName}...`}
-              disabled={busy}
-              className="h-11 flex-1 rounded-xl border border-[#303036] bg-[#101010] px-4 text-[13px] text-[#fafafa] outline-none placeholder:text-[#737373] focus:border-[#5a5a5e] disabled:opacity-60"
-            />
+            <div className="relative flex-1">
+              <input
+                type="text"
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                placeholder={`Message ${agentName}...`}
+                disabled={busy}
+                className="h-11 w-full rounded-xl border border-[#303036] bg-[#101010] pl-4 pr-20 text-[13px] text-[#fafafa] outline-none placeholder:text-[#737373] focus:border-[#5a5a5e] disabled:opacity-60"
+              />
+              <div className="absolute right-2.5 top-1/2 flex -translate-y-1/2 items-center gap-0.5">
+                <button
+                  type="button"
+                  title="Attach files — out of scope for this prototype"
+                  className="flex h-7 w-7 cursor-not-allowed items-center justify-center rounded-lg text-[#737373] opacity-60"
+                >
+                  <Paperclip className="h-4 w-4" />
+                </button>
+                <button
+                  type="button"
+                  title="Voice input — out of scope for this prototype"
+                  className="flex h-7 w-7 cursor-not-allowed items-center justify-center rounded-lg text-[#737373] opacity-60"
+                >
+                  <Mic className="h-4 w-4" />
+                </button>
+              </div>
+            </div>
             <button
               type="submit"
               disabled={!input.trim() || busy}
-              className="flex h-11 w-11 items-center justify-center rounded-xl bg-[#fafafa] text-[#111111] transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
+              className="flex h-11 w-11 items-center justify-center rounded-full bg-[#4ade80] text-[#111111] transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
             >
               <Send className="h-4 w-4" />
             </button>

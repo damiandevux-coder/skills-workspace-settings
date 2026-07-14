@@ -306,10 +306,8 @@ export function WorkspaceSettingsSidebar() {
               </button>
             </div>
 
-            {/* Workspace switcher card */}
-            <div className="flex w-full flex-col gap-1 rounded-[14px] border border-[#ffffff1a] bg-[#0a0a0a] p-[10px] shadow-[0_1px_2px_rgba(0,0,0,0.4)]">
-              <WorkspacePopover />
-            </div>
+            {/* Workspace switcher */}
+            <WorkspacePopover />
           </div>
 
           {/* Home */}

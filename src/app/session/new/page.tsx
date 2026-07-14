@@ -31,16 +31,16 @@ function NewSessionInner() {
   }
 
   // Materialize the session in the sidebar once the conversation starts. The
-  // URL is updated with replaceState (not router.replace) so the live chat
-  // doesn't remount and lose its messages.
+  // URL deliberately stays /session/new: Next's App Router intercepts
+  // history.replaceState as a navigation, which would remount the chat and
+  // wipe its messages.
   const handleFirstMessage = (text: string) => {
     if (!activeAgent) return;
     const title = text.length > 42 ? `${text.slice(0, 42)}…` : text;
-    const session = addSession(activeAgent.id, {
+    addSession(activeAgent.id, {
       title: skill ? `${skill.name}: ${title}` : title,
       skillId: skill?.id,
     });
-    window.history.replaceState(null, "", `/session/${session.id}`);
   };
 
   return (

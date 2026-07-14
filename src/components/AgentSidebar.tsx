@@ -38,12 +38,28 @@ interface NavItem {
   tooltip?: string;
 }
 
+const OUT_OF_SCOPE = "Out of scope for this prototype";
+
 const NAV_ITEMS: NavItem[] = [
   { id: "new-session", label: "New Session", href: "/session/new", icon: Plus },
-  { id: "files", label: "Files", href: "/files", icon: FolderOpen },
-  { id: "integrations", label: "Integrations", href: "/integrations", icon: Puzzle },
+  { id: "files", label: "Files", href: "#", icon: FolderOpen, disabled: true, tooltip: OUT_OF_SCOPE },
+  {
+    id: "integrations",
+    label: "Integrations",
+    href: "#",
+    icon: Puzzle,
+    disabled: true,
+    tooltip: OUT_OF_SCOPE,
+  },
   { id: "skills", label: "Skills", href: "/", icon: Wrench },
-  { id: "scheduled", label: "Scheduled", href: "/scheduled", icon: CalendarClock },
+  {
+    id: "scheduled",
+    label: "Scheduled",
+    href: "#",
+    icon: CalendarClock,
+    disabled: true,
+    tooltip: OUT_OF_SCOPE,
+  },
   {
     id: "desktop",
     label: "Desktop",
