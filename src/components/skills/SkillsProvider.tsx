@@ -9,6 +9,8 @@ export const CURRENT_AGENT = { name: "Nova", status: "ready" as const };
 export interface NewSkillInput {
   form: SkillFormData;
   origin: "created" | "imported";
+  /** Extra fields to overlay (e.g. hasScripts/hasReferences/hasAssets from a folder/zip import). */
+  extras?: Partial<WorkspaceSkill>;
 }
 
 interface SkillsContextValue {
@@ -35,7 +37,7 @@ export function SkillsProvider({ children }: { children: React.ReactNode }) {
 
   const hasSkill = useCallback((id: string) => getSkill(id) !== undefined, [getSkill]);
 
-  const addSkill = useCallback(({ form, origin }: NewSkillInput): WorkspaceSkill => {
+  const addSkill = useCallback(({ form, origin, extras }: NewSkillInput): WorkspaceSkill => {
     const skill: WorkspaceSkill = {
       id: form.name,
       name: form.name,
@@ -54,6 +56,7 @@ export function SkillsProvider({ children }: { children: React.ReactNode }) {
       origin,
       instructions: form.instructions,
       confirmedUse: null,
+      ...extras,
     };
     setInstalledSkills((prev) => [skill, ...prev]);
     return skill;

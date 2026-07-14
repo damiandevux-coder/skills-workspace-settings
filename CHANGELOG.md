@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-07-14 — Import: folders & archives with security scanning
+
+- **Import accepts three sources** now: a bare `SKILL.md`/`.txt`, a **skill folder** (drag-drop or "select a folder" picker — walks the tree, finds the shallowest `SKILL.md`), or a **`.zip` archive** (parsed for real via jszip)
+- **Zip imports run a security scan** before anything is staged: an animated multi-step check (unpack → file tree → executables/unsafe calls → SKILL.md integrity) that **blocks archives containing executable content** (`.exe`, `.dll`, `.bat`, …) with a clear failure state, and stamps a "Security scan passed — n files, no threats found" badge on success
+- Folder/zip imports derive the skill's Scripts/References/Assets flags from the actual file tree, shown on the detail page
+- Everything still flows into the same parse → Confirm Skill journey
+
 ## 2026-07-13 (evening) — UX audit round
 
 A 28-issue fresh-eyes UX audit, executed with a demo-readiness + consistency lens:
