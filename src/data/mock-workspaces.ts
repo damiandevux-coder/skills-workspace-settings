@@ -7,8 +7,9 @@ export const MOCK_WORKSPACES: Workspace[] = [
     emoji: "🟣",
     color: "#a78bfa",
     agents: [
-      { id: "agent-copywriter", name: "Copywriter", status: "ready" },
-      { id: "agent-brand-analyst", name: "Brand Analyst", status: "busy" },
+      { id: "agent-campaign-analyst", name: "Campaign Analyst", status: "ready" },
+      { id: "agent-creative-performance", name: "Creative Performance Agent", status: "busy" },
+      { id: "agent-launch-calendar", name: "Launch Calendar Agent", status: "ready" },
     ],
     members: [
       { id: "mem-1", email: "sarah@hypercli.com", name: "Sarah Chen", role: "admin", status: "active", invitedAt: "2026-06-01T10:00:00Z", joinedAt: "2026-06-01T10:05:00Z" },
@@ -26,7 +27,7 @@ export const MOCK_WORKSPACES: Workspace[] = [
           { id: "mk-colors", name: "Color Palette.md", type: "file", size: "8 KB", modified: "2026-05-15", status: "ready" },
           { id: "mk-typography", name: "Typography.md", type: "file", size: "15 KB", modified: "2026-05-20", status: "ready" },
         ],
-        assignedAgents: ["Copywriter"],
+        assignedAgents: ["Campaign Analyst"],
       },
       {
         id: "kb-campaign-research",
@@ -47,7 +48,7 @@ export const MOCK_WORKSPACES: Workspace[] = [
           },
           { id: "mk-focus-group", name: "Focus Group Notes.docx", type: "file", size: "310 KB", modified: "2026-07-05", status: "failed" },
         ],
-        assignedAgents: ["Copywriter", "Brand Analyst"],
+        assignedAgents: ["Campaign Analyst", "Creative Performance Agent"],
       },
     ],
   },

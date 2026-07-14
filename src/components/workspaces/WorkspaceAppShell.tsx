@@ -21,6 +21,7 @@ import {
 } from "lucide-react";
 import { AgentCreationModal } from "@/components/AgentCreationModal";
 import { WorkspaceSwitcher } from "./WorkspaceSwitcher";
+import { WorkspaceSettingsSidebar } from "./WorkspaceSettingsSidebar";
 import { useWorkspace } from "./WorkspaceProvider";
 
 interface NavItem {
@@ -84,6 +85,9 @@ export function WorkspaceAppShell({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="flex h-screen bg-[#070708]">
+      {/* Workspace settings rail (left of the agent sidebar) */}
+      <WorkspaceSettingsSidebar />
+
       {/* Sidebar */}
       <aside className="flex w-[240px] shrink-0 flex-col border-r border-[#222226] bg-[#0b0b0c]">
         <WorkspaceSwitcher />
