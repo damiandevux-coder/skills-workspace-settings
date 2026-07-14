@@ -405,12 +405,12 @@ export function ImportSkillModal({ isOpen, onClose, onToast }: ImportSkillModalP
         className="relative w-full max-w-[480px] rounded-2xl border border-[#303036] bg-[#070708] shadow-2xl"
       >
         {/* Header */}
-        <div className="flex items-center justify-between border-b border-[#222226] px-6 py-4">
+        <div className="flex items-center justify-between border-b border-[#232323] px-6 py-4">
           <div>
-            <h2 className="text-base font-semibold text-[#f5f5f5]">
+            <h2 className="text-base font-semibold text-[#fafafa]">
               {savedSkill ? "Confirm Skill" : "Import Skill"}
             </h2>
-            <p className="text-xs text-[#85858e] mt-0.5">
+            <p className="text-xs text-[#737373] mt-0.5">
               {savedSkill
                 ? "Activate now, or test it first"
                 : "Upload a SKILL.md, a skill folder, or a .zip archive"}
@@ -419,7 +419,7 @@ export function ImportSkillModal({ isOpen, onClose, onToast }: ImportSkillModalP
           <button
             onClick={handleClose}
             aria-label="Close"
-            className="flex h-8 w-8 items-center justify-center rounded-lg text-[#85858e] transition-colors hover:bg-[#151519] hover:text-[#f5f5f5]"
+            className="flex h-8 w-8 items-center justify-center rounded-lg text-[#737373] transition-colors hover:bg-[#151519] hover:text-[#fafafa]"
           >
             <X className="h-4 w-4" />
           </button>
@@ -485,7 +485,7 @@ export function ImportSkillModal({ isOpen, onClose, onToast }: ImportSkillModalP
                 </div>
                 <button
                   onClick={resetStaging}
-                  className="w-full rounded-lg border border-[#303036] px-4 py-2 text-[13px] text-[#a7a7ad] transition-colors hover:border-[#5a5a5e] hover:text-[#f5f5f5]"
+                  className="w-full rounded-lg border border-[#303036] px-4 py-2 text-[13px] text-[#a7a7ad] transition-colors hover:border-[#5a5a5e] hover:text-[#fafafa]"
                 >
                   Choose a different file
                 </button>
@@ -507,10 +507,10 @@ export function ImportSkillModal({ isOpen, onClose, onToast }: ImportSkillModalP
                     onChange={handleFileSelect}
                     className="absolute inset-0 cursor-pointer opacity-0"
                   />
-                  <Upload className={`mx-auto h-8 w-8 mb-3 ${dragActive ? "text-[#f5c45e]" : "text-[#85858e]"}`} />
-                  <p className="text-sm text-[#f5f5f5] font-medium">Drop your skill here</p>
-                  <p className="text-xs text-[#85858e] mt-1">SKILL.md, a skill folder, or a .zip — or click to browse</p>
-                  <p className="text-[10px] text-[#85858e] mt-2">.zip archives run a security scan before import</p>
+                  <Upload className={`mx-auto h-8 w-8 mb-3 ${dragActive ? "text-[#f5c45e]" : "text-[#737373]"}`} />
+                  <p className="text-sm text-[#fafafa] font-medium">Drop your skill here</p>
+                  <p className="text-xs text-[#737373] mt-1">SKILL.md, a skill folder, or a .zip — or click to browse</p>
+                  <p className="text-[10px] text-[#737373] mt-2">.zip archives run a security scan before import</p>
                 </div>
                 <div className="mt-2 text-center">
                   <button
@@ -541,8 +541,8 @@ export function ImportSkillModal({ isOpen, onClose, onToast }: ImportSkillModalP
                 <div className="flex items-center gap-3 rounded-lg border border-[#4ade80]/30 bg-[#4ade80]/5 px-4 py-3">
                   <SourceIcon className="h-5 w-5 text-[#4ade80]" />
                   <div className="min-w-0 flex-1">
-                    <p className="text-sm font-medium text-[#f5f5f5] truncate">{staged.label}</p>
-                    <p className="text-[10px] text-[#85858e]">
+                    <p className="text-sm font-medium text-[#fafafa] truncate">{staged.label}</p>
+                    <p className="text-[10px] text-[#737373]">
                       {staged.kind === "file"
                         ? "Ready to import"
                         : `${staged.filePaths.length} file${staged.filePaths.length !== 1 ? "s" : ""} · ready to import`}
@@ -551,7 +551,7 @@ export function ImportSkillModal({ isOpen, onClose, onToast }: ImportSkillModalP
                   <button
                     onClick={resetStaging}
                     aria-label="Remove selection"
-                    className="text-[#85858e] hover:text-[#f5f5f5] transition-colors"
+                    className="text-[#737373] hover:text-[#fafafa] transition-colors"
                   >
                     <X className="h-4 w-4" />
                   </button>
@@ -573,7 +573,7 @@ export function ImportSkillModal({ isOpen, onClose, onToast }: ImportSkillModalP
                 )}
 
                 <div className="rounded-lg border border-[#303036] bg-[#101010] p-3">
-                  <p className="text-[10px] font-semibold uppercase tracking-wider text-[#85858e] mb-2">
+                  <p className="text-[10px] font-semibold uppercase tracking-wider text-[#737373] mb-2">
                     SKILL.md preview
                   </p>
                   <pre className="text-[11px] text-[#a7a7ad] font-mono whitespace-pre-wrap max-h-[200px] overflow-y-auto">
@@ -588,17 +588,17 @@ export function ImportSkillModal({ isOpen, onClose, onToast }: ImportSkillModalP
 
         {/* Footer */}
         {!savedSkill && scan.status !== "failed" && (
-          <div className="flex items-center justify-end gap-2 border-t border-[#222226] px-6 py-4">
+          <div className="flex items-center justify-end gap-2 border-t border-[#232323] px-6 py-4">
             <button
               onClick={handleClose}
-              className="rounded-lg border border-[#303036] px-4 py-2 text-[13px] text-[#a7a7ad] transition-colors hover:border-[#5a5a5e] hover:text-[#f5f5f5]"
+              className="rounded-lg border border-[#303036] px-4 py-2 text-[13px] text-[#a7a7ad] transition-colors hover:border-[#5a5a5e] hover:text-[#fafafa]"
             >
               Cancel
             </button>
             <button
               onClick={handleImport}
               disabled={!staged || importing || scanBusy}
-              className="inline-flex items-center gap-2 rounded-lg bg-[#f5f5f5] px-4 py-2 text-[13px] font-medium text-[#111111] transition-opacity hover:opacity-90 disabled:opacity-40 disabled:cursor-not-allowed"
+              className="inline-flex items-center gap-2 rounded-lg bg-[#fafafa] px-4 py-2 text-[13px] font-medium text-[#111111] transition-opacity hover:opacity-90 disabled:opacity-40 disabled:cursor-not-allowed"
             >
               {importing ? (
                 <>

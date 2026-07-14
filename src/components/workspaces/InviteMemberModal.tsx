@@ -41,7 +41,7 @@ const ROLE_OPTIONS: RoleOption[] = [
     label: "Viewer",
     description: "Read-only access. Can view agents and knowledge but not interact.",
     icon: Eye,
-    color: "#85858e",
+    color: "#737373",
   },
 ];
 
@@ -118,22 +118,22 @@ export function InviteMemberModal({ isOpen, onClose }: InviteMemberModalProps) {
         className="relative w-full max-w-[480px] max-h-[90vh] overflow-y-auto rounded-2xl border border-[#303036] bg-[#070708] shadow-2xl"
       >
         {/* Header */}
-        <div className="flex items-center justify-between border-b border-[#222226] px-6 py-4">
+        <div className="flex items-center justify-between border-b border-[#232323] px-6 py-4">
           <div className="flex items-center gap-3">
             <div className="flex h-9 w-9 items-center justify-center rounded-lg border border-[#303036] bg-[#151519]">
               {step === "success" ? (
                 <Check className="h-4 w-4 text-[#4ade80]" />
               ) : (
-                <UserPlus className="h-4 w-4 text-[#85858e]" />
+                <UserPlus className="h-4 w-4 text-[#737373]" />
               )}
             </div>
             <div>
-              <h2 className="text-base font-semibold text-[#f5f5f5]">
+              <h2 className="text-base font-semibold text-[#fafafa]">
                 {step === "input" && "Invite Members"}
                 {step === "confirm" && "Confirm Invitation"}
                 {step === "success" && "Invites Sent"}
               </h2>
-              <p className="text-xs text-[#85858e] mt-0.5">
+              <p className="text-xs text-[#737373] mt-0.5">
                 {step === "input" && `To ${activeWorkspace.name} workspace`}
                 {step === "confirm" && `${parsedEmails.length} recipient${parsedEmails.length !== 1 ? "s" : ""}`}
                 {step === "success" && `${parsedEmails.length} invitation${parsedEmails.length !== 1 ? "s" : ""} sent`}
@@ -142,7 +142,7 @@ export function InviteMemberModal({ isOpen, onClose }: InviteMemberModalProps) {
           </div>
           <button
             onClick={handleClose}
-            className="flex h-8 w-8 items-center justify-center rounded-lg text-[#85858e] transition-colors hover:bg-[#151519] hover:text-[#f5f5f5]"
+            className="flex h-8 w-8 items-center justify-center rounded-lg text-[#737373] transition-colors hover:bg-[#151519] hover:text-[#fafafa]"
           >
             <X className="h-4 w-4" />
           </button>
@@ -159,7 +159,7 @@ export function InviteMemberModal({ isOpen, onClose }: InviteMemberModalProps) {
             >
               {/* Email Input */}
               <div>
-                <label className="mb-1.5 block text-[11px] font-semibold uppercase tracking-[0.18em] text-[#85858e]">
+                <label className="mb-1.5 block text-[11px] font-semibold uppercase tracking-[0.18em] text-[#737373]">
                   Email Addresses
                 </label>
                 <textarea
@@ -168,9 +168,9 @@ export function InviteMemberModal({ isOpen, onClose }: InviteMemberModalProps) {
                   onChange={(e) => setEmails(e.target.value)}
                   placeholder="sarah@company.com, mike@company.com..."
                   rows={3}
-                  className="w-full rounded-lg border border-[#303036] bg-[#101010] px-3 py-2.5 text-sm text-[#f5f5f5] outline-none placeholder:text-[#85858e] focus:border-[#5a5a5e] resize-none"
+                  className="w-full rounded-lg border border-[#303036] bg-[#101010] px-3 py-2.5 text-sm text-[#fafafa] outline-none placeholder:text-[#737373] focus:border-[#5a5a5e] resize-none"
                 />
-                <p className="mt-1.5 text-[11px] text-[#85858e]">
+                <p className="mt-1.5 text-[11px] text-[#737373]">
                   Separate multiple emails with commas, semicolons, or new lines.
                 </p>
                 {emails.length > 0 && (
@@ -182,7 +182,7 @@ export function InviteMemberModal({ isOpen, onClose }: InviteMemberModalProps) {
 
               {/* Role Selection */}
               <div>
-                <label className="mb-2 block text-[11px] font-semibold uppercase tracking-[0.18em] text-[#85858e]">
+                <label className="mb-2 block text-[11px] font-semibold uppercase tracking-[0.18em] text-[#737373]">
                   Role
                 </label>
                 <div className="space-y-1.5">
@@ -210,10 +210,10 @@ export function InviteMemberModal({ isOpen, onClose }: InviteMemberModalProps) {
                         </div>
                         <div className="min-w-0 flex-1">
                           <div className="flex items-center gap-2">
-                            <span className="text-sm font-medium text-[#f5f5f5]">{role.label}</span>
+                            <span className="text-sm font-medium text-[#fafafa]">{role.label}</span>
                             {isSelected && <Check className="h-3.5 w-3.5 text-[#4ade80]" />}
                           </div>
-                          <p className="text-[11px] text-[#85858e] mt-0.5">{role.description}</p>
+                          <p className="text-[11px] text-[#737373] mt-0.5">{role.description}</p>
                         </div>
                       </button>
                     );
@@ -225,12 +225,12 @@ export function InviteMemberModal({ isOpen, onClose }: InviteMemberModalProps) {
               <div className="rounded-lg border border-[#303036] bg-[#0b0b0c] p-3">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <Mail className="h-3.5 w-3.5 text-[#85858e]" />
+                    <Mail className="h-3.5 w-3.5 text-[#737373]" />
                     <span className="text-[12px] text-[#a7a7ad]">Or share an invite link</span>
                   </div>
                   <button
                     onClick={copyInviteLink}
-                    className="flex items-center gap-1.5 rounded-md border border-[#303036] px-2.5 py-1 text-[11px] text-[#85858e] hover:text-[#f5f5f5] hover:border-[#5a5a5e] transition-colors"
+                    className="flex items-center gap-1.5 rounded-md border border-[#303036] px-2.5 py-1 text-[11px] text-[#737373] hover:text-[#fafafa] hover:border-[#5a5a5e] transition-colors"
                   >
                     {copied ? (
                       <>
@@ -248,17 +248,17 @@ export function InviteMemberModal({ isOpen, onClose }: InviteMemberModalProps) {
               </div>
 
               {/* Footer */}
-              <div className="flex items-center justify-end gap-2 pt-4 border-t border-[#222226]">
+              <div className="flex items-center justify-end gap-2 pt-4 border-t border-[#232323]">
                 <button
                   onClick={handleClose}
-                  className="rounded-lg border border-[#303036] px-4 py-2 text-[13px] text-[#a7a7ad] transition-colors hover:border-[#5a5a5e] hover:text-[#f5f5f5]"
+                  className="rounded-lg border border-[#303036] px-4 py-2 text-[13px] text-[#a7a7ad] transition-colors hover:border-[#5a5a5e] hover:text-[#fafafa]"
                 >
                   Cancel
                 </button>
                 <button
                   onClick={handleContinue}
                   disabled={parseEmailInput(emails).length === 0}
-                  className="inline-flex items-center gap-2 rounded-lg bg-[#f5f5f5] px-4 py-2 text-[13px] font-medium text-[#111111] transition-opacity hover:opacity-90 disabled:opacity-30 disabled:cursor-not-allowed"
+                  className="inline-flex items-center gap-2 rounded-lg bg-[#fafafa] px-4 py-2 text-[13px] font-medium text-[#111111] transition-opacity hover:opacity-90 disabled:opacity-30 disabled:cursor-not-allowed"
                 >
                   Continue
                   <ChevronRight className="h-3.5 w-3.5" />
@@ -278,10 +278,10 @@ export function InviteMemberModal({ isOpen, onClose }: InviteMemberModalProps) {
               {/* Summary */}
               <div className="rounded-xl border border-[#303036] bg-[#0b0b0c] p-4 space-y-3">
                 <div className="flex items-center justify-between">
-                  <span className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[#85858e]">
+                  <span className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[#737373]">
                     Recipients
                   </span>
-                  <span className="text-[11px] text-[#85858e]">{parsedEmails.length}</span>
+                  <span className="text-[11px] text-[#737373]">{parsedEmails.length}</span>
                 </div>
                 <div className="flex flex-wrap gap-1.5">
                   {parsedEmails.map((email, i) => (
@@ -289,14 +289,14 @@ export function InviteMemberModal({ isOpen, onClose }: InviteMemberModalProps) {
                       key={i}
                       className="inline-flex items-center gap-1 rounded-lg border border-[#303036] bg-[#151519] px-2.5 py-1 text-[11px] text-[#a7a7ad]"
                     >
-                      <Mail className="h-2.5 w-2.5 text-[#85858e]" />
+                      <Mail className="h-2.5 w-2.5 text-[#737373]" />
                       {email}
                     </span>
                   ))}
                 </div>
-                <div className="border-t border-[#222226] pt-3">
+                <div className="border-t border-[#232323] pt-3">
                   <div className="flex items-center justify-between">
-                    <span className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[#85858e]">
+                    <span className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[#737373]">
                       Role
                     </span>
                     {selectedRoleOption && (
@@ -305,32 +305,32 @@ export function InviteMemberModal({ isOpen, onClose }: InviteMemberModalProps) {
                           className="h-3 w-3"
                           style={{ color: selectedRoleOption.color }}
                         />
-                        <span className="text-[12px] text-[#f5f5f5]">{selectedRoleOption.label}</span>
+                        <span className="text-[12px] text-[#fafafa]">{selectedRoleOption.label}</span>
                       </div>
                     )}
                   </div>
                 </div>
-                <div className="border-t border-[#222226] pt-3">
+                <div className="border-t border-[#232323] pt-3">
                   <div className="flex items-center justify-between">
-                    <span className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[#85858e]">
+                    <span className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[#737373]">
                       Workspace
                     </span>
-                    <span className="text-[12px] text-[#f5f5f5]">
+                    <span className="text-[12px] text-[#fafafa]">
                       {activeWorkspace.emoji} {activeWorkspace.name}
                     </span>
                   </div>
                 </div>
               </div>
 
-              <p className="text-[12px] text-[#85858e]">
+              <p className="text-[12px] text-[#737373]">
                 Invited members will receive an email with a link to join. Pending invites expire after 7 days.
               </p>
 
               {/* Footer */}
-              <div className="flex items-center justify-between gap-2 pt-4 border-t border-[#222226]">
+              <div className="flex items-center justify-between gap-2 pt-4 border-t border-[#232323]">
                 <button
                   onClick={() => setStep("input")}
-                  className="rounded-lg border border-[#303036] px-4 py-2 text-[13px] text-[#a7a7ad] transition-colors hover:border-[#5a5a5e] hover:text-[#f5f5f5]"
+                  className="rounded-lg border border-[#303036] px-4 py-2 text-[13px] text-[#a7a7ad] transition-colors hover:border-[#5a5a5e] hover:text-[#fafafa]"
                 >
                   Back
                 </button>
@@ -357,19 +357,19 @@ export function InviteMemberModal({ isOpen, onClose }: InviteMemberModalProps) {
                 <Check className="h-7 w-7 text-[#4ade80]" />
               </div>
               <div>
-                <h3 className="text-base font-semibold text-[#f5f5f5]">Invitations Sent</h3>
-                <p className="text-sm text-[#85858e] mt-1">
+                <h3 className="text-base font-semibold text-[#fafafa]">Invitations Sent</h3>
+                <p className="text-sm text-[#737373] mt-1">
                   {parsedEmails.length} invitation{parsedEmails.length !== 1 ? "s" : ""} sent to {activeWorkspace.name}
                 </p>
               </div>
               <div className="rounded-lg border border-[#303036] bg-[#0b0b0c] p-3 text-left">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[#85858e] mb-2">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[#737373] mb-2">
                   Sent to
                 </p>
                 <div className="space-y-1.5">
                   {parsedEmails.map((email, i) => (
                     <div key={i} className="flex items-center gap-2 text-[12px] text-[#a7a7ad]">
-                      <Mail className="h-3 w-3 text-[#85858e]" />
+                      <Mail className="h-3 w-3 text-[#737373]" />
                       {email}
                     </div>
                   ))}
@@ -377,7 +377,7 @@ export function InviteMemberModal({ isOpen, onClose }: InviteMemberModalProps) {
               </div>
               <button
                 onClick={handleClose}
-                className="inline-flex items-center gap-2 rounded-lg bg-[#f5f5f5] px-5 py-2 text-[13px] font-medium text-[#111111] transition-opacity hover:opacity-90"
+                className="inline-flex items-center gap-2 rounded-lg bg-[#fafafa] px-5 py-2 text-[13px] font-medium text-[#111111] transition-opacity hover:opacity-90"
               >
                 Done
               </button>

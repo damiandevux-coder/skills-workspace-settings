@@ -59,14 +59,14 @@ export function EditSkillModal({ isOpen, skill, onClose, onToast }: EditSkillMod
         className="relative w-full max-w-[680px] max-h-[90vh] overflow-hidden rounded-2xl border border-[#303036] bg-[#070708] shadow-2xl"
       >
         {/* Header */}
-        <div className="flex items-center justify-between border-b border-[#222226] px-6 py-4">
+        <div className="flex items-center justify-between border-b border-[#232323] px-6 py-4">
           <div className="flex items-center gap-3">
             <div className="flex h-9 w-9 items-center justify-center rounded-lg border border-[#303036] bg-[#151519]">
               <span className="text-[16px]">{skill.emoji || "🔧"}</span>
             </div>
             <div>
-              <h2 className="text-base font-semibold text-[#f5f5f5]">Configure {skill.name}</h2>
-              <p className="text-xs text-[#85858e] mt-0.5">
+              <h2 className="text-base font-semibold text-[#fafafa]">Configure {skill.name}</h2>
+              <p className="text-xs text-[#737373] mt-0.5">
                 Edit the SKILL.md instructions the agent follows
               </p>
             </div>
@@ -74,7 +74,7 @@ export function EditSkillModal({ isOpen, skill, onClose, onToast }: EditSkillMod
           <button
             onClick={onClose}
             aria-label="Close"
-            className="flex h-8 w-8 items-center justify-center rounded-lg text-[#85858e] transition-colors hover:bg-[#151519] hover:text-[#f5f5f5]"
+            className="flex h-8 w-8 items-center justify-center rounded-lg text-[#737373] transition-colors hover:bg-[#151519] hover:text-[#fafafa]"
           >
             <X className="h-4 w-4" />
           </button>
@@ -83,33 +83,33 @@ export function EditSkillModal({ isOpen, skill, onClose, onToast }: EditSkillMod
         {/* Editor */}
         <div className="px-6 py-5 space-y-3">
           <div className="flex items-center justify-between">
-            <div className="inline-flex items-center gap-1.5 text-[11px] text-[#85858e]">
+            <div className="inline-flex items-center gap-1.5 text-[11px] text-[#737373]">
               <FileText className="h-3.5 w-3.5" />
               <span className="font-mono">SKILL.md</span>
             </div>
-            <span className="text-[10px] text-[#85858e]">{markdown.length} chars</span>
+            <span className="text-[10px] text-[#737373]">{markdown.length} chars</span>
           </div>
           <textarea
             value={markdown}
             onChange={(e) => setMarkdown(e.target.value)}
             rows={18}
             spellCheck={false}
-            className="w-full rounded-lg border border-[#303036] bg-[#101010] px-3 py-2 font-mono text-[12px] leading-relaxed text-[#f5f5f5] outline-none focus:border-[#5a5a5e] resize-y max-h-[55vh]"
+            className="w-full rounded-lg border border-[#303036] bg-[#101010] px-3 py-2 font-mono text-[12px] leading-relaxed text-[#fafafa] outline-none focus:border-[#5a5a5e] resize-y max-h-[55vh]"
           />
         </div>
 
         {/* Footer */}
-        <div className="flex items-center justify-end gap-2 border-t border-[#222226] px-6 py-4">
+        <div className="flex items-center justify-end gap-2 border-t border-[#232323] px-6 py-4">
           <button
             onClick={onClose}
-            className="rounded-lg border border-[#303036] px-4 py-2 text-[13px] text-[#a7a7ad] transition-colors hover:border-[#5a5a5e] hover:text-[#f5f5f5]"
+            className="rounded-lg border border-[#303036] px-4 py-2 text-[13px] text-[#a7a7ad] transition-colors hover:border-[#5a5a5e] hover:text-[#fafafa]"
           >
             Cancel
           </button>
           <button
             onClick={handleSave}
             disabled={!markdown.trim()}
-            className="inline-flex items-center gap-2 rounded-lg bg-[#f5f5f5] px-4 py-2 text-[13px] font-medium text-[#111111] transition-opacity hover:opacity-90 disabled:opacity-40 disabled:cursor-not-allowed"
+            className="inline-flex items-center gap-2 rounded-lg bg-[#fafafa] px-4 py-2 text-[13px] font-medium text-[#111111] transition-opacity hover:opacity-90 disabled:opacity-40 disabled:cursor-not-allowed"
           >
             <Check className="h-4 w-4" />
             Save &amp; apply

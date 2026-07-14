@@ -265,23 +265,23 @@ function useTypingAnimation(text: string, speed = 30) {
 function ModeSelector({ onSelect }: { onSelect: (mode: "form" | "ai") => void }) {
   return (
     <div className="space-y-4">
-      <p className="text-sm text-[#85858e]">Choose how you want to create your skill:</p>
+      <p className="text-sm text-[#737373]">Choose how you want to create your skill:</p>
       <div className="grid grid-cols-1 gap-3">
         <button
           onClick={() => onSelect("form")}
           className="flex items-start gap-4 rounded-xl border border-[#303036] bg-[#0b0b0c] p-5 text-left transition-all hover:border-[#5a5a5e] hover:bg-[#111113] active:scale-[0.99]"
         >
           <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-[#303036] bg-[#151519]">
-            <FileText className="h-5 w-5 text-[#85858e]" />
+            <FileText className="h-5 w-5 text-[#737373]" />
           </div>
           <div className="min-w-0 flex-1">
-            <h3 className="text-sm font-medium text-[#f5f5f5]">Structured Form</h3>
-            <p className="text-xs text-[#85858e] mt-1">
+            <h3 className="text-sm font-medium text-[#fafafa]">Structured Form</h3>
+            <p className="text-xs text-[#737373] mt-1">
               Build step-by-step with templates, dependency gating, and live preview.
               Best for precision and production skills.
             </p>
           </div>
-          <ChevronRight className="ml-auto h-5 w-5 shrink-0 text-[#85858e] self-center" />
+          <ChevronRight className="ml-auto h-5 w-5 shrink-0 text-[#737373] self-center" />
         </button>
 
         <button
@@ -292,8 +292,8 @@ function ModeSelector({ onSelect }: { onSelect: (mode: "form" | "ai") => void })
             <Sparkles className="h-5 w-5 text-[#f5c45e]" />
           </div>
           <div className="min-w-0 flex-1">
-            <h3 className="text-sm font-medium text-[#f5f5f5]">Describe with AI</h3>
-            <p className="text-xs text-[#85858e] mt-1">
+            <h3 className="text-sm font-medium text-[#fafafa]">Describe with AI</h3>
+            <p className="text-xs text-[#737373] mt-1">
               Just describe what you want in plain English. AI generates name, description,
               and instructions. Best for quick prototyping.
             </p>
@@ -354,10 +354,10 @@ function FormWizard({
             <div
               className={`flex h-6 w-6 items-center justify-center rounded-full text-[11px] font-semibold transition-colors ${
                 s === step
-                  ? "bg-[#f5f5f5] text-[#111111]"
+                  ? "bg-[#fafafa] text-[#111111]"
                   : s < step
                   ? "bg-[#4ade80]/20 text-[#4ade80]"
-                  : "bg-[#303036] text-[#85858e]"
+                  : "bg-[#303036] text-[#737373]"
               }`}
             >
               {s < step ? <Check className="h-3 w-3" /> : s}
@@ -380,8 +380,8 @@ function FormWizard({
             className="space-y-4"
           >
             <div>
-              <h3 className="text-sm font-medium text-[#f5f5f5]">Identity</h3>
-              <p className="text-xs text-[#85858e] mt-0.5">
+              <h3 className="text-sm font-medium text-[#fafafa]">Identity</h3>
+              <p className="text-xs text-[#737373] mt-0.5">
                 The name and description determine when your agent uses this skill.
               </p>
             </div>
@@ -399,7 +399,7 @@ function FormWizard({
                     if (errors.name) setErrors((prev) => ({ ...prev, name: "" }));
                   }}
                   placeholder="my-skill"
-                  className={`h-9 w-full rounded-lg border bg-[#101010] px-3 font-mono text-[13px] text-[#f5f5f5] outline-none placeholder:text-[#85858e] focus:border-[#5a5a5e] transition-colors ${
+                  className={`h-9 w-full rounded-lg border bg-[#101010] px-3 font-mono text-[13px] text-[#fafafa] outline-none placeholder:text-[#737373] focus:border-[#5a5a5e] transition-colors ${
                     errors.name ? "border-[#ff6b6b]/50" : "border-[#303036]"
                   }`}
                 />
@@ -407,7 +407,7 @@ function FormWizard({
                   <p className="mt-1 text-[10px] text-[#ff6b6b]">{errors.name}</p>
                 )}
                 {!errors.name && (
-                  <p className="mt-1 text-[10px] text-[#85858e]">Lowercase letters, digits, and hyphens only.</p>
+                  <p className="mt-1 text-[10px] text-[#737373]">Lowercase letters, digits, and hyphens only.</p>
                 )}
               </div>
 
@@ -423,7 +423,7 @@ function FormWizard({
                   }}
                   placeholder="What this skill does and when the agent should use it."
                   rows={3}
-                  className={`w-full rounded-lg border bg-[#101010] px-3 py-2 text-[13px] text-[#f5f5f5] outline-none placeholder:text-[#85858e] focus:border-[#5a5a5e] resize-none transition-colors ${
+                  className={`w-full rounded-lg border bg-[#101010] px-3 py-2 text-[13px] text-[#fafafa] outline-none placeholder:text-[#737373] focus:border-[#5a5a5e] resize-none transition-colors ${
                     errors.description ? "border-[#ff6b6b]/50" : "border-[#303036]"
                   }`}
                 />
@@ -458,7 +458,7 @@ function FormWizard({
                     value={data.homepage}
                     onChange={(e) => onChange({ homepage: e.target.value })}
                     placeholder="https://..."
-                    className="h-9 w-full rounded-lg border border-[#303036] bg-[#101010] px-3 text-[13px] text-[#f5f5f5] outline-none placeholder:text-[#85858e] focus:border-[#5a5a5e]"
+                    className="h-9 w-full rounded-lg border border-[#303036] bg-[#101010] px-3 text-[13px] text-[#fafafa] outline-none placeholder:text-[#737373] focus:border-[#5a5a5e]"
                   />
                 </div>
               </div>
@@ -476,8 +476,8 @@ function FormWizard({
             className="space-y-4"
           >
             <div>
-              <h3 className="text-sm font-medium text-[#f5f5f5]">Instructions</h3>
-              <p className="text-xs text-[#85858e] mt-0.5">
+              <h3 className="text-sm font-medium text-[#fafafa]">Instructions</h3>
+              <p className="text-xs text-[#737373] mt-0.5">
                 The markdown body teaches the agent how to execute this skill.
               </p>
             </div>
@@ -495,8 +495,8 @@ function FormWizard({
                     onMouseLeave={() => setShowTemplatePreview(null)}
                     className="w-full rounded-lg border border-[#303036] bg-[#151519] px-3 py-2 text-left transition-colors hover:border-[#5a5a5e] hover:bg-[#1a1a1e]"
                   >
-                    <div className="text-[11px] font-medium text-[#f5f5f5]">{template.name}</div>
-                    <div className="text-[10px] text-[#85858e] mt-0.5">{template.description}</div>
+                    <div className="text-[11px] font-medium text-[#fafafa]">{template.name}</div>
+                    <div className="text-[10px] text-[#737373] mt-0.5">{template.description}</div>
                   </button>
                 </div>
               ))}
@@ -510,7 +510,7 @@ function FormWizard({
               }}
               placeholder="Write your instructions in markdown..."
               rows={12}
-              className={`w-full rounded-lg border bg-[#101010] px-3 py-2 font-mono text-[12px] leading-relaxed text-[#f5f5f5] outline-none placeholder:text-[#85858e] focus:border-[#5a5a5e] resize-y transition-colors ${
+              className={`w-full rounded-lg border bg-[#101010] px-3 py-2 font-mono text-[12px] leading-relaxed text-[#fafafa] outline-none placeholder:text-[#737373] focus:border-[#5a5a5e] resize-y transition-colors ${
                 errors.instructions ? "border-[#ff6b6b]/50" : "border-[#303036]"
               }`}
             />
@@ -530,8 +530,8 @@ function FormWizard({
             className="space-y-4"
           >
             <div>
-              <h3 className="text-sm font-medium text-[#f5f5f5]">Dependencies</h3>
-              <p className="text-xs text-[#85858e] mt-0.5">
+              <h3 className="text-sm font-medium text-[#fafafa]">Dependencies</h3>
+              <p className="text-xs text-[#737373] mt-0.5">
                 Gate this skill so it only loads when dependencies are available.
               </p>
             </div>
@@ -548,7 +548,7 @@ function FormWizard({
                     })
                   }
                   placeholder="jq, docker, gh (comma-separated)"
-                  className="h-9 w-full rounded-lg border border-[#303036] bg-[#101010] px-3 font-mono text-[13px] text-[#f5f5f5] outline-none placeholder:text-[#85858e] focus:border-[#5a5a5e]"
+                  className="h-9 w-full rounded-lg border border-[#303036] bg-[#101010] px-3 font-mono text-[13px] text-[#fafafa] outline-none placeholder:text-[#737373] focus:border-[#5a5a5e]"
                 />
               </div>
 
@@ -563,7 +563,7 @@ function FormWizard({
                     })
                   }
                   placeholder="API_KEY, TOKEN (comma-separated)"
-                  className="h-9 w-full rounded-lg border border-[#303036] bg-[#101010] px-3 font-mono text-[13px] text-[#f5f5f5] outline-none placeholder:text-[#85858e] focus:border-[#5a5a5e]"
+                  className="h-9 w-full rounded-lg border border-[#303036] bg-[#101010] px-3 font-mono text-[13px] text-[#fafafa] outline-none placeholder:text-[#737373] focus:border-[#5a5a5e]"
                 />
               </div>
 
@@ -582,7 +582,7 @@ function FormWizard({
                       className={`rounded-lg border px-3 py-1.5 text-[11px] transition-colors ${
                         data.os.includes(os.value)
                           ? "border-[#f5c45e] bg-[#f5c45e]/10 text-[#f5c45e]"
-                          : "border-[#303036] bg-[#151519] text-[#85858e] hover:border-[#5a5a5e]"
+                          : "border-[#303036] bg-[#151519] text-[#737373] hover:border-[#5a5a5e]"
                       }`}
                     >
                       {os.label}
@@ -599,7 +599,7 @@ function FormWizard({
       <div className="flex items-center justify-between pt-2">
         <button
           onClick={step === 1 ? onBack : prevStep}
-          className="inline-flex items-center gap-1 rounded-lg border border-[#303036] px-3 py-2 text-[13px] text-[#a7a7ad] transition-colors hover:border-[#5a5a5e] hover:text-[#f5f5f5]"
+          className="inline-flex items-center gap-1 rounded-lg border border-[#303036] px-3 py-2 text-[13px] text-[#a7a7ad] transition-colors hover:border-[#5a5a5e] hover:text-[#fafafa]"
         >
           <ArrowLeft className="h-4 w-4" />
           {step === 1 ? "Back" : "Previous"}
@@ -608,7 +608,7 @@ function FormWizard({
         {step < 3 ? (
           <button
             onClick={nextStep}
-            className="inline-flex items-center gap-1 rounded-lg bg-[#f5f5f5] px-4 py-2 text-[13px] font-medium text-[#111111] transition-opacity hover:opacity-90"
+            className="inline-flex items-center gap-1 rounded-lg bg-[#fafafa] px-4 py-2 text-[13px] font-medium text-[#111111] transition-opacity hover:opacity-90"
           >
             Next
             <ArrowRight className="h-4 w-4" />
@@ -618,7 +618,7 @@ function FormWizard({
             onClick={() => {
               if (validateStep(3)) onFinish();
             }}
-            className="inline-flex items-center gap-1 rounded-lg bg-[#f5f5f5] px-4 py-2 text-[13px] font-medium text-[#111111] transition-opacity hover:opacity-90"
+            className="inline-flex items-center gap-1 rounded-lg bg-[#fafafa] px-4 py-2 text-[13px] font-medium text-[#111111] transition-opacity hover:opacity-90"
           >
             Preview
             <ArrowRight className="h-4 w-4" />
@@ -678,8 +678,8 @@ function AiDraftPanel({
       {!generated ? (
         <>
           <div className="space-y-2">
-            <h3 className="text-sm font-medium text-[#f5f5f5]">Describe your skill</h3>
-            <p className="text-xs text-[#85858e]">
+            <h3 className="text-sm font-medium text-[#fafafa]">Describe your skill</h3>
+            <p className="text-xs text-[#737373]">
               Just tell us what you want in plain English. AI will generate the structure.
             </p>
           </div>
@@ -690,7 +690,7 @@ function AiDraftPanel({
               onChange={(e) => setPrompt(e.target.value)}
               placeholder="I want a skill that checks my website's health using curl and reports status codes..."
               rows={4}
-              className="w-full rounded-lg border border-[#303036] bg-[#101010] px-3 py-2 text-[13px] text-[#f5f5f5] outline-none placeholder:text-[#85858e] focus:border-[#f5c45e]/50 resize-none"
+              className="w-full rounded-lg border border-[#303036] bg-[#101010] px-3 py-2 text-[13px] text-[#fafafa] outline-none placeholder:text-[#737373] focus:border-[#f5c45e]/50 resize-none"
             />
 
             <div className="flex flex-wrap gap-2">
@@ -703,7 +703,7 @@ function AiDraftPanel({
                 <button
                   key={example}
                   onClick={() => setPrompt(example)}
-                  className="rounded-full border border-[#303036] bg-[#151519] px-3 py-1 text-[11px] text-[#85858e] transition-colors hover:border-[#5a5a5e] hover:text-[#f5f5f5]"
+                  className="rounded-full border border-[#303036] bg-[#151519] px-3 py-1 text-[11px] text-[#737373] transition-colors hover:border-[#5a5a5e] hover:text-[#fafafa]"
                 >
                   {example}
                 </button>
@@ -735,7 +735,7 @@ function AiDraftPanel({
           <div className="flex items-center justify-between pt-2">
             <button
               onClick={onBack}
-              className="inline-flex items-center gap-1 rounded-lg border border-[#303036] px-3 py-2 text-[13px] text-[#a7a7ad] transition-colors hover:border-[#5a5a5e] hover:text-[#f5f5f5]"
+              className="inline-flex items-center gap-1 rounded-lg border border-[#303036] px-3 py-2 text-[13px] text-[#a7a7ad] transition-colors hover:border-[#5a5a5e] hover:text-[#fafafa]"
             >
               <ArrowLeft className="h-4 w-4" />
               Back
@@ -762,8 +762,8 @@ function AiDraftPanel({
       ) : (
         <>
           <div className="space-y-2">
-            <h3 className="text-sm font-medium text-[#f5f5f5]">Generated Skill</h3>
-            <p className="text-xs text-[#85858e]">Review and edit before saving.</p>
+            <h3 className="text-sm font-medium text-[#fafafa]">Generated Skill</h3>
+            <p className="text-xs text-[#737373]">Review and edit before saving.</p>
           </div>
 
           <motion.div
@@ -774,8 +774,8 @@ function AiDraftPanel({
             <div className="flex items-center gap-3">
               <span className="text-2xl">{generated.emoji}</span>
               <div className="min-w-0">
-                <div className="text-sm font-medium text-[#f5f5f5]">{generated.name}</div>
-                <div className="text-xs text-[#85858e]">
+                <div className="text-sm font-medium text-[#fafafa]">{generated.name}</div>
+                <div className="text-xs text-[#737373]">
                   {descDone ? generated.description : typingDescription}
                   {!descDone && <span className="animate-pulse">|</span>}
                 </div>
@@ -784,10 +784,10 @@ function AiDraftPanel({
 
             <div className="rounded-lg border border-[#303036] bg-[#101010] p-3">
               <div className="flex items-center justify-between mb-2">
-                <span className="text-[10px] font-semibold uppercase tracking-wider text-[#85858e]">
+                <span className="text-[10px] font-semibold uppercase tracking-wider text-[#737373]">
                   Instructions Preview
                 </span>
-                <span className="text-[10px] text-[#85858e]">{generated.instructions.length} chars</span>
+                <span className="text-[10px] text-[#737373]">{generated.instructions.length} chars</span>
               </div>
               <pre className="text-[11px] text-[#a7a7ad] whitespace-pre-wrap font-mono leading-relaxed max-h-[200px] overflow-y-auto">
                 {generated.instructions.slice(0, 600)}
@@ -797,8 +797,8 @@ function AiDraftPanel({
 
             {generated.requiresBins.length > 0 && (
               <div className="flex items-center gap-2">
-                <Wrench className="h-3.5 w-3.5 text-[#85858e]" />
-                <span className="text-[11px] text-[#85858e]">
+                <Wrench className="h-3.5 w-3.5 text-[#737373]" />
+                <span className="text-[11px] text-[#737373]">
                   Requires: {generated.requiresBins.join(", ")}
                 </span>
               </div>
@@ -808,14 +808,14 @@ function AiDraftPanel({
           <div className="flex items-center justify-between pt-2">
             <button
               onClick={() => setGenerated(null)}
-              className="inline-flex items-center gap-1 rounded-lg border border-[#303036] px-3 py-2 text-[13px] text-[#a7a7ad] transition-colors hover:border-[#5a5a5e] hover:text-[#f5f5f5]"
+              className="inline-flex items-center gap-1 rounded-lg border border-[#303036] px-3 py-2 text-[13px] text-[#a7a7ad] transition-colors hover:border-[#5a5a5e] hover:text-[#fafafa]"
             >
               <RotateCcw className="h-4 w-4" />
               Regenerate
             </button>
             <button
               onClick={() => onFinish(generated)}
-              className="inline-flex items-center gap-1 rounded-lg bg-[#f5f5f5] px-4 py-2 text-[13px] font-medium text-[#111111] transition-opacity hover:opacity-90"
+              className="inline-flex items-center gap-1 rounded-lg bg-[#fafafa] px-4 py-2 text-[13px] font-medium text-[#111111] transition-opacity hover:opacity-90"
             >
               Use This
               <ArrowRight className="h-4 w-4" />
@@ -867,10 +867,10 @@ ${data.instructions}`;
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h3 className="text-sm font-medium text-[#f5f5f5]">Generated SKILL.md</h3>
+        <h3 className="text-sm font-medium text-[#fafafa]">Generated SKILL.md</h3>
         <button
           onClick={handleCopy}
-          className="inline-flex items-center gap-1 rounded-lg border border-[#303036] px-2.5 py-1.5 text-[11px] text-[#a7a7ad] transition-colors hover:border-[#5a5a5e] hover:text-[#f5f5f5]"
+          className="inline-flex items-center gap-1 rounded-lg border border-[#303036] px-2.5 py-1.5 text-[11px] text-[#a7a7ad] transition-colors hover:border-[#5a5a5e] hover:text-[#fafafa]"
         >
           {copied ? <Check className="h-3.5 w-3.5 text-[#4ade80]" /> : <Copy className="h-3.5 w-3.5" />}
           {copied ? "Copied!" : "Copy"}
@@ -886,7 +886,7 @@ ${data.instructions}`;
       <div className="flex items-center justify-between pt-2">
         <button
           onClick={onBack}
-          className="inline-flex items-center gap-1 rounded-lg border border-[#303036] px-3 py-2 text-[13px] text-[#a7a7ad] transition-colors hover:border-[#5a5a5e] hover:text-[#f5f5f5]"
+          className="inline-flex items-center gap-1 rounded-lg border border-[#303036] px-3 py-2 text-[13px] text-[#a7a7ad] transition-colors hover:border-[#5a5a5e] hover:text-[#fafafa]"
         >
           <ArrowLeft className="h-4 w-4" />
           Edit
@@ -931,10 +931,10 @@ export function SkillConfirmPanel({
           <Check className="h-7 w-7 text-[#4ade80]" />
         </div>
         <div>
-          <h3 className="text-base font-semibold text-[#f5f5f5]">
+          <h3 className="text-base font-semibold text-[#fafafa]">
             {emoji} {skillName} {verb} — confirm to activate
           </h3>
-          <p className="text-xs text-[#85858e] mt-1.5 max-w-[400px]">
+          <p className="text-xs text-[#737373] mt-1.5 max-w-[400px]">
             Activate it on {CURRENT_AGENT.name} now, or run it once in a session first —
             unconfirmed skills stay as <span className="text-[#f5c45e]">Preview</span>.
           </p>
@@ -952,14 +952,14 @@ export function SkillConfirmPanel({
         </button>
         <button
           onClick={onTryIt}
-          className="inline-flex items-center justify-center gap-2 rounded-lg border border-[#303036] px-4 py-2.5 text-[13px] font-medium text-[#f5f5f5] transition-colors hover:border-[#5a5a5e] hover:bg-[#151519]"
+          className="inline-flex items-center justify-center gap-2 rounded-lg border border-[#303036] px-4 py-2.5 text-[13px] font-medium text-[#fafafa] transition-colors hover:border-[#5a5a5e] hover:bg-[#151519]"
         >
           <Play className="h-4 w-4" />
           Test in a session first
         </button>
         <button
           onClick={onKeepPreview}
-          className="rounded-lg px-4 py-2 text-[12px] text-[#85858e] transition-colors hover:text-[#f5f5f5]"
+          className="rounded-lg px-4 py-2 text-[12px] text-[#737373] transition-colors hover:text-[#fafafa]"
         >
           Keep as preview for now
         </button>
@@ -1046,16 +1046,16 @@ export function SkillCreationModal({ isOpen, onClose, onToast }: SkillCreationMo
         className="relative w-full max-w-[600px] max-h-[90vh] overflow-hidden rounded-2xl border border-[#303036] bg-[#070708] shadow-2xl"
       >
         {/* Header */}
-        <div className="flex items-center justify-between border-b border-[#222226] px-6 py-4">
+        <div className="flex items-center justify-between border-b border-[#232323] px-6 py-4">
           <div>
-            <h2 className="text-base font-semibold text-[#f5f5f5]">
+            <h2 className="text-base font-semibold text-[#fafafa]">
               {mode === "choose" && "Create Skill"}
               {mode === "form" && "Structured Form"}
               {mode === "ai" && "Describe with AI"}
               {mode === "preview" && "Preview SKILL.md"}
               {mode === "saved" && "Confirm Skill"}
             </h2>
-            <p className="text-xs text-[#85858e] mt-0.5">
+            <p className="text-xs text-[#737373] mt-0.5">
               {mode === "choose" && "Choose your preferred creation method"}
               {mode === "form" && "Build step-by-step with full control"}
               {mode === "ai" && "Let AI generate the structure"}
@@ -1065,7 +1065,7 @@ export function SkillCreationModal({ isOpen, onClose, onToast }: SkillCreationMo
           </div>
           <button
             onClick={handleClose}
-            className="flex h-8 w-8 items-center justify-center rounded-lg text-[#85858e] transition-colors hover:bg-[#151519] hover:text-[#f5f5f5]"
+            className="flex h-8 w-8 items-center justify-center rounded-lg text-[#737373] transition-colors hover:bg-[#151519] hover:text-[#fafafa]"
           >
             <X className="h-4 w-4" />
           </button>

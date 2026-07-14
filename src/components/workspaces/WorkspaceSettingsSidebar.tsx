@@ -21,6 +21,7 @@ import {
 import { AgentCreationModal } from "@/components/AgentCreationModal";
 import { NewWorkspaceModal } from "./NewWorkspaceModal";
 import { useWorkspace } from "./WorkspaceProvider";
+import { CURRENT_USER } from "@/data/current-user";
 
 /**
  * Workspace-scoped settings rail (Figma "Sidebar Workspace", node 2793-109677).
@@ -133,8 +134,11 @@ function WorkspacePopover() {
         onClick={() => setOpen(!open)}
         className="flex w-full items-center gap-2 rounded-[10px] border border-[#ffffff1a] bg-[#0a0a0a] p-2 shadow-[0_1px_2px_rgba(0,0,0,0.4)] transition-colors hover:border-[#ffffff2e]"
       >
-        <span className="flex h-6 shrink-0 items-center justify-center rounded-[6px] border border-[#ffffff1a] bg-[#171717] px-1">
-          <Command className="h-4 w-4 text-[#fafafa]" />
+        <span
+          className="flex h-6 w-6 shrink-0 items-center justify-center rounded-[6px] border border-[#ffffff1a] text-[13px]"
+          style={{ backgroundColor: activeWorkspace.color + "14" }}
+        >
+          {activeWorkspace.emoji}
         </span>
         <span className="min-w-0 flex-1 truncate text-left text-[14px] font-semibold leading-5 text-[#fafafa]">
           {activeWorkspace.name}
@@ -306,16 +310,16 @@ export function WorkspaceSettingsSidebar() {
             <button className="flex w-full items-center gap-2 rounded-[8px] p-1 text-left transition-colors hover:bg-[#ffffff08]">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
-                src="/mock-avatar.png"
-                alt="John Smith"
+                src={CURRENT_USER.avatar}
+                alt={CURRENT_USER.name}
                 className="size-8 shrink-0 rounded-[10px] object-cover"
               />
               <span className="min-w-0 flex-1">
                 <span className="block truncate text-[14px] font-semibold leading-none text-[#fafafa]">
-                  John Smith
+                  {CURRENT_USER.name}
                 </span>
                 <span className="block truncate text-[12px] leading-4 tracking-[0.12px] text-[#737373]">
-                  johnsmith@gmail.com
+                  {CURRENT_USER.email}
                 </span>
               </span>
             </button>

@@ -57,10 +57,10 @@ function ToastItem({ toast, onRemove }: { toast: Toast; onRemove: (id: string) =
       className={`flex items-center gap-3 rounded-xl border ${borderColor} bg-[#111113] px-4 py-3 shadow-lg`}
     >
       {icon}
-      <span className="text-sm text-[#f5f5f5]">{toast.message}</span>
+      <span className="text-sm text-[#fafafa]">{toast.message}</span>
       <button
         onClick={() => onRemove(toast.id)}
-        className="ml-2 text-[#85858e] hover:text-[#f5f5f5] transition-colors"
+        className="ml-2 text-[#737373] hover:text-[#fafafa] transition-colors"
       >
         <X className="h-3.5 w-3.5" />
       </button>

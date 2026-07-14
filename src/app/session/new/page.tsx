@@ -38,7 +38,7 @@ function renderMessageText(text: string): React.ReactNode {
       .map((part, j) => {
         if (part.startsWith("**") && part.endsWith("**")) {
           return (
-            <strong key={j} className="font-semibold text-[#f5f5f5]">
+            <strong key={j} className="font-semibold text-[#fafafa]">
               {part.slice(2, -2)}
             </strong>
           );
@@ -56,7 +56,7 @@ function renderMessageText(text: string): React.ReactNode {
     if (isBullet) {
       return (
         <div key={i} className="flex gap-2 pl-1">
-          <span className="text-[#85858e]">•</span>
+          <span className="text-[#737373]">•</span>
           <span>{parts}</span>
         </div>
       );
@@ -96,7 +96,7 @@ function TypingText({ text, onDone }: { text: string; onDone: () => void }) {
   return (
     <>
       {renderMessageText(text.slice(0, count))}
-      {!done && <span className="animate-pulse text-[#85858e]">▌</span>}
+      {!done && <span className="animate-pulse text-[#737373]">▌</span>}
     </>
   );
 }
@@ -201,12 +201,12 @@ function SessionChat({ skill }: { skill: WorkspaceSkill }) {
   return (
     <div className="flex h-full flex-col">
       {/* Session header */}
-      <div className="border-b border-[#222226] bg-[#0b0b0c]">
+      <div className="border-b border-[#232323] bg-[#0b0b0c]">
         <div className="mx-auto flex max-w-[860px] items-center justify-between px-4 py-3 sm:px-6">
           <div className="flex items-center gap-3">
             <button
               onClick={() => router.push("/")}
-              className="inline-flex items-center gap-1.5 text-sm text-[#85858e] transition-colors hover:text-[#f5f5f5]"
+              className="inline-flex items-center gap-1.5 text-sm text-[#737373] transition-colors hover:text-[#fafafa]"
             >
               <ArrowLeft className="h-4 w-4" />
               Skills
@@ -216,7 +216,7 @@ function SessionChat({ skill }: { skill: WorkspaceSkill }) {
               <div className="flex h-7 w-7 items-center justify-center rounded-full bg-[#4ade80]/10 text-[12px] font-semibold text-[#4ade80]">
                 {CURRENT_AGENT.name[0]}
               </div>
-              <span className="text-sm font-medium text-[#f5f5f5]">{CURRENT_AGENT.name}</span>
+              <span className="text-sm font-medium text-[#fafafa]">{CURRENT_AGENT.name}</span>
               <span className="inline-flex items-center gap-1 text-[11px] text-[#4ade80]">
                 <span className="h-1.5 w-1.5 rounded-full bg-[#4ade80]" />
                 Ready
@@ -244,7 +244,7 @@ function SessionChat({ skill }: { skill: WorkspaceSkill }) {
             <div className="mx-auto flex max-w-[860px] flex-wrap items-center justify-between gap-3 px-4 py-3 sm:px-6">
               <div className="flex items-center gap-2.5">
                 <Sparkles className="h-4 w-4 shrink-0 text-[#4ade80]" />
-                <p className="text-[13px] text-[#f5f5f5]">
+                <p className="text-[13px] text-[#fafafa]">
                   {ranSuccessfully ? (
                     <>
                       <strong className="font-semibold">{liveSkill.name}</strong> ran successfully.
@@ -271,7 +271,7 @@ function SessionChat({ skill }: { skill: WorkspaceSkill }) {
                 </button>
                 <button
                   onClick={() => setBannerState("dismissed")}
-                  className="rounded-lg px-3 py-2 text-[12px] text-[#85858e] transition-colors hover:text-[#f5f5f5]"
+                  className="rounded-lg px-3 py-2 text-[12px] text-[#737373] transition-colors hover:text-[#fafafa]"
                 >
                   Keep as preview
                 </button>
@@ -288,7 +288,7 @@ function SessionChat({ skill }: { skill: WorkspaceSkill }) {
             <div className="mx-auto flex max-w-[860px] flex-wrap items-center justify-between gap-3 px-4 py-3 sm:px-6">
               <div className="flex items-center gap-2.5">
                 <CheckCircle2 className="h-4 w-4 shrink-0 text-[#4ade80]" />
-                <p className="text-[13px] text-[#f5f5f5]">
+                <p className="text-[13px] text-[#fafafa]">
                   <strong className="font-semibold">Skill confirmed applied</strong> —{" "}
                   {liveSkill.name} is now Active on {CURRENT_AGENT.name}.
                 </p>
@@ -312,10 +312,10 @@ function SessionChat({ skill }: { skill: WorkspaceSkill }) {
               <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-2xl border border-[#303036] bg-[#151519]">
                 <span className="text-xl">{liveSkill.emoji}</span>
               </div>
-              <h2 className="text-base font-semibold text-[#f5f5f5]">
+              <h2 className="text-base font-semibold text-[#fafafa]">
                 New session with {CURRENT_AGENT.name}
               </h2>
-              <p className="mx-auto mt-1 max-w-[420px] text-[13px] text-[#85858e]">
+              <p className="mx-auto mt-1 max-w-[420px] text-[13px] text-[#737373]">
                 The <strong className="text-[#a7a7ad]">{liveSkill.name}</strong> skill is attached.
                 {isPreview
                   ? " Send a prompt to see it in action, then confirm it works."
@@ -333,7 +333,7 @@ function SessionChat({ skill }: { skill: WorkspaceSkill }) {
                   <button
                     key={p}
                     onClick={() => sendMessage(p)}
-                    className="rounded-full border border-[#303036] bg-[#151519] px-4 py-2 text-[12px] text-[#a7a7ad] transition-colors hover:border-[#f5c45e]/40 hover:text-[#f5f5f5]"
+                    className="rounded-full border border-[#303036] bg-[#151519] px-4 py-2 text-[12px] text-[#a7a7ad] transition-colors hover:border-[#f5c45e]/40 hover:text-[#fafafa]"
                   >
                     {p}
                   </button>
@@ -350,7 +350,7 @@ function SessionChat({ skill }: { skill: WorkspaceSkill }) {
                 animate={{ opacity: 1, y: 0 }}
                 className="flex justify-end"
               >
-                <div className="max-w-[75%] rounded-2xl rounded-br-md bg-[#f5f5f5] px-4 py-2.5 text-[13px] text-[#111111]">
+                <div className="max-w-[75%] rounded-2xl rounded-br-md bg-[#fafafa] px-4 py-2.5 text-[13px] text-[#111111]">
                   {msg.text}
                 </div>
               </motion.div>
@@ -369,11 +369,11 @@ function SessionChat({ skill }: { skill: WorkspaceSkill }) {
                         {msg.kind === "setup" ? msg.action : `Used skill: ${liveSkill.id}`}
                       </span>
                       {msg.kind !== "setup" && (
-                        <span className="text-[11px] text-[#85858e]">· {msg.action}</span>
+                        <span className="text-[11px] text-[#737373]">· {msg.action}</span>
                       )}
                     </div>
                   )}
-                  <div className="rounded-2xl rounded-bl-md border border-[#222226] bg-[#151519] px-4 py-3 text-[13px] leading-relaxed text-[#a7a7ad]">
+                  <div className="rounded-2xl rounded-bl-md border border-[#232323] bg-[#151519] px-4 py-3 text-[13px] leading-relaxed text-[#a7a7ad]">
                     {msg.id === `a-${messages.length - 1}` && phase === "typing" ? (
                       <TypingText text={msg.text} onDone={handleTypingDone} />
                     ) : (
@@ -414,10 +414,10 @@ function SessionChat({ skill }: { skill: WorkspaceSkill }) {
                     </span>
                   </div>
                 )}
-                <div className="inline-flex items-center gap-1.5 rounded-2xl rounded-bl-md border border-[#222226] bg-[#151519] px-4 py-3">
-                  <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-[#85858e] [animation-delay:0ms]" />
-                  <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-[#85858e] [animation-delay:150ms]" />
-                  <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-[#85858e] [animation-delay:300ms]" />
+                <div className="inline-flex items-center gap-1.5 rounded-2xl rounded-bl-md border border-[#232323] bg-[#151519] px-4 py-3">
+                  <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-[#737373] [animation-delay:0ms]" />
+                  <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-[#737373] [animation-delay:150ms]" />
+                  <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-[#737373] [animation-delay:300ms]" />
                 </div>
               </div>
             </motion.div>
@@ -426,7 +426,7 @@ function SessionChat({ skill }: { skill: WorkspaceSkill }) {
       </div>
 
       {/* Composer */}
-      <div className="border-t border-[#222226] bg-[#0b0b0c]">
+      <div className="border-t border-[#232323] bg-[#0b0b0c]">
         <div className="mx-auto max-w-[860px] px-4 py-3 sm:px-6">
           <form
             onSubmit={(e) => {
@@ -441,12 +441,12 @@ function SessionChat({ skill }: { skill: WorkspaceSkill }) {
               onChange={(e) => setInput(e.target.value)}
               placeholder={`Message ${CURRENT_AGENT.name}...`}
               disabled={busy}
-              className="h-11 flex-1 rounded-xl border border-[#303036] bg-[#101010] px-4 text-[13px] text-[#f5f5f5] outline-none placeholder:text-[#85858e] focus:border-[#5a5a5e] disabled:opacity-60"
+              className="h-11 flex-1 rounded-xl border border-[#303036] bg-[#101010] px-4 text-[13px] text-[#fafafa] outline-none placeholder:text-[#737373] focus:border-[#5a5a5e] disabled:opacity-60"
             />
             <button
               type="submit"
               disabled={!input.trim() || busy}
-              className="flex h-11 w-11 items-center justify-center rounded-xl bg-[#f5f5f5] text-[#111111] transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
+              className="flex h-11 w-11 items-center justify-center rounded-xl bg-[#fafafa] text-[#111111] transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
             >
               <Send className="h-4 w-4" />
             </button>
@@ -470,7 +470,7 @@ function NewSessionInner() {
     return (
       <div className="flex h-full items-center justify-center">
         <div className="text-center">
-          <p className="text-sm text-[#85858e]">
+          <p className="text-sm text-[#737373]">
             {skillId ? `Skill "${skillId}" not found.` : "Pick a skill to test first."}
           </p>
           <button

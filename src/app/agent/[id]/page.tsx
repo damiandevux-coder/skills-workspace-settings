@@ -259,17 +259,17 @@ const AGENT_SPECIALTIES: AgentSpecialty[] = [
 function ConversationThread({ example }: { example: ConversationExample }) {
   return (
     <div className="rounded-xl border border-[#303036] bg-[#0b0b0c] overflow-hidden">
-      <div className="border-b border-[#222226] px-5 py-3">
-        <h3 className="text-sm font-medium text-[#f5f5f5]">{example.title}</h3>
-        <p className="text-[11px] text-[#85858e] mt-0.5">{example.subtitle}</p>
+      <div className="border-b border-[#232323] px-5 py-3">
+        <h3 className="text-sm font-medium text-[#fafafa]">{example.title}</h3>
+        <p className="text-[11px] text-[#737373] mt-0.5">{example.subtitle}</p>
       </div>
       <div className="p-5 space-y-4">
         {example.messages.map((msg, i) => (
           <div key={i} className={`flex ${msg.from === "human" ? "justify-end" : "justify-start"}`}>
             <div className={`max-w-[85%] rounded-2xl px-4 py-3 ${
               msg.from === "human"
-                ? "bg-[#f5f5f5] text-[#111111] rounded-br-md"
-                : "bg-[#151519] text-[#f5f5f5] border border-[#303036] rounded-bl-md"
+                ? "bg-[#fafafa] text-[#111111] rounded-br-md"
+                : "bg-[#151519] text-[#fafafa] border border-[#303036] rounded-bl-md"
             }`}>
               {msg.from === "agent" ? (
                 <div className="text-[13px] leading-relaxed">
@@ -288,7 +288,7 @@ function ConversationThread({ example }: { example: ConversationExample }) {
               ) : (
                 <p className="text-[13px] leading-relaxed whitespace-pre-wrap">{msg.text}</p>
               )}
-              {msg.time && <span className="text-[10px] mt-1.5 block text-[#85858e]">{msg.time}</span>}
+              {msg.time && <span className="text-[10px] mt-1.5 block text-[#737373]">{msg.time}</span>}
             </div>
           </div>
         ))}
@@ -311,7 +311,7 @@ export default function AgentDetailPage() {
     return (
       <div className="min-h-screen bg-[#070708] flex items-center justify-center">
         <div className="text-center">
-          <p className="text-[#85858e]">Agent not found</p>
+          <p className="text-[#737373]">Agent not found</p>
           <button onClick={() => router.push("/new-agent")} className="mt-4 text-sm text-[#4ade80] hover:underline">
             ← Back to marketplace
           </button>
@@ -331,11 +331,11 @@ export default function AgentDetailPage() {
   return (
     <div className="min-h-screen bg-[#070708]">
       {/* Hero Header */}
-      <div className="border-b border-[#222226] bg-[#0b0b0c]">
+      <div className="border-b border-[#232323] bg-[#0b0b0c]">
         <div className="mx-auto max-w-[1000px] px-4 sm:px-6 py-8">
           <button
             onClick={() => router.push("/new-agent")}
-            className="inline-flex items-center gap-2 text-sm text-[#85858e] hover:text-[#f5f5f5] transition-colors mb-6"
+            className="inline-flex items-center gap-2 text-sm text-[#737373] hover:text-[#fafafa] transition-colors mb-6"
           >
             <ArrowLeft className="h-4 w-4" />
             Back to marketplace
@@ -350,13 +350,13 @@ export default function AgentDetailPage() {
                 <Icon className="h-8 w-8" style={{ color: agent.color }} />
               </div>
               <div>
-                <h1 className="text-2xl font-semibold text-[#f5f5f5]">{agent.role}</h1>
-                <p className="text-sm text-[#85858e] mt-1">{agent.tagline}</p>
+                <h1 className="text-2xl font-semibold text-[#fafafa]">{agent.role}</h1>
+                <p className="text-sm text-[#737373] mt-1">{agent.tagline}</p>
                 <p className="text-[13px] text-[#a7a7ad] mt-3 max-w-xl">{agent.description}</p>
 
                 <div className="flex flex-wrap gap-2 mt-4">
                   {agent.tools.map((tool) => (
-                    <span key={tool} className="rounded-full border border-[#303036] bg-[#151519] px-3 py-1 text-[11px] text-[#85858e]">
+                    <span key={tool} className="rounded-full border border-[#303036] bg-[#151519] px-3 py-1 text-[11px] text-[#737373]">
                       {tool}
                     </span>
                   ))}
@@ -378,7 +378,7 @@ export default function AgentDetailPage() {
       </div>
 
       {/* Tabs */}
-      <div className="border-b border-[#222226] bg-[#0b0b0c]">
+      <div className="border-b border-[#232323] bg-[#0b0b0c]">
         <div className="mx-auto max-w-[1000px] px-4 sm:px-6">
           <div className="flex gap-1">
             {tabs.map((tab) => (
@@ -386,7 +386,7 @@ export default function AgentDetailPage() {
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
                 className={`relative px-4 py-3 text-[13px] font-medium transition-colors ${
-                  activeTab === tab.id ? "text-[#f5f5f5]" : "text-[#85858e] hover:text-[#a7a7ad]"
+                  activeTab === tab.id ? "text-[#fafafa]" : "text-[#737373] hover:text-[#a7a7ad]"
                 }`}
               >
                 {tab.label}
@@ -416,7 +416,7 @@ export default function AgentDetailPage() {
             >
               {/* Value Props */}
               <div>
-                <h2 className="text-sm font-semibold uppercase tracking-[0.18em] text-[#85858e] mb-5">
+                <h2 className="text-sm font-semibold uppercase tracking-[0.18em] text-[#737373] mb-5">
                   What they do
                 </h2>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -431,7 +431,7 @@ export default function AgentDetailPage() {
 
               {/* Conversation Examples */}
               <div>
-                <h2 className="text-sm font-semibold uppercase tracking-[0.18em] text-[#85858e] mb-5">
+                <h2 className="text-sm font-semibold uppercase tracking-[0.18em] text-[#737373] mb-5">
                   See them in action
                 </h2>
                 <div className="space-y-6">
@@ -451,19 +451,19 @@ export default function AgentDetailPage() {
               exit={{ opacity: 0, y: -10 }}
             >
               <div className="flex items-center justify-between mb-5">
-                <h2 className="text-sm font-semibold uppercase tracking-[0.18em] text-[#85858e]">
+                <h2 className="text-sm font-semibold uppercase tracking-[0.18em] text-[#737373]">
                   Pre-baked Skills
                 </h2>
-                <span className="text-[11px] text-[#85858e]">{agent.skills.length} skills included</span>
+                <span className="text-[11px] text-[#737373]">{agent.skills.length} skills included</span>
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {agent.skills.map((skill, i) => (
                   <div key={i} className="rounded-xl border border-[#303036] bg-[#0b0b0c] p-4">
                     <div className="flex items-center gap-2 mb-2">
                       <Wrench className="h-3.5 w-3.5" style={{ color: agent.color }} />
-                      <h3 className="text-[13px] font-medium text-[#f5f5f5]">{skill.name}</h3>
+                      <h3 className="text-[13px] font-medium text-[#fafafa]">{skill.name}</h3>
                     </div>
-                    <p className="text-[12px] text-[#85858e] leading-relaxed">{skill.description}</p>
+                    <p className="text-[12px] text-[#737373] leading-relaxed">{skill.description}</p>
                     {skill.requiredIntegration && (
                       <div className="flex items-center gap-1.5 mt-2">
                         <Lock className="h-3 w-3 text-[#f5c45e]" />
@@ -473,7 +473,7 @@ export default function AgentDetailPage() {
                   </div>
                 ))}
               </div>
-              <p className="text-[12px] text-[#85858e] mt-5 text-center">
+              <p className="text-[12px] text-[#737373] mt-5 text-center">
                 You can modify these skills or create new ones after launching.
               </p>
             </motion.div>
@@ -487,34 +487,34 @@ export default function AgentDetailPage() {
               exit={{ opacity: 0, y: -10 }}
             >
               <div className="flex items-center justify-between mb-5">
-                <h2 className="text-sm font-semibold uppercase tracking-[0.18em] text-[#85858e]">
+                <h2 className="text-sm font-semibold uppercase tracking-[0.18em] text-[#737373]">
                   Proposed Integrations
                 </h2>
-                <span className="text-[11px] text-[#85858e]">{agent.integrations.length} available</span>
+                <span className="text-[11px] text-[#737373]">{agent.integrations.length} available</span>
               </div>
               <div className="space-y-3">
                 {agent.integrations.map((integration, i) => (
                   <div key={i} className="flex items-start gap-4 rounded-xl border border-[#303036] bg-[#0b0b0c] p-4">
-                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[#151519] border border-[#222226]">
-                      <Puzzle className="h-4 w-4 text-[#85858e]" />
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[#151519] border border-[#232323]">
+                      <Puzzle className="h-4 w-4 text-[#737373]" />
                     </div>
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-2">
-                        <h3 className="text-[13px] font-medium text-[#f5f5f5]">{integration.name}</h3>
+                        <h3 className="text-[13px] font-medium text-[#fafafa]">{integration.name}</h3>
                         {integration.required ? (
                           <span className="rounded-full bg-[#f5c45e]/15 px-2 py-0.5 text-[10px] font-medium text-[#f5c45e]">Required</span>
                         ) : (
-                          <span className="rounded-full bg-[#151519] border border-[#222226] px-2 py-0.5 text-[10px] text-[#85858e]">Optional</span>
+                          <span className="rounded-full bg-[#151519] border border-[#232323] px-2 py-0.5 text-[10px] text-[#737373]">Optional</span>
                         )}
                       </div>
-                      <p className="text-[12px] text-[#85858e] mt-1">{integration.description}</p>
+                      <p className="text-[12px] text-[#737373] mt-1">{integration.description}</p>
                     </div>
                   </div>
                 ))}
               </div>
               <div className="mt-6 rounded-xl border border-[#303036] bg-[#0b0b0c] p-4">
                 <p className="text-[12px] text-[#a7a7ad]">
-                  <strong className="text-[#f5f5f5]">Good to know:</strong> None of these are required to launch. 
+                  <strong className="text-[#fafafa]">Good to know:</strong> None of these are required to launch. 
                   The agent works out of the box. Connect integrations to unlock additional capabilities. 
                   You can always add or remove integrations later.
                 </p>
@@ -524,7 +524,7 @@ export default function AgentDetailPage() {
         </AnimatePresence>
 
         {/* Mobile CTA */}
-        <div className="sm:hidden mt-10 pt-6 border-t border-[#222226]">
+        <div className="sm:hidden mt-10 pt-6 border-t border-[#232323]">
           <button
             onClick={() => router.push(`/new-agent?configure=${agent.id}`)}
             className="w-full inline-flex items-center justify-center gap-2 rounded-xl px-5 py-3 text-sm font-medium text-[#111111] transition-opacity hover:opacity-90"

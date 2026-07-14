@@ -47,21 +47,21 @@ export function NewWorkspaceModal({ isOpen, onClose }: NewWorkspaceModalProps) {
         className="relative w-full max-w-[440px] rounded-2xl border border-[#303036] bg-[#070708] shadow-2xl"
       >
         {/* Header */}
-        <div className="flex items-center justify-between border-b border-[#222226] px-6 py-4">
+        <div className="flex items-center justify-between border-b border-[#232323] px-6 py-4">
           <div className="flex items-center gap-3">
             <div className="flex h-9 w-9 items-center justify-center rounded-lg border border-[#303036] bg-[#151519]">
-              <LayoutGrid className="h-4 w-4 text-[#85858e]" />
+              <LayoutGrid className="h-4 w-4 text-[#737373]" />
             </div>
             <div>
-              <h2 className="text-base font-semibold text-[#f5f5f5]">New Workspace</h2>
-              <p className="text-xs text-[#85858e]">
+              <h2 className="text-base font-semibold text-[#fafafa]">New Workspace</h2>
+              <p className="text-xs text-[#737373]">
                 An isolated space with its own agents and shared knowledge
               </p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="flex h-8 w-8 items-center justify-center rounded-lg text-[#85858e] transition-colors hover:bg-[#151519] hover:text-[#f5f5f5]"
+            className="flex h-8 w-8 items-center justify-center rounded-lg text-[#737373] transition-colors hover:bg-[#151519] hover:text-[#fafafa]"
           >
             <X className="h-4 w-4" />
           </button>
@@ -70,7 +70,7 @@ export function NewWorkspaceModal({ isOpen, onClose }: NewWorkspaceModalProps) {
         {/* Form */}
         <div className="px-6 py-5 space-y-5">
           <div>
-            <label className="mb-1.5 block text-[11px] font-semibold uppercase tracking-[0.18em] text-[#85858e]">
+            <label className="mb-1.5 block text-[11px] font-semibold uppercase tracking-[0.18em] text-[#737373]">
               Name
             </label>
             <input
@@ -80,12 +80,12 @@ export function NewWorkspaceModal({ isOpen, onClose }: NewWorkspaceModalProps) {
               onChange={(e) => setName(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && handleCreate()}
               placeholder="e.g., Marketing"
-              className="h-10 w-full rounded-lg border border-[#303036] bg-[#101010] px-3 text-sm text-[#f5f5f5] outline-none placeholder:text-[#85858e] focus:border-[#5a5a5e]"
+              className="h-10 w-full rounded-lg border border-[#303036] bg-[#101010] px-3 text-sm text-[#fafafa] outline-none placeholder:text-[#737373] focus:border-[#5a5a5e]"
             />
           </div>
 
           <div>
-            <label className="mb-1.5 block text-[11px] font-semibold uppercase tracking-[0.18em] text-[#85858e]">
+            <label className="mb-1.5 block text-[11px] font-semibold uppercase tracking-[0.18em] text-[#737373]">
               Emoji
             </label>
             <div className="flex flex-wrap gap-1.5">
@@ -106,7 +106,7 @@ export function NewWorkspaceModal({ isOpen, onClose }: NewWorkspaceModalProps) {
           </div>
 
           <div>
-            <label className="mb-1.5 block text-[11px] font-semibold uppercase tracking-[0.18em] text-[#85858e]">
+            <label className="mb-1.5 block text-[11px] font-semibold uppercase tracking-[0.18em] text-[#737373]">
               Accent
             </label>
             <div className="flex gap-2">
@@ -115,7 +115,7 @@ export function NewWorkspaceModal({ isOpen, onClose }: NewWorkspaceModalProps) {
                   key={c}
                   onClick={() => setColor(c)}
                   className={`h-7 w-7 rounded-full border-2 transition-transform ${
-                    c === color ? "scale-110 border-[#f5f5f5]" : "border-transparent"
+                    c === color ? "scale-110 border-[#fafafa]" : "border-transparent"
                   }`}
                   style={{ backgroundColor: c }}
                 />
@@ -125,17 +125,17 @@ export function NewWorkspaceModal({ isOpen, onClose }: NewWorkspaceModalProps) {
         </div>
 
         {/* Footer */}
-        <div className="flex items-center justify-end gap-2 border-t border-[#222226] px-6 py-4">
+        <div className="flex items-center justify-end gap-2 border-t border-[#232323] px-6 py-4">
           <button
             onClick={onClose}
-            className="rounded-lg border border-[#303036] px-4 py-2 text-[13px] text-[#a7a7ad] transition-colors hover:border-[#5a5a5e] hover:text-[#f5f5f5]"
+            className="rounded-lg border border-[#303036] px-4 py-2 text-[13px] text-[#a7a7ad] transition-colors hover:border-[#5a5a5e] hover:text-[#fafafa]"
           >
             Cancel
           </button>
           <button
             onClick={handleCreate}
             disabled={!name.trim()}
-            className="inline-flex items-center gap-2 rounded-lg bg-[#f5f5f5] px-4 py-2 text-[13px] font-medium text-[#111111] transition-opacity hover:opacity-90 disabled:opacity-30 disabled:cursor-not-allowed"
+            className="inline-flex items-center gap-2 rounded-lg bg-[#fafafa] px-4 py-2 text-[13px] font-medium text-[#111111] transition-opacity hover:opacity-90 disabled:opacity-30 disabled:cursor-not-allowed"
           >
             <Plus className="h-4 w-4" />
             Create Workspace

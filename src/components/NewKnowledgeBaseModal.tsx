@@ -77,19 +77,19 @@ export function NewKnowledgeBaseModal({ isOpen, onClose, onCreate, agents }: New
         className="relative w-full max-w-[520px] max-h-[90vh] overflow-y-auto rounded-2xl border border-[#303036] bg-[#070708] shadow-2xl"
       >
         {/* Header */}
-        <div className="flex items-center justify-between border-b border-[#222226] px-6 py-4">
+        <div className="flex items-center justify-between border-b border-[#232323] px-6 py-4">
           <div className="flex items-center gap-3">
             <div className="flex h-9 w-9 items-center justify-center rounded-lg border border-[#303036] bg-[#151519]">
-              <HardDrive className="h-4 w-4 text-[#85858e]" />
+              <HardDrive className="h-4 w-4 text-[#737373]" />
             </div>
             <div>
-              <h2 className="text-base font-semibold text-[#f5f5f5]">New Knowledge Base</h2>
-              <p className="text-xs text-[#85858e]">Create a shared knowledge repository for your agents</p>
+              <h2 className="text-base font-semibold text-[#fafafa]">New Knowledge Base</h2>
+              <p className="text-xs text-[#737373]">Create a shared knowledge repository for your agents</p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="flex h-8 w-8 items-center justify-center rounded-lg text-[#85858e] transition-colors hover:bg-[#151519] hover:text-[#f5f5f5]"
+            className="flex h-8 w-8 items-center justify-center rounded-lg text-[#737373] transition-colors hover:bg-[#151519] hover:text-[#fafafa]"
           >
             <X className="h-4 w-4" />
           </button>
@@ -122,7 +122,7 @@ export function NewKnowledgeBaseModal({ isOpen, onClose, onCreate, agents }: New
                           setShowEmojiPicker(false);
                         }}
                         className={`flex h-8 w-8 items-center justify-center rounded-md text-lg transition-colors ${
-                          e === emoji ? "bg-[#303036]" : "hover:bg-[#222226]"
+                          e === emoji ? "bg-[#303036]" : "hover:bg-[#232323]"
                         }`}
                       >
                         {e}
@@ -133,7 +133,7 @@ export function NewKnowledgeBaseModal({ isOpen, onClose, onCreate, agents }: New
               </AnimatePresence>
             </div>
             <div className="flex-1">
-              <label className="mb-1.5 block text-[11px] font-semibold uppercase tracking-[0.18em] text-[#85858e]">
+              <label className="mb-1.5 block text-[11px] font-semibold uppercase tracking-[0.18em] text-[#737373]">
                 Name
               </label>
               <input
@@ -144,7 +144,7 @@ export function NewKnowledgeBaseModal({ isOpen, onClose, onCreate, agents }: New
                   if (errors.name) setErrors((p) => ({ ...p, name: "" }));
                 }}
                 placeholder="e.g., Product Documentation"
-                className={`h-10 w-full rounded-lg border bg-[#101010] px-3 text-sm text-[#f5f5f5] outline-none placeholder:text-[#85858e] transition-colors ${
+                className={`h-10 w-full rounded-lg border bg-[#101010] px-3 text-sm text-[#fafafa] outline-none placeholder:text-[#737373] transition-colors ${
                   errors.name ? "border-[#ef4444]" : "border-[#303036] focus:border-[#5a5a5e]"
                 }`}
               />
@@ -154,7 +154,7 @@ export function NewKnowledgeBaseModal({ isOpen, onClose, onCreate, agents }: New
 
           {/* Description */}
           <div>
-            <label className="mb-1.5 block text-[11px] font-semibold uppercase tracking-[0.18em] text-[#85858e]">
+            <label className="mb-1.5 block text-[11px] font-semibold uppercase tracking-[0.18em] text-[#737373]">
               Description
             </label>
             <textarea
@@ -165,24 +165,24 @@ export function NewKnowledgeBaseModal({ isOpen, onClose, onCreate, agents }: New
               }}
               placeholder="What knowledge will this base contain?"
               rows={3}
-              className={`w-full rounded-lg border bg-[#101010] px-3 py-2.5 text-sm text-[#f5f5f5] outline-none placeholder:text-[#85858e] resize-none transition-colors ${
+              className={`w-full rounded-lg border bg-[#101010] px-3 py-2.5 text-sm text-[#fafafa] outline-none placeholder:text-[#737373] resize-none transition-colors ${
                 errors.description ? "border-[#ef4444]" : "border-[#303036] focus:border-[#5a5a5e]"
               }`}
             />
             {errors.description && (
               <p className="mt-1 text-[11px] text-[#ef4444]">{errors.description}</p>
             )}
-            <p className="mt-1 text-right text-[10px] text-[#85858e]">
+            <p className="mt-1 text-right text-[10px] text-[#737373]">
               {description.length} chars
             </p>
           </div>
 
           {/* Assign Agents */}
           <div>
-            <label className="mb-2 block text-[11px] font-semibold uppercase tracking-[0.18em] text-[#85858e]">
+            <label className="mb-2 block text-[11px] font-semibold uppercase tracking-[0.18em] text-[#737373]">
               Assign Agents
             </label>
-            <p className="text-[11px] text-[#85858e] mb-2">
+            <p className="text-[11px] text-[#737373] mb-2">
               Select which agents can access this knowledge base
             </p>
             <div className="flex flex-wrap gap-1.5">
@@ -195,7 +195,7 @@ export function NewKnowledgeBaseModal({ isOpen, onClose, onCreate, agents }: New
                     className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px] transition-colors ${
                       isSelected
                         ? "border-[#4ade80]/30 bg-[#4ade80]/10 text-[#4ade80]"
-                        : "border-[#303036] bg-[#101010] text-[#85858e] hover:text-[#a7a7ad]"
+                        : "border-[#303036] bg-[#101010] text-[#737373] hover:text-[#a7a7ad]"
                     }`}
                   >
                     <Bot className="h-3 w-3" />
@@ -209,16 +209,16 @@ export function NewKnowledgeBaseModal({ isOpen, onClose, onCreate, agents }: New
         </div>
 
         {/* Footer */}
-        <div className="flex items-center justify-end gap-2 border-t border-[#222226] px-6 py-4">
+        <div className="flex items-center justify-end gap-2 border-t border-[#232323] px-6 py-4">
           <button
             onClick={onClose}
-            className="rounded-lg border border-[#303036] px-4 py-2 text-[13px] text-[#a7a7ad] transition-colors hover:border-[#5a5a5e] hover:text-[#f5f5f5]"
+            className="rounded-lg border border-[#303036] px-4 py-2 text-[13px] text-[#a7a7ad] transition-colors hover:border-[#5a5a5e] hover:text-[#fafafa]"
           >
             Cancel
           </button>
           <button
             onClick={handleSubmit}
-            className="inline-flex items-center gap-2 rounded-lg bg-[#f5f5f5] px-4 py-2 text-[13px] font-medium text-[#111111] transition-opacity hover:opacity-90"
+            className="inline-flex items-center gap-2 rounded-lg bg-[#fafafa] px-4 py-2 text-[13px] font-medium text-[#111111] transition-opacity hover:opacity-90"
           >
             <Plus className="h-4 w-4" />
             Create Knowledge Base

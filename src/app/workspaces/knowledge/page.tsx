@@ -25,6 +25,8 @@ import {
 import { KnowledgeItem, SharedKnowledge } from "@/types/skills";
 import { NewKnowledgeBaseModal } from "@/components/NewKnowledgeBaseModal";
 import { useWorkspace } from "@/components/workspaces/WorkspaceProvider";
+import { PageHeader } from "@/components/ui/PageHeader";
+import { EmptyState } from "@/components/ui/EmptyState";
 
 function StatusChip({
   status,
@@ -51,7 +53,7 @@ function StatusChip({
   }
   if (status === "queued") {
     return (
-      <span className="inline-flex items-center gap-1 rounded-full bg-[#151519] px-1.5 py-0.5 text-[10px] text-[#85858e]">
+      <span className="inline-flex items-center gap-1 rounded-full bg-[#151519] px-1.5 py-0.5 text-[10px] text-[#737373]">
         <Clock className="h-2.5 w-2.5" />
         queued
       </span>
@@ -68,7 +70,7 @@ function StatusChip({
             onRetry();
           }}
           title="Retry conversion"
-          className="ml-0.5 hover:text-[#f5f5f5] transition-colors"
+          className="ml-0.5 hover:text-[#fafafa] transition-colors"
         >
           <RotateCw className="h-2.5 w-2.5" />
         </button>
@@ -100,9 +102,9 @@ function KnowledgeTree({
       >
         {isFolder ? (
           expanded ? (
-            <ChevronDown className="h-3.5 w-3.5 text-[#85858e]" />
+            <ChevronDown className="h-3.5 w-3.5 text-[#737373]" />
           ) : (
-            <ChevronRight className="h-3.5 w-3.5 text-[#85858e]" />
+            <ChevronRight className="h-3.5 w-3.5 text-[#737373]" />
           )
         ) : (
           <span className="w-3.5" />
@@ -111,22 +113,25 @@ function KnowledgeTree({
           expanded ? (
             <FolderOpen className="h-4 w-4 text-[#f5c45e]" />
           ) : (
-            <Folder className="h-4 w-4 text-[#85858e]" />
+            <Folder className="h-4 w-4 text-[#737373]" />
           )
         ) : (
           <File className="h-4 w-4 text-[#a7a7ad]" />
         )}
-        <span className="text-[13px] text-[#f5f5f5] min-w-0 flex-1 truncate">{item.name}</span>
+        <span className="text-[13px] text-[#fafafa] min-w-0 flex-1 truncate">{item.name}</span>
         {!isFolder && (
           <StatusChip status={item.status} onRetry={() => onRetry?.(item.id)} />
         )}
-        {item.size && <span className="text-[10px] text-[#85858e]">{item.size}</span>}
+        {item.size && <span className="text-[10px] text-[#737373]">{item.size}</span>}
+        {item.modified && (
+          <span className="hidden text-[10px] text-[#737373] sm:inline">{item.modified}</span>
+        )}
         {/* Hover actions */}
         <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-          <button className="p-1 rounded hover:bg-[#222226] text-[#85858e] hover:text-[#f5f5f5]">
+          <button className="p-1 rounded hover:bg-[#232323] text-[#737373] hover:text-[#fafafa]">
             <Pencil className="h-3 w-3" />
           </button>
-          <button className="p-1 rounded hover:bg-[#222226] text-[#85858e] hover:text-[#ef4444]">
+          <button className="p-1 rounded hover:bg-[#232323] text-[#737373] hover:text-[#ef4444]">
             <Trash2 className="h-3 w-3" />
           </button>
         </div>
@@ -224,11 +229,11 @@ function KnowledgeCard({
           <span className="text-lg">{knowledge.emoji}</span>
         </div>
         <div className="min-w-0 flex-1">
-          <h3 className="text-sm font-medium text-[#f5f5f5]">{knowledge.name}</h3>
-          <p className="text-xs text-[#85858e] mt-0.5">{knowledge.description}</p>
+          <h3 className="text-sm font-medium text-[#fafafa]">{knowledge.name}</h3>
+          <p className="text-xs text-[#737373] mt-0.5">{knowledge.description}</p>
         </div>
         <div className="flex items-center gap-3 shrink-0">
-          <div className="flex items-center gap-1.5 text-[11px] text-[#85858e]">
+          <div className="flex items-center gap-1.5 text-[11px] text-[#737373]">
             <HardDrive className="h-3 w-3" />
             {fileCount} files
             {folderCount > 0 && `, ${folderCount} folders`}
@@ -236,14 +241,14 @@ function KnowledgeCard({
               <span className="text-[#f5c45e]"> · {pendingCount} pending</span>
             )}
           </div>
-          <div className="flex items-center gap-1.5 text-[11px] text-[#85858e]">
+          <div className="flex items-center gap-1.5 text-[11px] text-[#737373]">
             <Bot className="h-3 w-3" />
             {knowledge.assignedAgents.length} agent{knowledge.assignedAgents.length !== 1 ? "s" : ""}
           </div>
           {isExpanded ? (
-            <ChevronDown className="h-4 w-4 text-[#85858e]" />
+            <ChevronDown className="h-4 w-4 text-[#737373]" />
           ) : (
-            <ChevronRight className="h-4 w-4 text-[#85858e]" />
+            <ChevronRight className="h-4 w-4 text-[#737373]" />
           )}
         </div>
       </div>
@@ -258,23 +263,23 @@ function KnowledgeCard({
             transition={{ duration: 0.25 }}
             className="overflow-hidden"
           >
-            <div className="border-t border-[#222226] p-4">
+            <div className="border-t border-[#232323] p-4">
               <div className="flex items-center justify-between mb-3">
-                <h4 className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[#85858e]">
+                <h4 className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[#737373]">
                   Contents
                 </h4>
                 <div className="flex items-center gap-2">
-                  <button className="inline-flex items-center gap-1.5 rounded-md border border-[#303036] px-2.5 py-1.5 text-[11px] text-[#85858e] hover:text-[#f5f5f5] hover:border-[#5a5a5e] transition-colors">
+                  <button className="inline-flex items-center gap-1.5 rounded-md border border-[#303036] px-2.5 py-1.5 text-[11px] text-[#737373] hover:text-[#fafafa] hover:border-[#5a5a5e] transition-colors">
                     <Upload className="h-3 w-3" />
                     Upload
                   </button>
-                  <button className="inline-flex items-center gap-1.5 rounded-md border border-[#303036] px-2.5 py-1.5 text-[11px] text-[#85858e] hover:text-[#f5f5f5] hover:border-[#5a5a5e] transition-colors">
+                  <button className="inline-flex items-center gap-1.5 rounded-md border border-[#303036] px-2.5 py-1.5 text-[11px] text-[#737373] hover:text-[#fafafa] hover:border-[#5a5a5e] transition-colors">
                     <Plus className="h-3 w-3" />
                     New Folder
                   </button>
                 </div>
               </div>
-              <div className="rounded-lg border border-[#222226] bg-[#101010]">
+              <div className="rounded-lg border border-[#232323] bg-[#101010]">
                 {knowledge.items.map((item) => (
                   <KnowledgeTree
                     key={item.id}
@@ -287,7 +292,7 @@ function KnowledgeCard({
 
               {/* Assigned Agents */}
               <div className="mt-4">
-                <h4 className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[#85858e] mb-2">
+                <h4 className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[#737373] mb-2">
                   Assigned Agents
                 </h4>
                 <div className="flex flex-wrap gap-1.5">
@@ -300,7 +305,7 @@ function KnowledgeCard({
                       {agent}
                     </span>
                   ))}
-                  <button className="inline-flex items-center gap-1 rounded-full border border-dashed border-[#303036] px-2.5 py-1 text-[11px] text-[#85858e] hover:text-[#f5f5f5] hover:border-[#5a5a5e] transition-colors">
+                  <button className="inline-flex items-center gap-1 rounded-full border border-dashed border-[#303036] px-2.5 py-1 text-[11px] text-[#737373] hover:text-[#fafafa] hover:border-[#5a5a5e] transition-colors">
                     <Plus className="h-3 w-3" />
                     Assign Agent
                   </button>
@@ -340,17 +345,20 @@ function FilePreviewModal({
         className="relative w-full max-w-[640px] max-h-[80vh] rounded-2xl border border-[#303036] bg-[#070708] shadow-2xl flex flex-col"
       >
         {/* Header */}
-        <div className="flex items-center justify-between border-b border-[#222226] px-5 py-3">
+        <div className="flex items-center justify-between border-b border-[#232323] px-5 py-3">
           <div className="flex items-center gap-2.5">
-            <FileText className="h-4 w-4 text-[#85858e]" />
-            <span className="text-sm font-medium text-[#f5f5f5]">{item.name}</span>
+            <FileText className="h-4 w-4 text-[#737373]" />
+            <span className="text-sm font-medium text-[#fafafa]">{item.name}</span>
             {item.size && (
-              <span className="text-[11px] text-[#85858e]">{item.size}</span>
+              <span className="text-[11px] text-[#737373]">{item.size}</span>
+            )}
+            {item.modified && (
+              <span className="text-[11px] text-[#737373]">· modified {item.modified}</span>
             )}
           </div>
           <button
             onClick={onClose}
-            className="flex h-7 w-7 items-center justify-center rounded-lg text-[#85858e] transition-colors hover:bg-[#151519] hover:text-[#f5f5f5]"
+            className="flex h-7 w-7 items-center justify-center rounded-lg text-[#737373] transition-colors hover:bg-[#151519] hover:text-[#fafafa]"
           >
             ×
           </button>
@@ -364,9 +372,9 @@ function FilePreviewModal({
             </pre>
           ) : (
             <div className="flex flex-col items-center justify-center py-12 text-center">
-              <FileText className="h-8 w-8 text-[#85858e] mb-3" />
-              <p className="text-sm text-[#85858e]">Preview not available</p>
-              <p className="text-[11px] text-[#85858e] mt-1">
+              <FileText className="h-8 w-8 text-[#737373] mb-3" />
+              <p className="text-sm text-[#737373]">Preview not available</p>
+              <p className="text-[11px] text-[#737373] mt-1">
                 This file type cannot be previewed.
               </p>
             </div>
@@ -374,14 +382,14 @@ function FilePreviewModal({
         </div>
 
         {/* Footer */}
-        <div className="flex items-center justify-end gap-2 border-t border-[#222226] px-5 py-3">
+        <div className="flex items-center justify-end gap-2 border-t border-[#232323] px-5 py-3">
           <button
             onClick={onClose}
-            className="rounded-lg border border-[#303036] px-3 py-1.5 text-[12px] text-[#a7a7ad] transition-colors hover:border-[#5a5a5e] hover:text-[#f5f5f5]"
+            className="rounded-lg border border-[#303036] px-3 py-1.5 text-[12px] text-[#a7a7ad] transition-colors hover:border-[#5a5a5e] hover:text-[#fafafa]"
           >
             Close
           </button>
-          <button className="rounded-lg bg-[#f5f5f5] px-3 py-1.5 text-[12px] font-medium text-[#111111] transition-opacity hover:opacity-90">
+          <button className="rounded-lg bg-[#fafafa] px-3 py-1.5 text-[12px] font-medium text-[#111111] transition-opacity hover:opacity-90">
             Download
           </button>
         </div>
@@ -424,38 +432,33 @@ export default function WorkspaceKnowledgePage() {
     <div className="mx-auto max-w-[1200px] px-4 sm:px-6 py-8">
       {/* Header */}
       <div className="space-y-4 mb-8">
-        <div className="flex items-center justify-between">
-          <div>
-            <div className="flex items-center gap-2.5">
-              <h1 className="text-xl font-semibold text-[#f5f5f5]">Shared Knowledge</h1>
-              <span
-                className="inline-flex items-center gap-1.5 rounded-full border border-[#303036] px-2.5 py-0.5 text-[11px] text-[#a7a7ad]"
-                style={{ backgroundColor: activeWorkspace.color + "14" }}
-              >
-                {activeWorkspace.emoji} {activeWorkspace.name}
-              </span>
-            </div>
-            <p className="text-sm text-[#85858e] mt-1">
-              Knowledge bases that agents can access and reference during conversations.
-            </p>
-          </div>
-          <button
-            onClick={() => setIsNewModalOpen(true)}
-            className="inline-flex items-center gap-2 rounded-lg bg-[#f5f5f5] px-4 py-2 text-sm font-medium text-[#111111] transition-opacity hover:opacity-90"
-          >
-            <Plus className="h-4 w-4" />
-            New Knowledge Base
-          </button>
-        </div>
+        <PageHeader
+          title="Shared Knowledge"
+          description="Knowledge bases that agents can access and reference during conversations."
+          accent={{
+            emoji: activeWorkspace.emoji,
+            name: activeWorkspace.name,
+            color: activeWorkspace.color,
+          }}
+          actions={
+            <button
+              onClick={() => setIsNewModalOpen(true)}
+              className="inline-flex items-center gap-2 rounded-lg bg-[#fafafa] px-4 py-2 text-sm font-medium text-[#111111] transition-opacity hover:opacity-90"
+            >
+              <Plus className="h-4 w-4" />
+              New Knowledge Base
+            </button>
+          }
+        />
 
         <div className="relative">
-          <Search className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-[#85858e]" />
+          <Search className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-[#737373]" />
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search knowledge bases..."
-            className="h-10 w-full rounded-lg border border-[#303036] bg-[#101010] pl-10 pr-4 text-sm text-[#f5f5f5] outline-none placeholder:text-[#85858e] focus:border-[#5a5a5e]"
+            className="h-10 w-full rounded-lg border border-[#303036] bg-[#101010] pl-10 pr-4 text-sm text-[#fafafa] outline-none placeholder:text-[#737373] focus:border-[#5a5a5e]"
           />
         </div>
       </div>
@@ -473,14 +476,14 @@ export default function WorkspaceKnowledgePage() {
       </div>
 
       {filtered.length === 0 && (
-        <div className="rounded-xl border border-[#333333] bg-[#181818] px-5 py-12 text-center">
-          <HardDrive className="mx-auto mb-3 h-5 w-5 text-[#696969]" />
-          <p className="text-sm text-[#85858e]">
-            {searchQuery.trim()
+        <EmptyState
+          icon={HardDrive}
+          title={
+            searchQuery.trim()
               ? "No knowledge bases match your search."
-              : "No knowledge bases in this workspace yet."}
-          </p>
-        </div>
+              : "No knowledge bases in this workspace yet."
+          }
+        />
       )}
 
       <AnimatePresence>

@@ -51,8 +51,8 @@ function SidebarItem({ item, isActive }: { item: NavItem; isActive: boolean }) {
       href={item.href}
       className={`group relative flex items-center gap-3 rounded-lg px-3 py-2 text-[13px] transition-colors ${
         isActive
-          ? "bg-[#1a1a1e] text-[#f5f5f5]"
-          : "text-[#85858e] hover:bg-[#151519] hover:text-[#a7a7ad]"
+          ? "bg-[#1a1a1e] text-[#fafafa]"
+          : "text-[#737373] hover:bg-[#151519] hover:text-[#a7a7ad]"
       }`}
     >
       {isActive && (
@@ -83,11 +83,11 @@ export function AgentSidebar({ sessions }: { sessions: string[] }) {
 
   if (collapsed) {
     return (
-      <aside className="flex w-[48px] shrink-0 flex-col items-center border-r border-[#222226] bg-[#0b0b0c] pt-3">
+      <aside className="flex w-[48px] shrink-0 flex-col items-center border-r border-[#232323] bg-[#0b0b0c] pt-3">
         <button
           onClick={() => setCollapsed(false)}
           aria-label="Expand agent sidebar"
-          className="flex size-7 items-center justify-center rounded-lg text-[#85858e] transition-colors hover:bg-[#151519] hover:text-[#f5f5f5]"
+          className="flex size-7 items-center justify-center rounded-lg text-[#737373] transition-colors hover:bg-[#151519] hover:text-[#fafafa]"
         >
           <PanelLeft className="h-4 w-4" />
         </button>
@@ -96,14 +96,14 @@ export function AgentSidebar({ sessions }: { sessions: string[] }) {
   }
 
   return (
-    <aside className="flex w-[240px] shrink-0 flex-col border-r border-[#222226] bg-[#0b0b0c]">
+    <aside className="flex w-[240px] shrink-0 flex-col border-r border-[#232323] bg-[#0b0b0c]">
       {/* Header: agent name + collapse */}
       <div className="flex items-center justify-between px-4 py-3">
-        <span className="truncate text-sm font-medium text-[#f5f5f5]">{agentName}</span>
+        <span className="truncate text-sm font-medium text-[#fafafa]">{agentName}</span>
         <button
           onClick={() => setCollapsed(true)}
           aria-label="Collapse agent sidebar"
-          className="flex size-7 shrink-0 items-center justify-center rounded-lg text-[#85858e] transition-colors hover:bg-[#151519] hover:text-[#f5f5f5]"
+          className="flex size-7 shrink-0 items-center justify-center rounded-lg text-[#737373] transition-colors hover:bg-[#151519] hover:text-[#fafafa]"
         >
           <PanelRight className="h-4 w-4" />
         </button>
@@ -111,7 +111,7 @@ export function AgentSidebar({ sessions }: { sessions: string[] }) {
 
       {/* Nav */}
       <nav className="flex-1 space-y-0.5 overflow-y-auto px-3 py-2">
-        <p className="px-3 pb-1.5 text-[12px] text-[#85858e]">Agent</p>
+        <p className="px-3 pb-1.5 text-[12px] text-[#737373]">Agent</p>
         {NAV_ITEMS.map((item) => (
           <SidebarItem key={item.id} item={item} isActive={isItemActive(item)} />
         ))}
@@ -120,7 +120,7 @@ export function AgentSidebar({ sessions }: { sessions: string[] }) {
         <div className="pt-4">
           <button
             onClick={() => setSessionsExpanded(!sessionsExpanded)}
-            className="flex w-full items-center justify-between px-3 py-1.5 text-[12px] text-[#85858e]"
+            className="flex w-full items-center justify-between px-3 py-1.5 text-[12px] text-[#737373]"
           >
             Sessions
             {sessionsExpanded ? (
@@ -135,12 +135,12 @@ export function AgentSidebar({ sessions }: { sessions: string[] }) {
                 key={name}
                 className={`relative flex cursor-pointer items-center rounded-lg px-3 py-2 text-[13px] transition-colors ${
                   i === 0
-                    ? "text-[#f5f5f5]"
-                    : "text-[#85858e] hover:bg-[#151519] hover:text-[#a7a7ad]"
+                    ? "text-[#fafafa]"
+                    : "text-[#737373] hover:bg-[#151519] hover:text-[#a7a7ad]"
                 }`}
               >
                 {i === 0 && (
-                  <div className="absolute left-0 top-1/2 h-5 w-[2px] -translate-y-1/2 rounded-r-full bg-[#f5f5f5]/60" />
+                  <div className="absolute left-0 top-1/2 h-5 w-[2px] -translate-y-1/2 rounded-r-full bg-[#fafafa]/60" />
                 )}
                 <span className="truncate pl-1">{name}</span>
               </div>
@@ -152,7 +152,7 @@ export function AgentSidebar({ sessions }: { sessions: string[] }) {
       <div className="px-3 pb-3">
         <button
           onClick={() => setAdvancedExpanded(!advancedExpanded)}
-          className="flex w-full items-center justify-between rounded-lg px-3 py-2 text-[13px] text-[#85858e] transition-colors hover:bg-[#151519] hover:text-[#a7a7ad]"
+          className="flex w-full items-center justify-between rounded-lg px-3 py-2 text-[13px] text-[#737373] transition-colors hover:bg-[#151519] hover:text-[#a7a7ad]"
         >
           <div className="flex items-center gap-2">
             <Settings className="h-4 w-4" />
@@ -165,10 +165,10 @@ export function AgentSidebar({ sessions }: { sessions: string[] }) {
           )}
         </button>
 
-        <div className="mt-2 border-t border-[#222226] px-3 pb-2 pt-3">
+        <div className="mt-2 border-t border-[#232323] px-3 pb-2 pt-3">
           <div className="flex items-center justify-between">
-            <span className="text-[12px] text-[#85858e]">Tokens today</span>
-            <span className="font-mono text-[12px] text-[#f5f5f5]">547.7K / 2B</span>
+            <span className="text-[12px] text-[#737373]">Tokens today</span>
+            <span className="font-mono text-[12px] text-[#fafafa]">547.7K / 2B</span>
           </div>
         </div>
 

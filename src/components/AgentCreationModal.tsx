@@ -130,7 +130,7 @@ const AGENT_SPECIALTIES: AgentSpecialty[] = [
     description:
       "Define your own role, tools, and instructions. Perfect for niche domains not covered by the defaults.",
     tools: ["Any tools you configure"],
-    color: "#85858e",
+    color: "#737373",
     icon: Upload,
   },
 ];
@@ -183,12 +183,12 @@ export function AgentCreationModal({
         className="relative w-full max-w-[640px] max-h-[90vh] overflow-y-auto rounded-2xl border border-[#303036] bg-[#070708] shadow-2xl"
       >
         {/* Header */}
-        <div className="flex items-center justify-between border-b border-[#222226] px-6 py-4">
+        <div className="flex items-center justify-between border-b border-[#232323] px-6 py-4">
           <div>
-            <h2 className="text-base font-semibold text-[#f5f5f5]">
+            <h2 className="text-base font-semibold text-[#fafafa]">
               {step === 1 ? "Choose Agent Specialty" : "Configure Agent"}
             </h2>
-            <p className="text-xs text-[#85858e] mt-0.5">
+            <p className="text-xs text-[#737373] mt-0.5">
               {step === 1
                 ? "Select a specialist role for your new agent"
                 : "Set up your agent's name and capabilities"}
@@ -196,7 +196,7 @@ export function AgentCreationModal({
           </div>
           <button
             onClick={onClose}
-            className="flex h-8 w-8 items-center justify-center rounded-lg text-[#85858e] transition-colors hover:bg-[#151519] hover:text-[#f5f5f5]"
+            className="flex h-8 w-8 items-center justify-center rounded-lg text-[#737373] transition-colors hover:bg-[#151519] hover:text-[#fafafa]"
           >
             <X className="h-4 w-4" />
           </button>
@@ -240,21 +240,21 @@ export function AgentCreationModal({
                       </div>
                       <div className="min-w-0 flex-1">
                         <div className="flex items-center gap-2">
-                          <span className="text-sm font-medium text-[#f5f5f5]">
+                          <span className="text-sm font-medium text-[#fafafa]">
                             {agent.role}
                           </span>
                           {isSelected && (
                             <Check className="h-3.5 w-3.5 text-[#4ade80]" />
                           )}
                         </div>
-                        <p className="text-[11px] text-[#85858e] mt-0.5">
+                        <p className="text-[11px] text-[#737373] mt-0.5">
                           {agent.tagline}
                         </p>
                         <div className="flex flex-wrap gap-1 mt-2">
                           {agent.tools.slice(0, 4).map((tool) => (
                             <span
                               key={tool}
-                              className="rounded bg-[#151519] px-1.5 py-0.5 text-[10px] text-[#85858e]"
+                              className="rounded bg-[#151519] px-1.5 py-0.5 text-[10px] text-[#737373]"
                             >
                               {tool}
                             </span>
@@ -265,7 +265,7 @@ export function AgentCreationModal({
                         <a
                           href={`/agent/${agent.id}`}
                           onClick={(e) => e.stopPropagation()}
-                          className="mt-0.5 shrink-0 text-[#85858e] hover:text-[#f5f5f5] transition-colors"
+                          className="mt-0.5 shrink-0 text-[#737373] hover:text-[#fafafa] transition-colors"
                           title="View details"
                         >
                           <ExternalLink className="h-3.5 w-3.5" />
@@ -277,17 +277,17 @@ export function AgentCreationModal({
               </div>
 
               {/* Footer */}
-              <div className="flex items-center justify-end gap-2 mt-6 pt-4 border-t border-[#222226]">
+              <div className="flex items-center justify-end gap-2 mt-6 pt-4 border-t border-[#232323]">
                 <button
                   onClick={onClose}
-                  className="rounded-lg border border-[#303036] px-4 py-2 text-[13px] text-[#a7a7ad] transition-colors hover:border-[#5a5a5e] hover:text-[#f5f5f5]"
+                  className="rounded-lg border border-[#303036] px-4 py-2 text-[13px] text-[#a7a7ad] transition-colors hover:border-[#5a5a5e] hover:text-[#fafafa]"
                 >
                   Cancel
                 </button>
                 <button
                   onClick={() => selectedSpecialty && setStep(2)}
                   disabled={!selectedSpecialty}
-                  className="rounded-lg bg-[#f5f5f5] px-5 py-2 text-[13px] font-medium text-[#111111] transition-opacity hover:opacity-90 disabled:opacity-30 disabled:cursor-not-allowed"
+                  className="rounded-lg bg-[#fafafa] px-5 py-2 text-[13px] font-medium text-[#111111] transition-opacity hover:opacity-90 disabled:opacity-30 disabled:cursor-not-allowed"
                 >
                   Continue
                 </button>
@@ -317,17 +317,17 @@ export function AgentCreationModal({
                     />
                   </div>
                   <div className="min-w-0 flex-1">
-                    <p className="text-sm font-medium text-[#f5f5f5]">
+                    <p className="text-sm font-medium text-[#fafafa]">
                       {selectedAgent.role}
                     </p>
-                    <p className="text-[11px] text-[#85858e] mt-0.5">
+                    <p className="text-[11px] text-[#737373] mt-0.5">
                       {selectedAgent.description}
                     </p>
                     <div className="flex flex-wrap gap-1 mt-1.5">
                       {selectedAgent.tools.map((tool) => (
                         <span
                           key={tool}
-                          className="inline-flex items-center gap-1 rounded bg-[#151519] px-1.5 py-0.5 text-[10px] text-[#85858e]"
+                          className="inline-flex items-center gap-1 rounded bg-[#151519] px-1.5 py-0.5 text-[10px] text-[#737373]"
                         >
                           <Wrench className="h-2.5 w-2.5" />
                           {tool}
@@ -337,7 +337,7 @@ export function AgentCreationModal({
                   </div>
                   <button
                     onClick={() => setStep(1)}
-                    className="text-[11px] text-[#85858e] hover:text-[#f5f5f5] transition-colors shrink-0"
+                    className="text-[11px] text-[#737373] hover:text-[#fafafa] transition-colors shrink-0"
                   >
                     Change
                   </button>
@@ -346,7 +346,7 @@ export function AgentCreationModal({
 
               {/* Name */}
               <div>
-                <label className="mb-1.5 block text-[11px] font-semibold uppercase tracking-[0.18em] text-[#85858e]">
+                <label className="mb-1.5 block text-[11px] font-semibold uppercase tracking-[0.18em] text-[#737373]">
                   Agent Name
                 </label>
                 <input
@@ -354,13 +354,13 @@ export function AgentCreationModal({
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   placeholder="e.g., solar-forge-tower"
-                  className="h-10 w-full rounded-lg border border-[#303036] bg-[#101010] px-3 text-sm text-[#f5f5f5] outline-none placeholder:text-[#85858e] focus:border-[#5a5a5e]"
+                  className="h-10 w-full rounded-lg border border-[#303036] bg-[#101010] px-3 text-sm text-[#fafafa] outline-none placeholder:text-[#737373] focus:border-[#5a5a5e]"
                 />
               </div>
 
               {/* Category */}
               <div>
-                <label className="mb-1.5 block text-[11px] font-semibold uppercase tracking-[0.18em] text-[#85858e]">
+                <label className="mb-1.5 block text-[11px] font-semibold uppercase tracking-[0.18em] text-[#737373]">
                   Category
                 </label>
                 <div className="flex flex-wrap gap-2">
@@ -370,8 +370,8 @@ export function AgentCreationModal({
                       onClick={() => setCategory(cat)}
                       className={`rounded-full border px-3 py-1.5 text-[12px] transition-colors ${
                         category === cat
-                          ? "border-[#f5f5f5] bg-[#f5f5f5] text-[#111111]"
-                          : "border-[#303036] text-[#85858e] hover:text-[#a7a7ad] hover:border-[#5a5a5e]"
+                          ? "border-[#fafafa] bg-[#fafafa] text-[#111111]"
+                          : "border-[#303036] text-[#737373] hover:text-[#a7a7ad] hover:border-[#5a5a5e]"
                       }`}
                     >
                       {cat}
@@ -382,7 +382,7 @@ export function AgentCreationModal({
 
               {/* Features */}
               <div>
-                <label className="mb-2 block text-[11px] font-semibold uppercase tracking-[0.18em] text-[#85858e]">
+                <label className="mb-2 block text-[11px] font-semibold uppercase tracking-[0.18em] text-[#737373]">
                   Features
                 </label>
                 <div className="space-y-2">
@@ -395,10 +395,10 @@ export function AgentCreationModal({
                       }
                       className="h-4 w-4 accent-[#4ade80]"
                     />
-                    <Monitor className="h-4 w-4 text-[#85858e]" />
+                    <Monitor className="h-4 w-4 text-[#737373]" />
                     <div>
-                      <p className="text-sm text-[#f5f5f5]">Desktop browser</p>
-                      <p className="text-[11px] text-[#85858e]">
+                      <p className="text-sm text-[#fafafa]">Desktop browser</p>
+                      <p className="text-[11px] text-[#737373]">
                         Agent can control a desktop browser
                       </p>
                     </div>
@@ -412,10 +412,10 @@ export function AgentCreationModal({
                       }
                       className="h-4 w-4 accent-[#4ade80]"
                     />
-                    <Brain className="h-4 w-4 text-[#85858e]" />
+                    <Brain className="h-4 w-4 text-[#737373]" />
                     <div>
-                      <p className="text-sm text-[#f5f5f5]">Memory indexing</p>
-                      <p className="text-[11px] text-[#85858e]">
+                      <p className="text-sm text-[#fafafa]">Memory indexing</p>
+                      <p className="text-[11px] text-[#737373]">
                         Long-term memory across sessions
                       </p>
                     </div>
@@ -424,10 +424,10 @@ export function AgentCreationModal({
               </div>
 
               {/* Footer */}
-              <div className="flex items-center justify-between gap-2 pt-4 border-t border-[#222226]">
+              <div className="flex items-center justify-between gap-2 pt-4 border-t border-[#232323]">
                 <button
                   onClick={() => setStep(1)}
-                  className="rounded-lg border border-[#303036] px-4 py-2 text-[13px] text-[#a7a7ad] transition-colors hover:border-[#5a5a5e] hover:text-[#f5f5f5]"
+                  className="rounded-lg border border-[#303036] px-4 py-2 text-[13px] text-[#a7a7ad] transition-colors hover:border-[#5a5a5e] hover:text-[#fafafa]"
                 >
                   Back
                 </button>

@@ -7,6 +7,8 @@ import { Search, Plus, Play, Upload, Puzzle, Layers, ChevronDown, Check } from "
 import { WorkspaceSkill } from "@/types/skills";
 import { useSkills } from "./skills/SkillsProvider";
 import { useDialogEscape } from "@/lib/use-dialog";
+import { FilterPill } from "@/components/ui/FilterPill";
+import { EmptyState } from "@/components/ui/EmptyState";
 
 interface SkillGridProps {
   skills: WorkspaceSkill[];
@@ -53,7 +55,7 @@ function CategoryFilter({
         className={`inline-flex h-9 items-center gap-2 rounded-full border px-4 text-sm font-medium transition-colors ${
           selected.size > 0
             ? "border-[#f5c45e]/50 bg-[#1c1507]/40 text-[#f5c45e]"
-            : "border-[#3d3d40] bg-[#151515] text-[#f5f5f5] hover:border-[#626266]"
+            : "border-[#3d3d40] bg-[#151515] text-[#fafafa] hover:border-[#626266]"
         }`}
       >
         <Layers className="h-3.5 w-3.5" />
@@ -69,16 +71,16 @@ function CategoryFilter({
             aria-label="Filter by category"
             className="absolute right-0 top-11 z-40 w-[280px] max-w-[calc(100vw-2rem)] overflow-hidden rounded-xl border border-[#303036] bg-[#0b0b0c] shadow-2xl"
           >
-            <div className="border-b border-[#222226] p-2">
+            <div className="border-b border-[#232323] p-2">
               <div className="relative">
-                <Search className="absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-[#85858e]" />
+                <Search className="absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-[#737373]" />
                 <input
                   type="text"
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
                   placeholder="Search categories..."
                   autoFocus
-                  className="h-8 w-full rounded-lg border border-[#303036] bg-[#101010] pl-8 pr-3 text-[12px] text-[#f5f5f5] outline-none placeholder:text-[#85858e] focus:border-[#5a5a5e]"
+                  className="h-8 w-full rounded-lg border border-[#303036] bg-[#101010] pl-8 pr-3 text-[12px] text-[#fafafa] outline-none placeholder:text-[#737373] focus:border-[#5a5a5e]"
                 />
               </div>
             </div>
@@ -90,7 +92,7 @@ function CategoryFilter({
                 }}
                 className={`flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-[13px] transition-colors ${
                   selected.size === 0
-                    ? "bg-[#1a1a1e] text-[#f5f5f5]"
+                    ? "bg-[#1a1a1e] text-[#fafafa]"
                     : "text-[#a7a7ad] hover:bg-[#151519]"
                 }`}
               >
@@ -103,7 +105,7 @@ function CategoryFilter({
                 >
                   {selected.size === 0 && <Check className="h-3 w-3" />}
                 </span>
-                <Layers className="h-3.5 w-3.5 text-[#85858e]" />
+                <Layers className="h-3.5 w-3.5 text-[#737373]" />
                 All categories
               </button>
               {visible.map((c) => {
@@ -118,7 +120,7 @@ function CategoryFilter({
                       onChange(next);
                     }}
                     className={`flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-[13px] transition-colors ${
-                      isSelected ? "text-[#f5f5f5]" : "text-[#a7a7ad] hover:bg-[#151519]"
+                      isSelected ? "text-[#fafafa]" : "text-[#a7a7ad] hover:bg-[#151519]"
                     }`}
                   >
                     <span
@@ -131,12 +133,12 @@ function CategoryFilter({
                       {isSelected && <Check className="h-3 w-3" />}
                     </span>
                     <span className="flex-1 text-left">{c.name}</span>
-                    <span className="text-[11px] text-[#85858e]">{c.count}</span>
+                    <span className="text-[11px] text-[#737373]">{c.count}</span>
                   </button>
                 );
               })}
               {visible.length === 0 && (
-                <p className="px-3 py-4 text-center text-[12px] text-[#85858e]">
+                <p className="px-3 py-4 text-center text-[12px] text-[#737373]">
                   No matching categories
                 </p>
               )}
@@ -176,8 +178,8 @@ function SkillCard({
           </>
         ) : (
           <>
-            <div className={`h-1.5 w-1.5 rounded-full ${skill.disabled ? "bg-[#85858e]" : "bg-[#4ade80]"}`} />
-            <span className={`text-[10px] font-medium ${skill.disabled ? "text-[#85858e]" : "text-[#4ade80]"}`}>
+            <div className={`h-1.5 w-1.5 rounded-full ${skill.disabled ? "bg-[#737373]" : "bg-[#4ade80]"}`} />
+            <span className={`text-[10px] font-medium ${skill.disabled ? "text-[#737373]" : "text-[#4ade80]"}`}>
               {skill.disabled ? "Disabled" : "Active"}
             </span>
           </>
@@ -189,8 +191,8 @@ function SkillCard({
           <span className="text-[16px] leading-none">{skill.emoji || "🔧"}</span>
         </div>
         <div className="min-w-0 flex-1 pr-16">
-          <div className="text-sm font-medium text-[#f5f5f5]">{skill.name}</div>
-          <div className="text-xs text-[#85858e] mt-0.5 line-clamp-2">{skill.description}</div>
+          <div className="text-sm font-medium text-[#fafafa]">{skill.name}</div>
+          <div className="text-xs text-[#737373] mt-0.5 line-clamp-2">{skill.description}</div>
         </div>
       </div>
 
@@ -217,7 +219,7 @@ function SkillCard({
               }`}
             >
               <span
-                className={`h-3 w-3 rounded-full bg-[#f5f5f5] transition-transform ${
+                className={`h-3 w-3 rounded-full bg-[#fafafa] transition-transform ${
                   skill.disabled ? "" : "translate-x-3"
                 }`}
               />
@@ -243,7 +245,7 @@ function SkillCard({
               e.stopPropagation();
               onConfigure(skill);
             }}
-            className="text-[10px] font-medium text-[#85858e] hover:text-[#f5f5f5] transition-colors"
+            className="text-[10px] font-medium text-[#737373] hover:text-[#fafafa] transition-colors"
           >
             Configure
           </button>
@@ -304,15 +306,10 @@ export function SkillGrid({ skills, onCreateSkill, onImportSkill, onConfigureSki
     setSearchQuery("");
   };
 
-  const statusChip = (value: StatusFilter, label: string, activeClasses: string) => (
-    <button
-      onClick={() => setStatusFilter(value)}
-      className={`h-7 rounded-full px-3 text-[11px] font-medium transition-colors ${
-        statusFilter === value ? activeClasses : "text-[#85858e] hover:text-[#f5f5f5]"
-      }`}
-    >
+  const statusChip = (value: StatusFilter, label: string, tone: "neutral" | "success" | "warning" | "muted") => (
+    <FilterPill active={statusFilter === value} onClick={() => setStatusFilter(value)} tone={tone}>
       {label}
-    </button>
+    </FilterPill>
   );
 
   return (
@@ -321,22 +318,22 @@ export function SkillGrid({ skills, onCreateSkill, onImportSkill, onConfigureSki
       <div className="space-y-4">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-xl font-semibold text-[#f5f5f5]">Skills</h1>
-            <p className="text-sm text-[#85858e] mt-1">
+            <h1 className="text-xl font-semibold text-[#fafafa]">Skills</h1>
+            <p className="text-sm text-[#737373] mt-1">
               Skills are instruction packs that teach your agent how and when to use tools.
             </p>
           </div>
           <div className="flex items-center gap-2">
             <button
               onClick={onImportSkill}
-              className="inline-flex items-center gap-2 rounded-lg border border-[#303036] bg-[#151519] px-4 py-2 text-sm font-medium text-[#f5f5f5] transition-colors hover:border-[#5a5a5e] hover:bg-[#1a1a1e]"
+              className="inline-flex items-center gap-2 rounded-lg border border-[#303036] bg-[#151519] px-4 py-2 text-sm font-medium text-[#fafafa] transition-colors hover:border-[#5a5a5e] hover:bg-[#1a1a1e]"
             >
               <Upload className="h-4 w-4" />
               Import
             </button>
             <button
               onClick={onCreateSkill}
-              className="inline-flex items-center gap-2 rounded-lg bg-[#f5f5f5] px-4 py-2 text-sm font-medium text-[#111111] transition-opacity hover:opacity-90"
+              className="inline-flex items-center gap-2 rounded-lg bg-[#fafafa] px-4 py-2 text-sm font-medium text-[#111111] transition-opacity hover:opacity-90"
             >
               <Plus className="h-4 w-4" />
               Create Skill
@@ -346,22 +343,22 @@ export function SkillGrid({ skills, onCreateSkill, onImportSkill, onConfigureSki
 
         {/* Search */}
         <div className="relative">
-          <Search className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-[#85858e]" />
+          <Search className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-[#737373]" />
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search skills..."
-            className="h-10 w-full rounded-lg border border-[#303036] bg-[#101010] pl-10 pr-4 text-sm text-[#f5f5f5] outline-none placeholder:text-[#85858e] focus:border-[#5a5a5e]"
+            className="h-10 w-full rounded-lg border border-[#303036] bg-[#101010] pl-10 pr-4 text-sm text-[#fafafa] outline-none placeholder:text-[#737373] focus:border-[#5a5a5e]"
           />
         </div>
 
         {/* Filters */}
         <div className="flex flex-wrap items-center gap-1.5">
-          {statusChip("all", `All (${skills.length})`, "bg-[#303036] text-[#f5f5f5]")}
-          {statusChip("active", `Active (${activeCount})`, "bg-[#4ade80]/15 text-[#4ade80]")}
-          {statusChip("disabled", `Disabled (${disabledCount})`, "bg-[#85858e]/15 text-[#85858e]")}
-          {statusChip("preview", `Preview (${previewCount})`, "bg-[#f5c45e]/15 text-[#f5c45e]")}
+          {statusChip("all", `All (${skills.length})`, "neutral")}
+          {statusChip("active", `Active (${activeCount})`, "success")}
+          {statusChip("disabled", `Disabled (${disabledCount})`, "muted")}
+          {statusChip("preview", `Preview (${previewCount})`, "warning")}
 
           <CategoryFilter
             categories={categories}
@@ -373,18 +370,20 @@ export function SkillGrid({ skills, onCreateSkill, onImportSkill, onConfigureSki
 
       {/* Grid */}
       {filteredSkills.length === 0 ? (
-        <div className="rounded-xl border border-[#333333] bg-[#181818] px-5 py-12 text-center">
-          <Puzzle className="mx-auto mb-3 h-5 w-5 text-[#696969]" />
-          <p className="text-sm text-[#85858e]">No skills match your filters.</p>
-          {hasActiveFilters && (
-            <button
-              onClick={clearFilters}
-              className="mt-3 text-sm text-[#f5c45e] hover:underline"
-            >
-              Clear filters
-            </button>
-          )}
-        </div>
+        <EmptyState
+          icon={Puzzle}
+          title="No skills match your filters."
+          action={
+            hasActiveFilters ? (
+              <button
+                onClick={clearFilters}
+                className="text-sm text-[#f5c45e] hover:underline"
+              >
+                Clear filters
+              </button>
+            ) : undefined
+          }
+        />
       ) : (
         <div className="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3">
           {filteredSkills.map((skill) => (
