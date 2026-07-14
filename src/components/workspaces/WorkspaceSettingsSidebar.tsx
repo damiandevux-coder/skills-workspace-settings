@@ -14,8 +14,6 @@ import {
   Plus,
   Ellipsis,
   UsersRound,
-  Settings2,
-  SquareActivity,
   ChartColumnBig,
   FolderOpen,
   Settings,
@@ -48,8 +46,6 @@ const ADMIN_ITEMS: AdminItem[] = [
     icon: UsersRound,
     isActive: (p) => p.startsWith("/workspaces/members"),
   },
-  { id: "controls", label: "Controls", href: "#", icon: Settings2, isActive: () => false },
-  { id: "activity", label: "Activity", href: "#", icon: SquareActivity, isActive: () => false },
   { id: "usage", label: "Usage", href: "#", icon: ChartColumnBig, isActive: () => false },
   {
     id: "shared-resources",

@@ -11,7 +11,6 @@ import {
   Wrench,
   CalendarClock,
   Monitor,
-  HardDrive,
   ChevronDown,
   ChevronUp,
   ChevronRight,
@@ -43,7 +42,6 @@ const NAV_ITEMS: NavItem[] = [
   { id: "skills", label: "Skills", href: "/", icon: Wrench },
   { id: "scheduled", label: "Scheduled", href: "#", icon: CalendarClock },
   { id: "desktop", label: "Desktop", href: "#", icon: Monitor },
-  { id: "workspaces", label: "Workspaces", href: "/workspaces", icon: HardDrive },
 ];
 
 function SidebarItem({ item, isActive }: { item: NavItem; isActive: boolean }) {
@@ -80,7 +78,6 @@ export function AgentSidebar({ sessions }: { sessions: string[] }) {
 
   const isItemActive = (item: NavItem) => {
     if (item.id === "skills") return pathname === "/" || pathname.startsWith("/skill");
-    if (item.id === "workspaces") return pathname === "/workspaces";
     return false;
   };
 
