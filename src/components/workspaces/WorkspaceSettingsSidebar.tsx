@@ -42,6 +42,13 @@ interface AdminItem {
 
 const ADMIN_ITEMS: AdminItem[] = [
   {
+    id: "shared-knowledge",
+    label: "Shared knowledge",
+    href: "/workspaces/knowledge",
+    icon: FolderOpen,
+    isActive: (p) => p.startsWith("/workspaces/knowledge"),
+  },
+  {
     id: "members",
     label: "Members",
     href: "/workspaces/members",
@@ -54,13 +61,6 @@ const ADMIN_ITEMS: AdminItem[] = [
     href: "/workspaces/usage",
     icon: ChartColumnBig,
     isActive: (p) => p.startsWith("/workspaces/usage"),
-  },
-  {
-    id: "shared-resources",
-    label: "Shared resources",
-    href: "/workspaces/knowledge",
-    icon: FolderOpen,
-    isActive: (p) => p.startsWith("/workspaces/knowledge"),
   },
   {
     id: "settings",
