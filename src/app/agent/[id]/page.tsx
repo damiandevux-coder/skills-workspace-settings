@@ -312,8 +312,8 @@ export default function AgentDetailPage() {
       <div className="min-h-screen bg-[#070708] flex items-center justify-center">
         <div className="text-center">
           <p className="text-[#737373]">Agent not found</p>
-          <button onClick={() => router.push("/new-agent")} className="mt-4 text-sm text-[#4ade80] hover:underline">
-            ← Back to marketplace
+          <button onClick={() => router.push("/workspaces")} className="mt-4 text-sm text-[#4ade80] hover:underline">
+            ← Back to your workspace
           </button>
         </div>
       </div>
@@ -334,11 +334,11 @@ export default function AgentDetailPage() {
       <div className="border-b border-[#232323] bg-[#0b0b0c]">
         <div className="mx-auto max-w-[1000px] px-4 sm:px-6 py-8">
           <button
-            onClick={() => router.push("/new-agent")}
+            onClick={() => (window.history.length > 1 ? router.back() : router.push("/workspaces"))}
             className="inline-flex items-center gap-2 text-sm text-[#737373] hover:text-[#fafafa] transition-colors mb-6"
           >
             <ArrowLeft className="h-4 w-4" />
-            Back to marketplace
+            Back
           </button>
 
           <div className="flex items-start justify-between gap-4">
@@ -366,7 +366,7 @@ export default function AgentDetailPage() {
 
             {/* Hire CTA */}
             <button
-              onClick={() => router.push(`/new-agent?configure=${agent.id}`)}
+              onClick={() => router.push(`/workspaces?newAgent=${agent.id}`)}
               className="hidden sm:inline-flex items-center gap-2 rounded-xl px-5 py-2.5 text-sm font-medium text-[#111111] transition-opacity hover:opacity-90 shrink-0"
               style={{ backgroundColor: agent.color }}
             >
@@ -526,7 +526,7 @@ export default function AgentDetailPage() {
         {/* Mobile CTA */}
         <div className="sm:hidden mt-10 pt-6 border-t border-[#232323]">
           <button
-            onClick={() => router.push(`/new-agent?configure=${agent.id}`)}
+            onClick={() => router.push(`/workspaces?newAgent=${agent.id}`)}
             className="w-full inline-flex items-center justify-center gap-2 rounded-xl px-5 py-3 text-sm font-medium text-[#111111] transition-opacity hover:opacity-90"
             style={{ backgroundColor: agent.color }}
           >

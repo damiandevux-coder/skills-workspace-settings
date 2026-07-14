@@ -17,6 +17,7 @@ import {
   ChartColumnBig,
   FolderOpen,
   Settings,
+  LogOut,
 } from "lucide-react";
 import { AgentCreationModal } from "@/components/AgentCreationModal";
 import { NewWorkspaceModal } from "./NewWorkspaceModal";
@@ -47,7 +48,13 @@ const ADMIN_ITEMS: AdminItem[] = [
     icon: UsersRound,
     isActive: (p) => p.startsWith("/workspaces/members"),
   },
-  { id: "usage", label: "Usage", href: "#", icon: ChartColumnBig, isActive: () => false },
+  {
+    id: "usage",
+    label: "Usage",
+    href: "/workspaces/usage",
+    icon: ChartColumnBig,
+    isActive: (p) => p.startsWith("/workspaces/usage"),
+  },
   {
     id: "shared-resources",
     label: "Shared resources",
@@ -55,7 +62,13 @@ const ADMIN_ITEMS: AdminItem[] = [
     icon: FolderOpen,
     isActive: (p) => p.startsWith("/workspaces/knowledge"),
   },
-  { id: "settings", label: "Settings", href: "#", icon: Settings, isActive: () => false },
+  {
+    id: "settings",
+    label: "Settings",
+    href: "/workspaces/settings",
+    icon: Settings,
+    isActive: (p) => p.startsWith("/workspaces/settings"),
+  },
 ];
 
 function GroupLabel({ children }: { children: React.ReactNode }) {
@@ -204,6 +217,25 @@ export function WorkspaceSettingsSidebar() {
   const [collapsed, setCollapsed] = useState(false);
   const [agentsExpanded, setAgentsExpanded] = useState(false);
   const [isAgentModalOpen, setIsAgentModalOpen] = useState(false);
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const footerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setUserMenuOpen(false);
+    };
+    const onMouseDown = (e: MouseEvent) => {
+      if (footerRef.current && !footerRef.current.contains(e.target as Node)) {
+        setUserMenuOpen(false);
+      }
+    };
+    document.addEventListener("keydown", onKeyDown);
+    document.addEventListener("mousedown", onMouseDown);
+    return () => {
+      document.removeEventListener("keydown", onKeyDown);
+      document.removeEventListener("mousedown", onMouseDown);
+    };
+  }, []);
 
   const agents = activeWorkspace.agents;
   const visibleAgents = agentsExpanded ? agents : agents.slice(0, AGENTS_VISIBLE_COLLAPSED);
@@ -306,8 +338,45 @@ export function WorkspaceSettingsSidebar() {
           </div>
 
           {/* Footer */}
-          <div className="flex flex-1 flex-col justify-end p-2">
-            <button className="flex w-full items-center gap-2 rounded-[8px] p-1 text-left transition-colors hover:bg-[#ffffff08]">
+          <div className="relative flex flex-1 flex-col justify-end p-2" ref={footerRef}>
+            <AnimatePresence>
+              {userMenuOpen && (
+                <motion.div
+                  initial={{ opacity: 0, y: 6 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: 6 }}
+                  transition={{ duration: 0.15 }}
+                  className="absolute bottom-full left-2 right-2 z-30 mb-1 rounded-[10px] border border-[#ffffff1a] bg-[#171717] p-1.5 shadow-2xl"
+                >
+                  <div className="border-b border-[#ffffff1a] px-2 pb-2 pt-1">
+                    <p className="truncate text-[13px] font-semibold text-[#fafafa]">
+                      {CURRENT_USER.name}
+                    </p>
+                    <p className="truncate text-[11px] text-[#737373]">{CURRENT_USER.email}</p>
+                  </div>
+                  <button
+                    onClick={() => setUserMenuOpen(false)}
+                    title="Not available in this prototype"
+                    className="mt-1 flex w-full items-center gap-2 rounded-[8px] px-2 py-2 text-left text-[13px] text-[#a7a7ad] transition-colors hover:bg-[#ffffff0d] hover:text-[#fafafa]"
+                  >
+                    <Settings className="h-3.5 w-3.5" />
+                    Account settings
+                  </button>
+                  <button
+                    onClick={() => setUserMenuOpen(false)}
+                    title="Not available in this prototype"
+                    className="flex w-full items-center gap-2 rounded-[8px] px-2 py-2 text-left text-[13px] text-[#a7a7ad] transition-colors hover:bg-[#ffffff0d] hover:text-[#fafafa]"
+                  >
+                    <LogOut className="h-3.5 w-3.5" />
+                    Log out
+                  </button>
+                </motion.div>
+              )}
+            </AnimatePresence>
+            <button
+              onClick={() => setUserMenuOpen(!userMenuOpen)}
+              className="flex w-full items-center gap-2 rounded-[8px] p-1 text-left transition-colors hover:bg-[#ffffff08]"
+            >
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={CURRENT_USER.avatar}

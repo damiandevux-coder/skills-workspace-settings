@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { Bot, ChevronRight, HardDrive, Plus, Users, UserPlus, User } from "lucide-react";
 import { AgentCreationModal } from "@/components/AgentCreationModal";
@@ -39,6 +39,20 @@ export default function WorkspaceHomePage() {
   const { activeWorkspace, addAgent } = useWorkspace();
   const [isAgentModalOpen, setIsAgentModalOpen] = useState(false);
   const [isInviteModalOpen, setIsInviteModalOpen] = useState(false);
+  const [hireSpecialty, setHireSpecialty] = useState<string | undefined>(undefined);
+
+  // Deep link: /workspaces?newAgent=<specialty> opens the creation modal at the
+  // configure step (marketplace "Hire this Agent"). Runs post-mount because it
+  // reads window.location — same idiom as ?new=1 on the knowledge page.
+  useEffect(() => {
+    const specialty = new URLSearchParams(window.location.search).get("newAgent");
+    if (specialty) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- one-time sync from window.location on mount
+      setHireSpecialty(specialty);
+      setIsAgentModalOpen(true);
+      window.history.replaceState(null, "", "/workspaces");
+    }
+  }, []);
 
   const fileStats = activeWorkspace.knowledgeBases
     .map((kb) => countFiles(kb.items))
@@ -198,7 +212,7 @@ export default function WorkspaceHomePage() {
                 return (
                   <Link
                     key={kb.id}
-                    href="/workspaces/knowledge"
+                    href={`/workspaces/knowledge?kb=${kb.id}`}
                     className="flex items-center gap-2.5 rounded-lg px-3 py-2 text-[13px] text-[#a7a7ad] hover:bg-[#151519] transition-colors"
                   >
                     <span>{kb.emoji}</span>
@@ -236,8 +250,12 @@ export default function WorkspaceHomePage() {
 
       <AgentCreationModal
         isOpen={isAgentModalOpen}
-        onClose={() => setIsAgentModalOpen(false)}
+        onClose={() => {
+          setIsAgentModalOpen(false);
+          setHireSpecialty(undefined);
+        }}
         onCreated={(agent) => addAgent(agent.name)}
+        initialSpecialty={hireSpecialty}
       />
       <InviteMemberModal
         isOpen={isInviteModalOpen}

@@ -24,6 +24,7 @@ export interface Workspace {
   name: string;
   emoji: string;
   color: string; // accent hex used to tint the switcher avatar
+  defaultInviteRole?: WorkspaceMemberRole; // role preselected in the invite modal
   agents: WorkspaceAgent[];
   knowledgeBases: SharedKnowledge[];
   members: WorkspaceMember[];

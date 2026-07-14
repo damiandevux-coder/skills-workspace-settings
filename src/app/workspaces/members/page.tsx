@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useCallback, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Users,
@@ -12,7 +12,9 @@ import {
   ChevronDown,
   Search,
   X,
+  RotateCw,
 } from "lucide-react";
+import { ToastContainer, type Toast } from "@/components/Toast";
 import { InviteMemberModal } from "@/components/workspaces/InviteMemberModal";
 import { useWorkspace } from "@/components/workspaces/WorkspaceProvider";
 import { WorkspaceMember, WorkspaceMemberRole } from "@/types/workspaces";
@@ -54,6 +56,13 @@ function RoleBadge({ role }: { role: WorkspaceMemberRole }) {
 function formatDate(iso: string): string {
   const d = new Date(iso);
   return d.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+}
+
+const INVITE_EXPIRY_DAYS = 7;
+
+function inviteDaysLeft(invitedAt: string): number {
+  const elapsed = Math.floor((Date.now() - new Date(invitedAt).getTime()) / 86_400_000);
+  return Math.max(0, INVITE_EXPIRY_DAYS - elapsed);
 }
 
 function RoleDropdown({
@@ -110,11 +119,20 @@ function RoleDropdown({
 }
 
 export default function MembersPage() {
-  const { activeWorkspace, updateMemberRole, removeMember } = useWorkspace();
+  const { activeWorkspace, updateMemberRole, removeMember, resendInvite } = useWorkspace();
   const [isInviteModalOpen, setIsInviteModalOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [filter, setFilter] = useState<"all" | "active" | "pending">("all");
   const [memberToDelete, setMemberToDelete] = useState<WorkspaceMember | null>(null);
+  const [toasts, setToasts] = useState<Toast[]>([]);
+
+  const addToast = useCallback((message: string, type: Toast["type"] = "info") => {
+    const id = Math.random().toString(36).slice(2);
+    setToasts((prev) => [...prev, { id, message, type }]);
+  }, []);
+  const removeToast = useCallback((id: string) => {
+    setToasts((prev) => prev.filter((t) => t.id !== id));
+  }, []);
 
   const filteredMembers = activeWorkspace.members.filter((m) => {
     const matchesSearch =
@@ -247,7 +265,9 @@ export default function MembersPage() {
                     {member.status === "active" ? (
                       <Chip tone="success" icon={Check}>Active</Chip>
                     ) : (
-                      <Chip tone="warning" icon={Clock}>Pending</Chip>
+                      <Chip tone="warning" icon={Clock}>
+                        {inviteDaysLeft(member.invitedAt)}d left
+                      </Chip>
                     )}
                   </div>
 
@@ -260,11 +280,23 @@ export default function MembersPage() {
                   </span>
 
                   {/* Actions */}
-                  <div className="flex items-center justify-end">
+                  <div className="flex items-center justify-end gap-0.5">
+                    {member.status === "pending" && (
+                      <button
+                        onClick={() => {
+                          resendInvite(member.id);
+                          addToast(`Invite resent to ${member.email}`, "success");
+                        }}
+                        className="flex h-7 w-7 items-center justify-center rounded-lg text-[#737373] hover:bg-[#151519] hover:text-[#fafafa] transition-colors"
+                        title="Resend invite"
+                      >
+                        <RotateCw className="h-3.5 w-3.5" />
+                      </button>
+                    )}
                     <button
                       onClick={() => setMemberToDelete(member)}
                       className="flex h-7 w-7 items-center justify-center rounded-lg text-[#737373] hover:bg-[#ef4444]/10 hover:text-[#ef4444] transition-colors"
-                      title="Remove member"
+                      title={member.status === "pending" ? "Revoke invite" : "Remove member"}
                     >
                       <Trash2 className="h-3.5 w-3.5" />
                     </button>
@@ -307,6 +339,8 @@ export default function MembersPage() {
         isOpen={isInviteModalOpen}
         onClose={() => setIsInviteModalOpen(false)}
       />
+
+      <ToastContainer toasts={toasts} onRemove={removeToast} />
     </div>
   );
 }

@@ -1,49 +1,19 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Mail, Plus, UserPlus, Shield, Pencil, Eye, User, Check, Copy } from "lucide-react";
+import { X, Mail, UserPlus, Check, Copy, ChevronRight, AlertTriangle } from "lucide-react";
 import { WorkspaceMemberRole } from "@/types/workspaces";
 import { useWorkspace } from "./WorkspaceProvider";
+import { ROLE_LIST } from "@/lib/roles";
 
-interface RoleOption {
-  id: WorkspaceMemberRole;
-  label: string;
-  description: string;
-  icon: React.ElementType;
-  color: string;
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+interface ParsedEmails {
+  valid: string[];
+  invalid: string[];
+  alreadyMembers: string[];
 }
-
-const ROLE_OPTIONS: RoleOption[] = [
-  {
-    id: "admin",
-    label: "Admin",
-    description: "Full access. Can manage members, agents, and workspace settings.",
-    icon: Shield,
-    color: "#ef4444",
-  },
-  {
-    id: "editor",
-    label: "Editor",
-    description: "Can create and edit agents, manage knowledge bases, and run sessions.",
-    icon: Pencil,
-    color: "#60a5fa",
-  },
-  {
-    id: "member",
-    label: "Member",
-    description: "Can use agents and access shared knowledge. Cannot create or delete.",
-    icon: User,
-    color: "#4ade80",
-  },
-  {
-    id: "viewer",
-    label: "Viewer",
-    description: "Read-only access. Can view agents and knowledge but not interact.",
-    icon: Eye,
-    color: "#737373",
-  },
-];
 
 interface InviteMemberModalProps {
   isOpen: boolean;
@@ -53,22 +23,41 @@ interface InviteMemberModalProps {
 export function InviteMemberModal({ isOpen, onClose }: InviteMemberModalProps) {
   const { inviteMember, activeWorkspace } = useWorkspace();
   const [emails, setEmails] = useState("");
-  const [selectedRole, setSelectedRole] = useState<WorkspaceMemberRole>("member");
+  const [selectedRole, setSelectedRole] = useState<WorkspaceMemberRole>(
+    activeWorkspace.defaultInviteRole ?? "member"
+  );
   const [step, setStep] = useState<"input" | "confirm" | "success">("input");
   const [parsedEmails, setParsedEmails] = useState<string[]>([]);
+  const [excludedMembers, setExcludedMembers] = useState<string[]>([]);
   const [copied, setCopied] = useState(false);
 
-  const parseEmailInput = (input: string): string[] => {
-    return input
-      .split(/[,;\n]+/)
-      .map((e) => e.trim())
-      .filter((e) => e.length > 0 && e.includes("@"));
+  const existingEmails = useMemo(
+    () => new Set(activeWorkspace.members.map((m) => m.email.toLowerCase())),
+    [activeWorkspace.members]
+  );
+
+  const parseEmailInput = (input: string): ParsedEmails => {
+    const seen = new Set<string>();
+    const result: ParsedEmails = { valid: [], invalid: [], alreadyMembers: [] };
+    for (const raw of input.split(/[,;\n]+/)) {
+      const email = raw.trim();
+      if (!email) continue;
+      const key = email.toLowerCase();
+      if (seen.has(key)) continue; // dedupe within the input
+      seen.add(key);
+      if (!EMAIL_REGEX.test(email)) result.invalid.push(email);
+      else if (existingEmails.has(key)) result.alreadyMembers.push(email);
+      else result.valid.push(email);
+    }
+    return result;
   };
 
+  const parsed = parseEmailInput(emails);
+
   const handleContinue = () => {
-    const validEmails = parseEmailInput(emails);
-    if (validEmails.length === 0) return;
-    setParsedEmails(validEmails);
+    if (parsed.valid.length === 0) return;
+    setParsedEmails(parsed.valid);
+    setExcludedMembers(parsed.alreadyMembers);
     setStep("confirm");
   };
 
@@ -81,9 +70,10 @@ export function InviteMemberModal({ isOpen, onClose }: InviteMemberModalProps) {
 
   const handleClose = () => {
     setEmails("");
-    setSelectedRole("member");
+    setSelectedRole(activeWorkspace.defaultInviteRole ?? "member");
     setStep("input");
     setParsedEmails([]);
+    setExcludedMembers([]);
     setCopied(false);
     onClose();
   };
@@ -98,7 +88,7 @@ export function InviteMemberModal({ isOpen, onClose }: InviteMemberModalProps) {
     setTimeout(() => setCopied(false), 2000);
   };
 
-  const selectedRoleOption = ROLE_OPTIONS.find((r) => r.id === selectedRole);
+  const selectedRoleOption = ROLE_LIST.find((r) => r.id === selectedRole);
 
   if (!isOpen) return null;
 
@@ -174,8 +164,18 @@ export function InviteMemberModal({ isOpen, onClose }: InviteMemberModalProps) {
                   Separate multiple emails with commas, semicolons, or new lines.
                 </p>
                 {emails.length > 0 && (
-                  <p className="mt-1 text-[11px] text-[#4ade80]">
-                    {parseEmailInput(emails).length} valid email{parseEmailInput(emails).length !== 1 ? "s" : ""} detected
+                  <p className="mt-1 text-[11px]">
+                    <span className="text-[#4ade80]">
+                      {parsed.valid.length} valid
+                    </span>
+                    {parsed.invalid.length > 0 && (
+                      <span className="text-[#ef4444]"> · {parsed.invalid.length} invalid</span>
+                    )}
+                    {parsed.alreadyMembers.length > 0 && (
+                      <span className="text-[#f5c45e]">
+                        {" "}· {parsed.alreadyMembers.length} already in this workspace
+                      </span>
+                    )}
                   </p>
                 )}
               </div>
@@ -186,7 +186,7 @@ export function InviteMemberModal({ isOpen, onClose }: InviteMemberModalProps) {
                   Role
                 </label>
                 <div className="space-y-1.5">
-                  {ROLE_OPTIONS.map((role) => {
+                  {ROLE_LIST.map((role) => {
                     const Icon = role.icon;
                     const isSelected = selectedRole === role.id;
                     return (
@@ -257,7 +257,7 @@ export function InviteMemberModal({ isOpen, onClose }: InviteMemberModalProps) {
                 </button>
                 <button
                   onClick={handleContinue}
-                  disabled={parseEmailInput(emails).length === 0}
+                  disabled={parsed.valid.length === 0}
                   className="inline-flex items-center gap-2 rounded-lg bg-[#fafafa] px-4 py-2 text-[13px] font-medium text-[#111111] transition-opacity hover:opacity-90 disabled:opacity-30 disabled:cursor-not-allowed"
                 >
                   Continue
@@ -321,6 +321,28 @@ export function InviteMemberModal({ isOpen, onClose }: InviteMemberModalProps) {
                   </div>
                 </div>
               </div>
+
+              {excludedMembers.length > 0 && (
+                <div className="rounded-lg border border-[#f5c45e]/25 bg-[#f5c45e]/5 p-3">
+                  <div className="flex items-center gap-2">
+                    <AlertTriangle className="h-3.5 w-3.5 shrink-0 text-[#f5c45e]" />
+                    <span className="text-[12px] text-[#f5c45e]">
+                      Skipped — already in this workspace
+                    </span>
+                  </div>
+                  <div className="mt-2 flex flex-wrap gap-1.5">
+                    {excludedMembers.map((email) => (
+                      <span
+                        key={email}
+                        className="inline-flex items-center gap-1 rounded-lg border border-[#f5c45e]/25 px-2.5 py-1 text-[11px] text-[#f5c45e]/80"
+                      >
+                        <Mail className="h-2.5 w-2.5" />
+                        {email}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
 
               <p className="text-[12px] text-[#737373]">
                 Invited members will receive an email with a link to join. Pending invites expire after 7 days.
@@ -386,25 +408,5 @@ export function InviteMemberModal({ isOpen, onClose }: InviteMemberModalProps) {
         </AnimatePresence>
       </motion.div>
     </div>
-  );
-}
-
-// Missing import
-function ChevronRight({ className }: { className?: string }) {
-  return (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      className={className}
-    >
-      <path d="m9 18 6-6-6-6" />
-    </svg>
   );
 }

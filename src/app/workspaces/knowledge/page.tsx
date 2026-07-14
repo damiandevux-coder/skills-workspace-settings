@@ -165,12 +165,22 @@ function KnowledgeCard({
   knowledge,
   onPreview,
   onRetry,
+  initiallyExpanded = false,
 }: {
   knowledge: SharedKnowledge;
   onPreview?: (item: KnowledgeItem) => void;
   onRetry?: (knowledgeBaseId: string, fileId: string) => void;
+  initiallyExpanded?: boolean;
 }) {
-  const [isExpanded, setIsExpanded] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(initiallyExpanded);
+
+  // The ?kb= deep link resolves after mount, so honor a late-arriving flag.
+  useEffect(() => {
+    if (initiallyExpanded) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- one-time sync from the deep-link flag
+      setIsExpanded(true);
+    }
+  }, [initiallyExpanded]);
 
   const fileCount = useMemo(() => {
     let count = 0;
@@ -403,18 +413,29 @@ export default function WorkspaceKnowledgePage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [previewItem, setPreviewItem] = useState<KnowledgeItem | null>(null);
   const [isNewModalOpen, setIsNewModalOpen] = useState(false);
+  const [focusKbId, setFocusKbId] = useState<string | null>(null);
   const knowledgeBases = activeWorkspace.knowledgeBases;
 
-  // Deep link: /workspaces/knowledge?new=1 opens the creation modal on mount.
-  // Reads `window.location` (a platform API unavailable during SSR/static
-  // generation), so this must run post-mount in an effect rather than during
-  // render — the one-time setState here is the deliberate exception called
-  // out in the React docs for "synchronizing with an external system".
+  // Deep links: ?new=1 opens the creation modal, ?kb=<id> expands + scrolls to
+  // that knowledge base. Reads `window.location` (a platform API unavailable
+  // during SSR/static generation), so this must run post-mount in an effect
+  // rather than during render — the one-time setState here is the deliberate
+  // exception called out in the React docs for "synchronizing with an
+  // external system".
   useEffect(() => {
-    if (new URLSearchParams(window.location.search).get("new") === "1") {
+    const params = new URLSearchParams(window.location.search);
+    const kb = params.get("kb");
+    if (params.get("new") === "1") {
       // eslint-disable-next-line react-hooks/set-state-in-effect -- one-time sync from window.location on mount, not a render-loop hazard
       setIsNewModalOpen(true);
       window.history.replaceState(null, "", "/workspaces/knowledge");
+    } else if (kb) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- one-time sync from window.location on mount, not a render-loop hazard
+      setFocusKbId(kb);
+      window.history.replaceState(null, "", "/workspaces/knowledge");
+      requestAnimationFrame(() => {
+        document.getElementById(`kb-${kb}`)?.scrollIntoView({ behavior: "smooth", block: "start" });
+      });
     }
   }, []);
 
@@ -466,12 +487,14 @@ export default function WorkspaceKnowledgePage() {
       {/* Grid */}
       <div className="space-y-3">
         {filtered.map((knowledge) => (
-          <KnowledgeCard
-            key={knowledge.id}
-            knowledge={knowledge}
-            onPreview={setPreviewItem}
-            onRetry={retryFile}
-          />
+          <div key={knowledge.id} id={`kb-${knowledge.id}`}>
+            <KnowledgeCard
+              knowledge={knowledge}
+              onPreview={setPreviewItem}
+              onRetry={retryFile}
+              initiallyExpanded={knowledge.id === focusKbId}
+            />
+          </div>
         ))}
       </div>
 

@@ -21,6 +21,11 @@ interface WorkspaceContextValue {
   inviteMember: (email: string, role: WorkspaceMemberRole) => void;
   removeMember: (memberId: string) => void;
   updateMemberRole: (memberId: string, role: WorkspaceMemberRole) => void;
+  resendInvite: (memberId: string) => void;
+  updateWorkspace: (
+    patch: Partial<Pick<Workspace, "name" | "emoji" | "color" | "defaultInviteRole">>
+  ) => void;
+  deleteWorkspace: () => void;
 }
 
 const WorkspaceContext = createContext<WorkspaceContextValue | null>(null);
@@ -135,6 +140,40 @@ export function WorkspaceProvider({ children }: { children: React.ReactNode }) {
     );
   };
 
+  const resendInvite = (memberId: string) => {
+    setWorkspaces((prev) =>
+      prev.map((w) =>
+        w.id === activeWorkspace.id
+          ? {
+              ...w,
+              members: w.members.map((m) =>
+                m.id === memberId && m.status === "pending"
+                  ? { ...m, invitedAt: new Date().toISOString() }
+                  : m
+              ),
+            }
+          : w
+      )
+    );
+  };
+
+  const updateWorkspace = (
+    patch: Partial<Pick<Workspace, "name" | "emoji" | "color" | "defaultInviteRole">>
+  ) => {
+    setWorkspaces((prev) =>
+      prev.map((w) => (w.id === activeWorkspace.id ? { ...w, ...patch } : w))
+    );
+  };
+
+  const deleteWorkspace = () => {
+    // Guard: never delete the last workspace.
+    if (workspaces.length <= 1) return;
+    const deletedId = activeWorkspace.id;
+    const remaining = workspaces.filter((w) => w.id !== deletedId);
+    setWorkspaces(remaining);
+    setActiveWorkspaceId(remaining[0].id);
+  };
+
   const updateMemberRole = (memberId: string, role: WorkspaceMemberRole) => {
     setWorkspaces((prev) =>
       prev.map((w) =>
@@ -161,6 +200,9 @@ export function WorkspaceProvider({ children }: { children: React.ReactNode }) {
         inviteMember,
         removeMember,
         updateMemberRole,
+        resendInvite,
+        updateWorkspace,
+        deleteWorkspace,
       }}
     >
       {children}
