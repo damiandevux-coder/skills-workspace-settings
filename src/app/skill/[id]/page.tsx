@@ -151,7 +151,7 @@ export default function SkillDetailPage() {
   const params = useParams();
   const router = useRouter();
   const skillId = params.id as string;
-  const { installedSkills, getSkill, toggleSkillDisabled, confirmSkill } = useSkills();
+  const { installedSkills, getSkill, confirmSkill } = useSkills();
 
   const liveSkill = getSkill(skillId);
   const allSkills = installedSkills;
@@ -286,26 +286,6 @@ export default function SkillDetailPage() {
                 <Play className="h-4 w-4" />
                 Test in a session
               </button>
-              {!isPreview && liveSkill && (
-                <button
-                  onClick={() => {
-                    toggleSkillDisabled(skillId);
-                    addToast(
-                      liveSkill.disabled
-                        ? `${detail.name} enabled`
-                        : `${detail.name} disabled`,
-                      "success"
-                    );
-                  }}
-                  className={`rounded-lg px-4 py-2.5 text-sm font-medium transition-opacity hover:opacity-90 ${
-                    detail.disabled
-                      ? "bg-[#f5c45e] text-[#111111]"
-                      : "border border-[#303036] text-[#85858e] hover:bg-[#151519] hover:text-[#f5f5f5]"
-                  }`}
-                >
-                  {detail.disabled ? "Enable" : "Disable"}
-                </button>
-              )}
             </div>
           </div>
         </div>

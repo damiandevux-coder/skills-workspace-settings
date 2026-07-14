@@ -6,6 +6,7 @@
 - **Zip imports run a security scan** before anything is staged: an animated multi-step check (unpack → file tree → executables/unsafe calls → SKILL.md integrity) that **blocks archives containing executable content** (`.exe`, `.dll`, `.bat`, …) with a clear failure state, and stamps a "Security scan passed — n files, no threats found" badge on success
 - Folder/zip imports derive the skill's Scripts/References/Assets flags from the actual file tree, shown on the detail page
 - Everything still flows into the same parse → Confirm Skill journey
+- Detail page header slimmed to **Configure · Test in a session** — the Enable/Disable button is gone (the card toggle is the single enable/disable affordance)
 
 ## 2026-07-13 (evening) — UX audit round
 
