@@ -2,14 +2,26 @@
 
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
-import { Bot, ChevronRight, HardDrive, Plus, Users, UserPlus, User } from "lucide-react";
+import {
+  Activity,
+  Bot,
+  ChevronRight,
+  HardDrive,
+  Plus,
+  Users,
+  UserPlus,
+  Zap,
+} from "lucide-react";
 import { AgentCreationModal } from "@/components/AgentCreationModal";
 import { InviteMemberModal } from "@/components/workspaces/InviteMemberModal";
 import { useWorkspace } from "@/components/workspaces/WorkspaceProvider";
 import { KnowledgeItem } from "@/types/skills";
-import { ROLE_CONFIG } from "@/lib/roles";
-import { PageHeader } from "@/components/ui/PageHeader";
+import { getWorkspaceUsage, formatTokens } from "@/data/mock-usage";
+import { getWorkspaceActivity } from "@/data/mock-activity";
+import { formatRelativeTime } from "@/lib/utils";
+import { StatCard } from "@/components/ui/StatCard";
 import { EmptyState } from "@/components/ui/EmptyState";
+import { SectionLabel } from "@/components/ui/SectionLabel";
 
 function countFiles(items: KnowledgeItem[]): { total: number; pending: number } {
   let total = 0;
@@ -36,7 +48,7 @@ const STATUS_DOT: Record<string, string> = {
 };
 
 export default function WorkspaceHomePage() {
-  const { activeWorkspace, addAgent } = useWorkspace();
+  const { activeWorkspace, addAgent, selectAgent } = useWorkspace();
   const [isAgentModalOpen, setIsAgentModalOpen] = useState(false);
   const [isInviteModalOpen, setIsInviteModalOpen] = useState(false);
   const [hireSpecialty, setHireSpecialty] = useState<string | undefined>(undefined);
@@ -61,190 +73,227 @@ export default function WorkspaceHomePage() {
       pending: 0,
     });
 
+  const pendingMembers = activeWorkspace.members.filter((m) => m.status === "pending").length;
+  const busyAgents = activeWorkspace.agents.filter((a) => a.status === "busy").length;
+  const usage = getWorkspaceUsage(activeWorkspace.id);
+  const todayTokens = usage.dailyTokens[usage.dailyTokens.length - 1];
+  const activity = getWorkspaceActivity(activeWorkspace.id);
+
   return (
     <div className="mx-auto max-w-[1200px] px-4 sm:px-6 py-8">
       {/* Header */}
-      <PageHeader
-        className="mb-8"
-        title={`${activeWorkspace.emoji} ${activeWorkspace.name}`}
-        description="An isolated workspace — its agents and shared knowledge live only here."
-        accent={{
-          emoji: activeWorkspace.emoji,
-          name: `${activeWorkspace.members.length} members · ${activeWorkspace.agents.length} agents`,
-          color: activeWorkspace.color,
-        }}
-      />
-
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        {/* Members card */}
-        <div className="rounded-xl border border-[#303036] bg-[#0b0b0c] p-5">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="flex items-center gap-2 text-sm font-medium text-[#fafafa]">
-              <Users className="h-4 w-4 text-[#737373]" />
-              Members
-            </h2>
-            <span className="text-[11px] text-[#737373]">{activeWorkspace.members.length}</span>
+      <div className="mb-8 flex items-start justify-between gap-4">
+        <div className="flex items-center gap-4">
+          <div
+            className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border border-[#303036] text-2xl"
+            style={{ backgroundColor: activeWorkspace.color + "14" }}
+          >
+            {activeWorkspace.emoji}
           </div>
+          <div>
+            <h1 className="text-xl font-semibold text-[#fafafa]">{activeWorkspace.name}</h1>
+            <p className="mt-0.5 text-sm text-[#737373]">
+              {activeWorkspace.members.length} member
+              {activeWorkspace.members.length !== 1 ? "s" : ""} ·{" "}
+              {activeWorkspace.agents.length} agent
+              {activeWorkspace.agents.length !== 1 ? "s" : ""} ·{" "}
+              {activeWorkspace.knowledgeBases.length} knowledge base
+              {activeWorkspace.knowledgeBases.length !== 1 ? "s" : ""}
+            </p>
+          </div>
+        </div>
+        <div className="flex shrink-0 items-center gap-2">
+          <button
+            onClick={() => setIsInviteModalOpen(true)}
+            className="inline-flex items-center gap-2 rounded-lg border border-[#303036] bg-[#151519] px-4 py-2 text-[13px] font-medium text-[#fafafa] transition-colors hover:border-[#5a5a5e]"
+          >
+            <UserPlus className="h-3.5 w-3.5" />
+            Invite member
+          </button>
+          <button
+            onClick={() => setIsAgentModalOpen(true)}
+            className="inline-flex items-center gap-2 rounded-lg bg-[#4ade80] px-4 py-2 text-[13px] font-medium text-[#111111] transition-opacity hover:opacity-90"
+          >
+            <Plus className="h-3.5 w-3.5" />
+            New agent
+          </button>
+        </div>
+      </div>
 
-          {activeWorkspace.members.length > 0 ? (
-            <div className="space-y-1">
-              {activeWorkspace.members.slice(0, 4).map((member) => {
-                const RoleIcon = ROLE_CONFIG[member.role]?.icon ?? User;
+      {/* Stats */}
+      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+        <StatCard
+          icon={Users}
+          label="Members"
+          value={activeWorkspace.members.length}
+          hint={pendingMembers > 0 ? `${pendingMembers} pending invite${pendingMembers !== 1 ? "s" : ""}` : undefined}
+          href="/workspaces/members"
+        />
+        <StatCard
+          icon={Bot}
+          label="Agents"
+          value={activeWorkspace.agents.length}
+          hint={busyAgents > 0 ? `${busyAgents} busy right now` : undefined}
+        />
+        <StatCard
+          icon={HardDrive}
+          label="Knowledge files"
+          value={fileStats.total}
+          hint={fileStats.pending > 0 ? `${fileStats.pending} still processing` : undefined}
+          href="/workspaces/knowledge"
+        />
+        <StatCard
+          icon={Zap}
+          label="Tokens today"
+          value={formatTokens(todayTokens)}
+          tone="#4ade80"
+          hint="View usage"
+          href="/workspaces/usage"
+        />
+      </div>
+
+      {/* Body */}
+      <div className="mt-6 grid grid-cols-1 gap-4 lg:grid-cols-3">
+        {/* Activity feed */}
+        <div className="lg:col-span-2 rounded-xl border border-[#303036] bg-[#0b0b0c] overflow-hidden">
+          <div className="flex items-center gap-2 border-b border-[#232323] px-5 py-3">
+            <Activity className="h-3.5 w-3.5 text-[#737373]" />
+            <SectionLabel>Activity</SectionLabel>
+          </div>
+          {activity.length > 0 ? (
+            <div className="divide-y divide-[#232323]">
+              {activity.map((entry) => {
+                const Icon = entry.icon;
                 return (
-                  <div
-                    key={member.id}
-                    className="flex items-center gap-2.5 rounded-lg px-3 py-2 text-[13px] text-[#a7a7ad] hover:bg-[#151519] transition-colors"
-                  >
-                    <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[#303036] text-[10px] font-medium text-[#fafafa]">
-                      {member.name ? member.name.charAt(0).toUpperCase() : member.email.charAt(0).toUpperCase()}
-                    </div>
-                    <span className="flex-1 truncate">
-                      {member.name || member.email}
+                  <div key={entry.id} className="flex items-center gap-3 px-5 py-3">
+                    <span
+                      className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg"
+                      style={{ backgroundColor: entry.color + "15" }}
+                    >
+                      <Icon className="h-3.5 w-3.5" style={{ color: entry.color }} />
                     </span>
-                    <RoleIcon className="h-3 w-3 shrink-0" style={{ color: ROLE_CONFIG[member.role]?.color ?? "#737373" }} />
-                    {member.status === "pending" && (
-                      <span className="text-[10px] text-[#f5c45e]">Pending</span>
-                    )}
+                    <p className="min-w-0 flex-1 truncate text-[13px] text-[#a7a7ad]">
+                      {entry.parts.map((part, i) =>
+                        part.strong ? (
+                          <span key={i} className="font-medium text-[#fafafa]">
+                            {part.text}
+                          </span>
+                        ) : (
+                          <span key={i}>{part.text}</span>
+                        )
+                      )}
+                    </p>
+                    <span className="shrink-0 text-[11px] text-[#737373]">
+                      {formatRelativeTime(entry.timestamp)}
+                    </span>
                   </div>
                 );
               })}
-              {activeWorkspace.members.length > 4 && (
-                <Link
-                  href="/workspaces/members"
-                  className="flex items-center gap-1.5 rounded-lg px-3 py-2 text-[11px] text-[#737373] hover:text-[#a7a7ad] hover:bg-[#151519] transition-colors"
-                >
-                  +{activeWorkspace.members.length - 4} more
-                  <ChevronRight className="h-3 w-3" />
-                </Link>
-              )}
-              <button
-                onClick={() => setIsInviteModalOpen(true)}
-                className="mt-2 inline-flex items-center gap-1.5 rounded-md border border-[#303036] px-2.5 py-1.5 text-[11px] text-[#737373] hover:text-[#fafafa] hover:border-[#5a5a5e] transition-colors"
-              >
-                <UserPlus className="h-3 w-3" />
-                Invite member
-              </button>
             </div>
           ) : (
             <EmptyState
-              icon={Users}
-              title="No members yet"
-              variant="dashed"
-              action={
-                <button
-                  onClick={() => setIsInviteModalOpen(true)}
-                  className="inline-flex items-center gap-2 rounded-lg bg-[#fafafa] px-3.5 py-2 text-[12px] font-medium text-[#111111] transition-opacity hover:opacity-90"
-                >
-                  <UserPlus className="h-3.5 w-3.5" />
-                  Invite member
-                </button>
-              }
+              icon={Activity}
+              title="No activity yet"
+              description="Invite members, add agents, and run sessions — it all shows up here."
+              variant="plain"
             />
           )}
         </div>
 
-        {/* Agents card */}
-        <div className="rounded-xl border border-[#303036] bg-[#0b0b0c] p-5">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="flex items-center gap-2 text-sm font-medium text-[#fafafa]">
-              <Bot className="h-4 w-4 text-[#737373]" />
-              Agents
-            </h2>
-            <span className="text-[11px] text-[#737373]">{activeWorkspace.agents.length}</span>
-          </div>
-
-          {activeWorkspace.agents.length > 0 ? (
-            <div className="space-y-1">
-              {activeWorkspace.agents.map((agent) => (
-                <div
-                  key={agent.id}
-                  className="flex items-center gap-2.5 rounded-lg px-3 py-2 text-[13px] text-[#a7a7ad] hover:bg-[#151519] transition-colors"
-                >
-                  <div className={`h-2 w-2 rounded-full ${STATUS_DOT[agent.status]}`} />
-                  <span className="flex-1 truncate">{agent.name}</span>
-                  <span className="text-[10px] uppercase tracking-wide text-[#737373]">
-                    {agent.status}
-                  </span>
-                </div>
-              ))}
-              <button
-                onClick={() => setIsAgentModalOpen(true)}
-                className="mt-2 inline-flex items-center gap-1.5 rounded-md border border-[#303036] px-2.5 py-1.5 text-[11px] text-[#737373] hover:text-[#fafafa] hover:border-[#5a5a5e] transition-colors"
-              >
-                <Plus className="h-3 w-3" />
-                Add agent
-              </button>
+        {/* Right column */}
+        <div className="space-y-4">
+          {/* Agents */}
+          <div className="rounded-xl border border-[#303036] bg-[#0b0b0c] p-4">
+            <div className="mb-2 flex items-center justify-between px-1">
+              <SectionLabel>Agents</SectionLabel>
+              <span className="text-[11px] text-[#737373]">{activeWorkspace.agents.length}</span>
             </div>
-          ) : (
-            <EmptyState
-              icon={Bot}
-              title="No agents in this workspace yet"
-              variant="dashed"
-              action={
+            {activeWorkspace.agents.length > 0 ? (
+              <div className="space-y-0.5">
+                {activeWorkspace.agents.map((agent) => (
+                  <Link
+                    key={agent.id}
+                    href={`/agents/${agent.id}`}
+                    onClick={() => selectAgent(agent.id)}
+                    className="flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-[13px] text-[#a7a7ad] transition-colors hover:bg-[#151519] hover:text-[#fafafa]"
+                  >
+                    <div className={`h-2 w-2 shrink-0 rounded-full ${STATUS_DOT[agent.status]}`} />
+                    <span className="min-w-0 flex-1 truncate">{agent.name}</span>
+                    <ChevronRight className="h-3 w-3 shrink-0 text-[#737373]" />
+                  </Link>
+                ))}
                 <button
                   onClick={() => setIsAgentModalOpen(true)}
-                  className="inline-flex items-center gap-2 rounded-lg bg-[#fafafa] px-3.5 py-2 text-[12px] font-medium text-[#111111] transition-opacity hover:opacity-90"
+                  className="mt-1.5 inline-flex items-center gap-1.5 rounded-md border border-[#303036] px-2.5 py-1.5 text-[11px] text-[#737373] transition-colors hover:border-[#5a5a5e] hover:text-[#fafafa]"
                 >
-                  <Plus className="h-3.5 w-3.5" />
+                  <Plus className="h-3 w-3" />
                   Add agent
                 </button>
-              }
-            />
-          )}
-        </div>
-
-        {/* Knowledge card */}
-        <div className="rounded-xl border border-[#303036] bg-[#0b0b0c] p-5">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="flex items-center gap-2 text-sm font-medium text-[#fafafa]">
-              <HardDrive className="h-4 w-4 text-[#737373]" />
-              Shared Knowledge
-            </h2>
-            <span className="text-[11px] text-[#737373]">
-              {activeWorkspace.knowledgeBases.length}
-            </span>
+              </div>
+            ) : (
+              <EmptyState
+                icon={Bot}
+                title="No agents yet"
+                variant="dashed"
+                action={
+                  <button
+                    onClick={() => setIsAgentModalOpen(true)}
+                    className="inline-flex items-center gap-2 rounded-lg bg-[#fafafa] px-3.5 py-2 text-[12px] font-medium text-[#111111] transition-opacity hover:opacity-90"
+                  >
+                    <Plus className="h-3.5 w-3.5" />
+                    Add agent
+                  </button>
+                }
+              />
+            )}
           </div>
 
-          {activeWorkspace.knowledgeBases.length > 0 ? (
-            <div className="space-y-1">
-              {activeWorkspace.knowledgeBases.map((kb) => {
-                const stats = countFiles(kb.items);
-                return (
-                  <Link
-                    key={kb.id}
-                    href={`/workspaces/knowledge?kb=${kb.id}`}
-                    className="flex items-center gap-2.5 rounded-lg px-3 py-2 text-[13px] text-[#a7a7ad] hover:bg-[#151519] transition-colors"
-                  >
-                    <span>{kb.emoji}</span>
-                    <span className="flex-1 truncate">{kb.name}</span>
-                    <span className="text-[10px] text-[#737373]">
-                      {stats.total} files{stats.pending > 0 && ` · ${stats.pending} pending`}
-                    </span>
-                    <ChevronRight className="h-3.5 w-3.5 text-[#737373]" />
-                  </Link>
-                );
-              })}
-              <p className="mt-2 px-3 text-[11px] text-[#737373]">
-                {fileStats.total} files total
-                {fileStats.pending > 0 && ` · ${fileStats.pending} still processing`}
-              </p>
+          {/* Knowledge */}
+          <div className="rounded-xl border border-[#303036] bg-[#0b0b0c] p-4">
+            <div className="mb-2 flex items-center justify-between px-1">
+              <SectionLabel>Shared knowledge</SectionLabel>
+              <span className="text-[11px] text-[#737373]">
+                {activeWorkspace.knowledgeBases.length}
+              </span>
             </div>
-          ) : (
-            <EmptyState
-              icon={HardDrive}
-              title="No shared knowledge yet"
-              variant="dashed"
-              action={
-                <Link
-                  href="/workspaces/knowledge?new=1"
-                  className="inline-flex items-center gap-2 rounded-lg bg-[#fafafa] px-3.5 py-2 text-[12px] font-medium text-[#111111] transition-opacity hover:opacity-90"
-                >
-                  <Plus className="h-3.5 w-3.5" />
-                  New knowledge base
-                </Link>
-              }
-            />
-          )}
+            {activeWorkspace.knowledgeBases.length > 0 ? (
+              <div className="space-y-0.5">
+                {activeWorkspace.knowledgeBases.map((kb) => {
+                  const stats = countFiles(kb.items);
+                  return (
+                    <Link
+                      key={kb.id}
+                      href={`/workspaces/knowledge?kb=${kb.id}`}
+                      className="flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-[13px] text-[#a7a7ad] transition-colors hover:bg-[#151519] hover:text-[#fafafa]"
+                    >
+                      <span>{kb.emoji}</span>
+                      <span className="min-w-0 flex-1 truncate">{kb.name}</span>
+                      <span className="shrink-0 text-[10px] text-[#737373]">
+                        {stats.total} files
+                        {stats.pending > 0 && ` · ${stats.pending} pending`}
+                      </span>
+                      <ChevronRight className="h-3 w-3 shrink-0 text-[#737373]" />
+                    </Link>
+                  );
+                })}
+              </div>
+            ) : (
+              <EmptyState
+                icon={HardDrive}
+                title="No shared knowledge yet"
+                variant="dashed"
+                action={
+                  <Link
+                    href="/workspaces/knowledge?new=1"
+                    className="inline-flex items-center gap-2 rounded-lg bg-[#fafafa] px-3.5 py-2 text-[12px] font-medium text-[#111111] transition-opacity hover:opacity-90"
+                  >
+                    <Plus className="h-3.5 w-3.5" />
+                    New knowledge base
+                  </Link>
+                }
+              />
+            )}
+          </div>
         </div>
       </div>
 
