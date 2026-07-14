@@ -77,9 +77,8 @@ export default function AgentProfilePage() {
   const specialty = AGENT_SPECIALTIES.find((s) => s.id === agent.specialtyId);
   const SpecialtyIcon = specialty?.icon ?? Bot;
   const accentColor = specialty?.color ?? "#4ade80";
-  // Until knowledge bases reference agents by id, match by name.
   const assignedKbs = activeWorkspace.knowledgeBases.filter((kb) =>
-    kb.assignedAgents.includes(agent.name)
+    kb.assignedAgents.includes(agent.id)
   );
   const activeSkillCount = installedSkills.filter(
     (s) => s.status !== "preview" && !s.disabled

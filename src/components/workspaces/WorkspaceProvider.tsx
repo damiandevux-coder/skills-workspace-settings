@@ -36,6 +36,12 @@ interface WorkspaceContextValue {
     assignedAgents: string[];
   }) => void;
   retryFile: (knowledgeBaseId: string, fileId: string) => void;
+  addFilesToKb: (knowledgeBaseId: string, files: { name: string; size?: string }[]) => void;
+  addFolderToKb: (knowledgeBaseId: string, name: string) => void;
+  renameKnowledgeItem: (knowledgeBaseId: string, itemId: string, name: string) => void;
+  deleteKnowledgeItem: (knowledgeBaseId: string, itemId: string) => void;
+  assignAgentToKb: (knowledgeBaseId: string, agentId: string) => void;
+  unassignAgentFromKb: (knowledgeBaseId: string, agentId: string) => void;
   inviteMember: (email: string, role: WorkspaceMemberRole) => void;
   removeMember: (memberId: string) => void;
   updateMemberRole: (memberId: string, role: WorkspaceMemberRole) => void;
@@ -54,16 +60,35 @@ export function useWorkspace(): WorkspaceContextValue {
   return ctx;
 }
 
+/** Recursively map every item in a knowledge tree. */
+function mapItems(
+  items: KnowledgeItem[],
+  fn: (item: KnowledgeItem) => KnowledgeItem
+): KnowledgeItem[] {
+  return items.map((item) => {
+    const mapped = fn(item);
+    if (mapped.children) return { ...mapped, children: mapItems(mapped.children, fn) };
+    return mapped;
+  });
+}
+
+/** Recursively drop an item (and its subtree) from a knowledge tree. */
+function removeItem(items: KnowledgeItem[], itemId: string): KnowledgeItem[] {
+  return items
+    .filter((item) => item.id !== itemId)
+    .map((item) =>
+      item.children ? { ...item, children: removeItem(item.children, itemId) } : item
+    );
+}
+
 function setFileStatus(
   items: KnowledgeItem[],
   fileId: string,
   status: NonNullable<KnowledgeItem["status"]>
 ): KnowledgeItem[] {
-  return items.map((item) => {
-    if (item.id === fileId && item.type === "file") return { ...item, status };
-    if (item.children) return { ...item, children: setFileStatus(item.children, fileId, status) };
-    return item;
-  });
+  return mapItems(items, (item) =>
+    item.id === fileId && item.type === "file" ? { ...item, status } : item
+  );
 }
 
 export function WorkspaceProvider({ children }: { children: React.ReactNode }) {
@@ -233,6 +258,87 @@ export function WorkspaceProvider({ children }: { children: React.ReactNode }) {
     );
   };
 
+  /** Apply a transform to one knowledge base of the active workspace. */
+  const updateKb = (knowledgeBaseId: string, fn: (kb: SharedKnowledge) => SharedKnowledge) => {
+    setWorkspaces((prev) =>
+      prev.map((w) =>
+        w.id === activeWorkspace.id
+          ? {
+              ...w,
+              knowledgeBases: w.knowledgeBases.map((kb) =>
+                kb.id === knowledgeBaseId ? fn(kb) : kb
+              ),
+            }
+          : w
+      )
+    );
+  };
+
+  const addFilesToKb = (knowledgeBaseId: string, files: { name: string; size?: string }[]) => {
+    const stamp = Date.now();
+    const newItems: KnowledgeItem[] = files.map((f, i) => ({
+      id: `file-${stamp}-${i}`,
+      name: f.name,
+      type: "file",
+      size: f.size,
+      modified: new Date().toISOString().slice(0, 10),
+      status: "queued",
+    }));
+    updateKb(knowledgeBaseId, (kb) => ({ ...kb, items: [...newItems, ...kb.items] }));
+    // Mock conversion pipeline: queued → processing → ready, staggered per file.
+    newItems.forEach((item, i) => {
+      setTimeout(() => {
+        updateKb(knowledgeBaseId, (kb) => ({
+          ...kb,
+          items: setFileStatus(kb.items, item.id, "processing"),
+        }));
+      }, 800 + i * 400);
+      setTimeout(() => {
+        updateKb(knowledgeBaseId, (kb) => ({
+          ...kb,
+          items: setFileStatus(kb.items, item.id, "ready"),
+        }));
+      }, 2400 + i * 700);
+    });
+  };
+
+  const addFolderToKb = (knowledgeBaseId: string, name: string) => {
+    const folder: KnowledgeItem = {
+      id: `folder-${Date.now()}`,
+      name,
+      type: "folder",
+      modified: new Date().toISOString().slice(0, 10),
+      children: [],
+    };
+    updateKb(knowledgeBaseId, (kb) => ({ ...kb, items: [folder, ...kb.items] }));
+  };
+
+  const renameKnowledgeItem = (knowledgeBaseId: string, itemId: string, name: string) => {
+    updateKb(knowledgeBaseId, (kb) => ({
+      ...kb,
+      items: mapItems(kb.items, (item) => (item.id === itemId ? { ...item, name } : item)),
+    }));
+  };
+
+  const deleteKnowledgeItem = (knowledgeBaseId: string, itemId: string) => {
+    updateKb(knowledgeBaseId, (kb) => ({ ...kb, items: removeItem(kb.items, itemId) }));
+  };
+
+  const assignAgentToKb = (knowledgeBaseId: string, agentId: string) => {
+    updateKb(knowledgeBaseId, (kb) =>
+      kb.assignedAgents.includes(agentId)
+        ? kb
+        : { ...kb, assignedAgents: [...kb.assignedAgents, agentId] }
+    );
+  };
+
+  const unassignAgentFromKb = (knowledgeBaseId: string, agentId: string) => {
+    updateKb(knowledgeBaseId, (kb) => ({
+      ...kb,
+      assignedAgents: kb.assignedAgents.filter((id) => id !== agentId),
+    }));
+  };
+
   const resendInvite = (memberId: string) => {
     setWorkspaces((prev) =>
       prev.map((w) =>
@@ -294,6 +400,12 @@ export function WorkspaceProvider({ children }: { children: React.ReactNode }) {
         addAgent,
         addKnowledgeBase,
         retryFile,
+        addFilesToKb,
+        addFolderToKb,
+        renameKnowledgeItem,
+        deleteKnowledgeItem,
+        assignAgentToKb,
+        unassignAgentFromKb,
         inviteMember,
         removeMember,
         updateMemberRole,

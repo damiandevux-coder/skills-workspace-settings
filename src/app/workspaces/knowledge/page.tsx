@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Search,
@@ -27,6 +27,8 @@ import { NewKnowledgeBaseModal } from "@/components/NewKnowledgeBaseModal";
 import { useWorkspace } from "@/components/workspaces/WorkspaceProvider";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { EmptyState } from "@/components/ui/EmptyState";
+import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
+import { useDialogEscape } from "@/lib/use-dialog";
 
 function StatusChip({
   status,
@@ -84,21 +86,38 @@ function KnowledgeTree({
   depth = 0,
   onPreview,
   onRetry,
+  onRename,
+  onDelete,
 }: {
   item: KnowledgeItem;
   depth?: number;
   onPreview?: (item: KnowledgeItem) => void;
   onRetry?: (fileId: string) => void;
+  onRename?: (itemId: string, name: string) => void;
+  onDelete?: (item: KnowledgeItem) => void;
 }) {
   const [expanded, setExpanded] = useState(false);
+  const [editing, setEditing] = useState(false);
+  const [draftName, setDraftName] = useState(item.name);
   const isFolder = item.type === "folder";
+
+  const commitRename = () => {
+    setEditing(false);
+    const name = draftName.trim();
+    if (name && name !== item.name) onRename?.(item.id, name);
+    else setDraftName(item.name);
+  };
 
   return (
     <div>
       <div
         className="group flex items-center gap-2 rounded-md py-1.5 px-2 hover:bg-[#151519] cursor-pointer transition-colors"
         style={{ paddingLeft: `${8 + depth * 16}px` }}
-        onClick={() => (isFolder ? setExpanded(!expanded) : onPreview?.(item))}
+        onClick={() => {
+          if (editing) return;
+          if (isFolder) setExpanded(!expanded);
+          else onPreview?.(item);
+        }}
       >
         {isFolder ? (
           expanded ? (
@@ -118,23 +137,58 @@ function KnowledgeTree({
         ) : (
           <File className="h-4 w-4 text-[#a7a7ad]" />
         )}
-        <span className="text-[13px] text-[#fafafa] min-w-0 flex-1 truncate">{item.name}</span>
-        {!isFolder && (
+        {editing ? (
+          <input
+            autoFocus
+            value={draftName}
+            onChange={(e) => setDraftName(e.target.value)}
+            onClick={(e) => e.stopPropagation()}
+            onBlur={commitRename}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") commitRename();
+              if (e.key === "Escape") {
+                setDraftName(item.name);
+                setEditing(false);
+              }
+            }}
+            className="h-6 min-w-0 flex-1 rounded border border-[#5a5a5e] bg-[#101010] px-1.5 text-[13px] text-[#fafafa] outline-none"
+          />
+        ) : (
+          <span className="text-[13px] text-[#fafafa] min-w-0 flex-1 truncate">{item.name}</span>
+        )}
+        {!isFolder && !editing && (
           <StatusChip status={item.status} onRetry={() => onRetry?.(item.id)} />
         )}
-        {item.size && <span className="text-[10px] text-[#737373]">{item.size}</span>}
-        {item.modified && (
+        {item.size && !editing && <span className="text-[10px] text-[#737373]">{item.size}</span>}
+        {item.modified && !editing && (
           <span className="hidden text-[10px] text-[#737373] sm:inline">{item.modified}</span>
         )}
         {/* Hover actions */}
-        <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-          <button className="p-1 rounded hover:bg-[#232323] text-[#737373] hover:text-[#fafafa]">
-            <Pencil className="h-3 w-3" />
-          </button>
-          <button className="p-1 rounded hover:bg-[#232323] text-[#737373] hover:text-[#ef4444]">
-            <Trash2 className="h-3 w-3" />
-          </button>
-        </div>
+        {!editing && (
+          <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+            <button
+              title="Rename"
+              onClick={(e) => {
+                e.stopPropagation();
+                setDraftName(item.name);
+                setEditing(true);
+              }}
+              className="p-1 rounded hover:bg-[#232323] text-[#737373] hover:text-[#fafafa]"
+            >
+              <Pencil className="h-3 w-3" />
+            </button>
+            <button
+              title="Delete"
+              onClick={(e) => {
+                e.stopPropagation();
+                onDelete?.(item);
+              }}
+              className="p-1 rounded hover:bg-[#232323] text-[#737373] hover:text-[#ef4444]"
+            >
+              <Trash2 className="h-3 w-3" />
+            </button>
+          </div>
+        )}
       </div>
       <AnimatePresence>
         {isFolder && expanded && item.children && (
@@ -152,11 +206,190 @@ function KnowledgeTree({
                 depth={depth + 1}
                 onPreview={onPreview}
                 onRetry={onRetry}
+                onRename={onRename}
+                onDelete={onDelete}
               />
             ))}
           </motion.div>
         )}
       </AnimatePresence>
+    </div>
+  );
+}
+
+function UploadFilesModal({
+  open,
+  kbName,
+  onClose,
+  onUpload,
+}: {
+  open: boolean;
+  kbName: string;
+  onClose: () => void;
+  onUpload: (files: { name: string; size?: string }[]) => void;
+}) {
+  const [picked, setPicked] = useState<{ name: string; size?: string }[]>([]);
+  const inputRef = useRef<HTMLInputElement>(null);
+  useDialogEscape(onClose, open);
+
+  useEffect(() => {
+    if (!open) setPicked([]);
+  }, [open]);
+
+  const formatSize = (bytes: number) =>
+    bytes >= 1_048_576 ? `${(bytes / 1_048_576).toFixed(1)} MB` : `${Math.max(1, Math.round(bytes / 1024))} KB`;
+
+  if (!open) return null;
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        className="absolute inset-0 bg-black/60 backdrop-blur-[3px]"
+        onClick={onClose}
+      />
+      <motion.div
+        initial={{ opacity: 0, scale: 0.95, y: 20 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        className="relative w-full max-w-[440px] rounded-2xl border border-[#303036] bg-[#070708] p-6 shadow-2xl"
+      >
+        <h3 className="text-base font-semibold text-[#fafafa]">Upload files</h3>
+        <p className="mt-0.5 text-[12px] text-[#737373]">
+          Files are added to <span className="text-[#fafafa]">{kbName}</span> and converted for
+          agent use.
+        </p>
+
+        <input
+          ref={inputRef}
+          type="file"
+          multiple
+          className="hidden"
+          onChange={(e) => {
+            const files = [...(e.target.files ?? [])].map((f) => ({
+              name: f.name,
+              size: formatSize(f.size),
+            }));
+            if (files.length) setPicked((prev) => [...prev, ...files]);
+            e.target.value = "";
+          }}
+        />
+        <button
+          onClick={() => inputRef.current?.click()}
+          className="mt-4 flex w-full flex-col items-center gap-2 rounded-xl border border-dashed border-[#303036] px-4 py-8 text-center transition-colors hover:border-[#5a5a5e]"
+        >
+          <Upload className="h-5 w-5 text-[#737373]" />
+          <span className="text-[13px] text-[#a7a7ad]">Click to choose files</span>
+          <span className="text-[11px] text-[#737373]">PDF, docs, markdown, images…</span>
+        </button>
+
+        {picked.length > 0 && (
+          <div className="mt-3 max-h-40 space-y-1 overflow-y-auto">
+            {picked.map((f, i) => (
+              <div
+                key={`${f.name}-${i}`}
+                className="flex items-center gap-2 rounded-lg bg-[#101010] px-3 py-2 text-[12px]"
+              >
+                <File className="h-3.5 w-3.5 shrink-0 text-[#a7a7ad]" />
+                <span className="min-w-0 flex-1 truncate text-[#fafafa]">{f.name}</span>
+                <span className="text-[#737373]">{f.size}</span>
+                <button
+                  onClick={() => setPicked((prev) => prev.filter((_, j) => j !== i))}
+                  className="text-[#737373] hover:text-[#ef4444]"
+                >
+                  ×
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+
+        <div className="mt-5 flex items-center justify-end gap-2 border-t border-[#232323] pt-4">
+          <button
+            onClick={onClose}
+            className="rounded-lg border border-[#303036] px-4 py-2 text-[13px] text-[#a7a7ad] transition-colors hover:border-[#5a5a5e] hover:text-[#fafafa]"
+          >
+            Cancel
+          </button>
+          <button
+            onClick={() => {
+              onUpload(picked);
+              onClose();
+            }}
+            disabled={picked.length === 0}
+            className="rounded-lg bg-[#fafafa] px-4 py-2 text-[13px] font-medium text-[#111111] transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-30"
+          >
+            Add {picked.length > 0 ? `${picked.length} file${picked.length !== 1 ? "s" : ""}` : "files"}
+          </button>
+        </div>
+      </motion.div>
+    </div>
+  );
+}
+
+function NewFolderModal({
+  open,
+  onClose,
+  onCreate,
+}: {
+  open: boolean;
+  onClose: () => void;
+  onCreate: (name: string) => void;
+}) {
+  const [name, setName] = useState("");
+  useDialogEscape(onClose, open);
+
+  useEffect(() => {
+    if (!open) setName("");
+  }, [open]);
+
+  if (!open) return null;
+
+  const submit = () => {
+    if (!name.trim()) return;
+    onCreate(name.trim());
+    onClose();
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        className="absolute inset-0 bg-black/60 backdrop-blur-[3px]"
+        onClick={onClose}
+      />
+      <motion.div
+        initial={{ opacity: 0, scale: 0.95, y: 20 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        className="relative w-full max-w-[360px] rounded-2xl border border-[#303036] bg-[#070708] p-6 shadow-2xl"
+      >
+        <h3 className="text-base font-semibold text-[#fafafa]">New folder</h3>
+        <input
+          autoFocus
+          type="text"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          onKeyDown={(e) => e.key === "Enter" && submit()}
+          placeholder="Folder name"
+          className="mt-4 h-10 w-full rounded-lg border border-[#303036] bg-[#101010] px-3 text-sm text-[#fafafa] outline-none placeholder:text-[#737373] focus:border-[#5a5a5e]"
+        />
+        <div className="mt-5 flex items-center justify-end gap-2">
+          <button
+            onClick={onClose}
+            className="rounded-lg border border-[#303036] px-4 py-2 text-[13px] text-[#a7a7ad] transition-colors hover:border-[#5a5a5e] hover:text-[#fafafa]"
+          >
+            Cancel
+          </button>
+          <button
+            onClick={submit}
+            disabled={!name.trim()}
+            className="rounded-lg bg-[#fafafa] px-4 py-2 text-[13px] font-medium text-[#111111] transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-30"
+          >
+            Create
+          </button>
+        </div>
+      </motion.div>
     </div>
   );
 }
@@ -172,7 +405,21 @@ function KnowledgeCard({
   onRetry?: (knowledgeBaseId: string, fileId: string) => void;
   initiallyExpanded?: boolean;
 }) {
+  const {
+    activeWorkspace,
+    addFilesToKb,
+    addFolderToKb,
+    renameKnowledgeItem,
+    deleteKnowledgeItem,
+    assignAgentToKb,
+    unassignAgentFromKb,
+  } = useWorkspace();
   const [isExpanded, setIsExpanded] = useState(initiallyExpanded);
+  const [uploadOpen, setUploadOpen] = useState(false);
+  const [folderOpen, setFolderOpen] = useState(false);
+  const [assignOpen, setAssignOpen] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState<KnowledgeItem | null>(null);
+  const assignRef = useRef<HTMLDivElement>(null);
 
   // The ?kb= deep link resolves after mount, so honor a late-arriving flag.
   useEffect(() => {
@@ -181,6 +428,22 @@ function KnowledgeCard({
       setIsExpanded(true);
     }
   }, [initiallyExpanded]);
+
+  useEffect(() => {
+    if (!assignOpen) return;
+    const onMouseDown = (e: MouseEvent) => {
+      if (assignRef.current && !assignRef.current.contains(e.target as Node)) setAssignOpen(false);
+    };
+    document.addEventListener("mousedown", onMouseDown);
+    return () => document.removeEventListener("mousedown", onMouseDown);
+  }, [assignOpen]);
+
+  const assignedAgents = knowledge.assignedAgents
+    .map((id) => activeWorkspace.agents.find((a) => a.id === id))
+    .filter((a): a is NonNullable<typeof a> => !!a);
+  const unassignedAgents = activeWorkspace.agents.filter(
+    (a) => !knowledge.assignedAgents.includes(a.id)
+  );
 
   const fileCount = useMemo(() => {
     let count = 0;
@@ -279,25 +542,39 @@ function KnowledgeCard({
                   Contents
                 </h4>
                 <div className="flex items-center gap-2">
-                  <button className="inline-flex items-center gap-1.5 rounded-md border border-[#303036] px-2.5 py-1.5 text-[11px] text-[#737373] hover:text-[#fafafa] hover:border-[#5a5a5e] transition-colors">
+                  <button
+                    onClick={() => setUploadOpen(true)}
+                    className="inline-flex items-center gap-1.5 rounded-md border border-[#303036] px-2.5 py-1.5 text-[11px] text-[#737373] hover:text-[#fafafa] hover:border-[#5a5a5e] transition-colors"
+                  >
                     <Upload className="h-3 w-3" />
                     Upload
                   </button>
-                  <button className="inline-flex items-center gap-1.5 rounded-md border border-[#303036] px-2.5 py-1.5 text-[11px] text-[#737373] hover:text-[#fafafa] hover:border-[#5a5a5e] transition-colors">
+                  <button
+                    onClick={() => setFolderOpen(true)}
+                    className="inline-flex items-center gap-1.5 rounded-md border border-[#303036] px-2.5 py-1.5 text-[11px] text-[#737373] hover:text-[#fafafa] hover:border-[#5a5a5e] transition-colors"
+                  >
                     <Plus className="h-3 w-3" />
                     New Folder
                   </button>
                 </div>
               </div>
               <div className="rounded-lg border border-[#232323] bg-[#101010]">
-                {knowledge.items.map((item) => (
-                  <KnowledgeTree
-                    key={item.id}
-                    item={item}
-                    onPreview={onPreview}
-                    onRetry={(fileId) => onRetry?.(knowledge.id, fileId)}
-                  />
-                ))}
+                {knowledge.items.length > 0 ? (
+                  knowledge.items.map((item) => (
+                    <KnowledgeTree
+                      key={item.id}
+                      item={item}
+                      onPreview={onPreview}
+                      onRetry={(fileId) => onRetry?.(knowledge.id, fileId)}
+                      onRename={(itemId, name) => renameKnowledgeItem(knowledge.id, itemId, name)}
+                      onDelete={setDeleteTarget}
+                    />
+                  ))
+                ) : (
+                  <p className="px-3 py-4 text-center text-[12px] text-[#737373]">
+                    No files yet — upload some to get started.
+                  </p>
+                )}
               </div>
 
               {/* Assigned Agents */}
@@ -306,25 +583,92 @@ function KnowledgeCard({
                   Assigned Agents
                 </h4>
                 <div className="flex flex-wrap gap-1.5">
-                  {knowledge.assignedAgents.map((agent) => (
+                  {assignedAgents.map((agent) => (
                     <span
-                      key={agent}
-                      className="inline-flex items-center gap-1 rounded-full bg-[#151519] border border-[#303036] px-2.5 py-1 text-[11px] text-[#a7a7ad]"
+                      key={agent.id}
+                      className="group/chip inline-flex items-center gap-1 rounded-full bg-[#151519] border border-[#303036] px-2.5 py-1 text-[11px] text-[#a7a7ad]"
                     >
                       <Bot className="h-3 w-3" />
-                      {agent}
+                      {agent.name}
+                      <button
+                        title="Unassign"
+                        onClick={() => unassignAgentFromKb(knowledge.id, agent.id)}
+                        className="ml-0.5 hidden text-[#737373] hover:text-[#ef4444] group-hover/chip:inline"
+                      >
+                        ×
+                      </button>
                     </span>
                   ))}
-                  <button className="inline-flex items-center gap-1 rounded-full border border-dashed border-[#303036] px-2.5 py-1 text-[11px] text-[#737373] hover:text-[#fafafa] hover:border-[#5a5a5e] transition-colors">
-                    <Plus className="h-3 w-3" />
-                    Assign Agent
-                  </button>
+                  <div ref={assignRef} className="relative">
+                    <button
+                      onClick={() => setAssignOpen(!assignOpen)}
+                      disabled={unassignedAgents.length === 0}
+                      className="inline-flex items-center gap-1 rounded-full border border-dashed border-[#303036] px-2.5 py-1 text-[11px] text-[#737373] hover:text-[#fafafa] hover:border-[#5a5a5e] transition-colors disabled:cursor-not-allowed disabled:opacity-50"
+                    >
+                      <Plus className="h-3 w-3" />
+                      Assign Agent
+                    </button>
+                    <AnimatePresence>
+                      {assignOpen && (
+                        <motion.div
+                          initial={{ opacity: 0, y: 4 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, y: 4 }}
+                          transition={{ duration: 0.15 }}
+                          className="absolute bottom-full left-0 z-30 mb-1 w-56 rounded-xl border border-[#303036] bg-[#151519] p-1 shadow-2xl"
+                        >
+                          {unassignedAgents.map((agent) => (
+                            <button
+                              key={agent.id}
+                              onClick={() => {
+                                assignAgentToKb(knowledge.id, agent.id);
+                                setAssignOpen(false);
+                              }}
+                              className="flex w-full items-center gap-2 rounded-lg px-2.5 py-2 text-left text-[12px] text-[#a7a7ad] transition-colors hover:bg-[#232323] hover:text-[#fafafa]"
+                            >
+                              <Bot className="h-3.5 w-3.5" />
+                              {agent.name}
+                            </button>
+                          ))}
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </div>
                 </div>
               </div>
             </div>
           </motion.div>
         )}
       </AnimatePresence>
+
+      <UploadFilesModal
+        open={uploadOpen}
+        kbName={knowledge.name}
+        onClose={() => setUploadOpen(false)}
+        onUpload={(files) => addFilesToKb(knowledge.id, files)}
+      />
+      <NewFolderModal
+        open={folderOpen}
+        onClose={() => setFolderOpen(false)}
+        onCreate={(name) => addFolderToKb(knowledge.id, name)}
+      />
+      <ConfirmDialog
+        open={!!deleteTarget}
+        title={deleteTarget?.type === "folder" ? "Delete Folder" : "Delete File"}
+        body={
+          <>
+            Are you sure you want to delete{" "}
+            <span className="text-[#fafafa]">{deleteTarget?.name}</span>
+            {deleteTarget?.type === "folder" ? " and everything inside it" : ""}? Agents will lose
+            access immediately.
+          </>
+        }
+        confirmLabel="Delete"
+        onConfirm={() => {
+          if (deleteTarget) deleteKnowledgeItem(knowledge.id, deleteTarget.id);
+        }}
+        onClose={() => setDeleteTarget(null)}
+      />
     </motion.div>
   );
 }
@@ -399,7 +743,21 @@ function FilePreviewModal({
           >
             Close
           </button>
-          <button className="rounded-lg bg-[#fafafa] px-3 py-1.5 text-[12px] font-medium text-[#111111] transition-opacity hover:opacity-90">
+          <button
+            onClick={() => {
+              if (!item?.content) return;
+              const blob = new Blob([item.content], { type: "text/plain" });
+              const url = URL.createObjectURL(blob);
+              const a = document.createElement("a");
+              a.href = url;
+              a.download = item.name;
+              a.click();
+              URL.revokeObjectURL(url);
+            }}
+            disabled={!item?.content}
+            title={item?.content ? undefined : "No downloadable content in this mock file"}
+            className="rounded-lg bg-[#fafafa] px-3 py-1.5 text-[12px] font-medium text-[#111111] transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
+          >
             Download
           </button>
         </div>
@@ -520,7 +878,7 @@ export default function WorkspaceKnowledgePage() {
           <NewKnowledgeBaseModal
             isOpen={isNewModalOpen}
             onClose={() => setIsNewModalOpen(false)}
-            agents={activeWorkspace.agents.map((a) => a.name)}
+            agents={activeWorkspace.agents.map((a) => ({ id: a.id, name: a.name }))}
             onCreate={addKnowledgeBase}
           />
         )}

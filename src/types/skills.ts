@@ -90,5 +90,6 @@ export interface SharedKnowledge {
   description: string;
   emoji: string;
   items: KnowledgeItem[];
+  /** Agent IDs (not names) with access to this knowledge base. */
   assignedAgents: string[];
 }

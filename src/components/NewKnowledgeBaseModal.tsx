@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, HardDrive, Bot, Plus, ChevronDown } from "lucide-react";
+import { X, HardDrive, Bot, Plus } from "lucide-react";
 import { EMOJI_OPTIONS } from "@/types/skills";
 
 interface NewKnowledgeBaseModalProps {
@@ -12,16 +12,15 @@ interface NewKnowledgeBaseModalProps {
     name: string;
     description: string;
     emoji: string;
+    /** Agent IDs granted access. */
     assignedAgents: string[];
   }) => void;
-  /** Agent names offered for assignment. Defaults to the classic mock list. */
-  agents?: string[];
+  /** Workspace agents offered for assignment. */
+  agents: { id: string; name: string }[];
 }
 
-const MOCK_AGENTS = ["claw-1", "claw-2", "claw-3", "dev-agent", "prod-agent"];
-
 export function NewKnowledgeBaseModal({ isOpen, onClose, onCreate, agents }: NewKnowledgeBaseModalProps) {
-  const agentOptions = agents ?? MOCK_AGENTS;
+  const agentOptions = agents;
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [emoji, setEmoji] = useState("📚");
@@ -53,9 +52,9 @@ export function NewKnowledgeBaseModal({ isOpen, onClose, onCreate, agents }: New
     onClose();
   };
 
-  const toggleAgent = (agent: string) => {
+  const toggleAgent = (agentId: string) => {
     setSelectedAgents((prev) =>
-      prev.includes(agent) ? prev.filter((a) => a !== agent) : [...prev, agent]
+      prev.includes(agentId) ? prev.filter((a) => a !== agentId) : [...prev, agentId]
     );
   };
 
@@ -187,11 +186,11 @@ export function NewKnowledgeBaseModal({ isOpen, onClose, onCreate, agents }: New
             </p>
             <div className="flex flex-wrap gap-1.5">
               {agentOptions.map((agent) => {
-                const isSelected = selectedAgents.includes(agent);
+                const isSelected = selectedAgents.includes(agent.id);
                 return (
                   <button
-                    key={agent}
-                    onClick={() => toggleAgent(agent)}
+                    key={agent.id}
+                    onClick={() => toggleAgent(agent.id)}
                     className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px] transition-colors ${
                       isSelected
                         ? "border-[#4ade80]/30 bg-[#4ade80]/10 text-[#4ade80]"
@@ -199,11 +198,14 @@ export function NewKnowledgeBaseModal({ isOpen, onClose, onCreate, agents }: New
                     }`}
                   >
                     <Bot className="h-3 w-3" />
-                    {agent}
+                    {agent.name}
                     {isSelected && <span className="text-[10px]">✓</span>}
                   </button>
                 );
               })}
+              {agentOptions.length === 0 && (
+                <p className="text-[11px] text-[#737373]">No agents in this workspace yet.</p>
+              )}
             </div>
           </div>
         </div>
