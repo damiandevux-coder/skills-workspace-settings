@@ -2,43 +2,32 @@
 
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
-import {
-  Activity,
-  Bot,
-  ChevronRight,
-  HardDrive,
-  Plus,
-  Users,
-  UserPlus,
-  Zap,
-} from "lucide-react";
+import { useRouter } from "next/navigation";
+import { Bot, HardDrive, Mail, Plus, Users, UserPlus, Zap } from "lucide-react";
 import { AgentCreationModal } from "@/components/AgentCreationModal";
 import { InviteMemberModal } from "@/components/workspaces/InviteMemberModal";
 import { useWorkspace } from "@/components/workspaces/WorkspaceProvider";
 import { KnowledgeItem } from "@/types/skills";
+import { WorkspaceAgent } from "@/types/workspaces";
 import { getWorkspaceUsage, formatTokens } from "@/data/mock-usage";
-import { getWorkspaceActivity } from "@/data/mock-activity";
+import { ROLE_CONFIG } from "@/lib/roles";
 import { formatRelativeTime } from "@/lib/utils";
 import { StatCard } from "@/components/ui/StatCard";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { SectionLabel } from "@/components/ui/SectionLabel";
+import { Chip } from "@/components/ui/Chip";
+import { DailyBars } from "@/components/ui/DailyBars";
 
-function countFiles(items: KnowledgeItem[]): { total: number; pending: number } {
+function countFiles(items: KnowledgeItem[]): number {
   let total = 0;
-  let pending = 0;
   const walk = (list: KnowledgeItem[]) => {
     list.forEach((item) => {
-      if (item.type === "file") {
-        total++;
-        if (item.status === "processing" || item.status === "queued" || item.status === "failed") {
-          pending++;
-        }
-      }
+      if (item.type === "file") total++;
       if (item.children) walk(item.children);
     });
   };
   walk(items);
-  return { total, pending };
+  return total;
 }
 
 const STATUS_DOT: Record<string, string> = {
@@ -47,7 +36,22 @@ const STATUS_DOT: Record<string, string> = {
   offline: "bg-[#737373]",
 };
 
+function AgentStatusChip({ status }: { status: WorkspaceAgent["status"] }) {
+  if (status === "ready") return <Chip tone="success">Active</Chip>;
+  if (status === "busy") return <Chip tone="warning">Busy</Chip>;
+  return <span className="text-[11px] uppercase tracking-wide text-[#737373]">Stopped</span>;
+}
+
+function lastActivity(agent: WorkspaceAgent): string | null {
+  const times = agent.sessions
+    .map((s) => s.lastActiveAt ?? s.createdAt)
+    .sort()
+    .reverse();
+  return times[0] ?? null;
+}
+
 export default function WorkspaceHomePage() {
+  const router = useRouter();
   const { activeWorkspace, addAgent, selectAgent } = useWorkspace();
   const [isAgentModalOpen, setIsAgentModalOpen] = useState(false);
   const [isInviteModalOpen, setIsInviteModalOpen] = useState(false);
@@ -66,18 +70,18 @@ export default function WorkspaceHomePage() {
     }
   }, []);
 
-  const fileStats = activeWorkspace.knowledgeBases
-    .map((kb) => countFiles(kb.items))
-    .reduce((acc, s) => ({ total: acc.total + s.total, pending: acc.pending + s.pending }), {
-      total: 0,
-      pending: 0,
-    });
-
-  const pendingMembers = activeWorkspace.members.filter((m) => m.status === "pending").length;
-  const busyAgents = activeWorkspace.agents.filter((a) => a.status === "busy").length;
+  const totalFiles = activeWorkspace.knowledgeBases.reduce(
+    (acc, kb) => acc + countFiles(kb.items),
+    0
+  );
   const usage = getWorkspaceUsage(activeWorkspace.id);
   const todayTokens = usage.dailyTokens[usage.dailyTokens.length - 1];
-  const activity = getWorkspaceActivity(activeWorkspace.id);
+  const agentUsage = new Map(usage.perAgent.map((r) => [r.agentId, r]));
+
+  const openSession = (agentId: string) => {
+    selectAgent(agentId);
+    router.push("/session/new");
+  };
 
   return (
     <div className="mx-auto max-w-[1200px] px-4 sm:px-6 py-8">
@@ -96,9 +100,7 @@ export default function WorkspaceHomePage() {
               {activeWorkspace.members.length} member
               {activeWorkspace.members.length !== 1 ? "s" : ""} ·{" "}
               {activeWorkspace.agents.length} agent
-              {activeWorkspace.agents.length !== 1 ? "s" : ""} ·{" "}
-              {activeWorkspace.knowledgeBases.length} knowledge base
-              {activeWorkspace.knowledgeBases.length !== 1 ? "s" : ""}
+              {activeWorkspace.agents.length !== 1 ? "s" : ""}
             </p>
           </div>
         </div>
@@ -122,179 +124,142 @@ export default function WorkspaceHomePage() {
 
       {/* Stats */}
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-        <StatCard
-          icon={Users}
-          label="Members"
-          value={activeWorkspace.members.length}
-          hint={pendingMembers > 0 ? `${pendingMembers} pending invite${pendingMembers !== 1 ? "s" : ""}` : undefined}
-          href="/workspaces/members"
-        />
-        <StatCard
-          icon={Bot}
-          label="Agents"
-          value={activeWorkspace.agents.length}
-          hint={busyAgents > 0 ? `${busyAgents} busy right now` : undefined}
-        />
-        <StatCard
-          icon={HardDrive}
-          label="Knowledge files"
-          value={fileStats.total}
-          hint={fileStats.pending > 0 ? `${fileStats.pending} still processing` : undefined}
-          href="/workspaces/knowledge"
-        />
-        <StatCard
-          icon={Zap}
-          label="Tokens today"
-          value={formatTokens(todayTokens)}
-          tone="#4ade80"
-          hint="View usage"
-          href="/workspaces/usage"
-        />
+        <StatCard icon={Users} label="Members" value={activeWorkspace.members.length} href="/workspaces/members" />
+        <StatCard icon={Bot} label="Agents" value={activeWorkspace.agents.length} />
+        <StatCard icon={HardDrive} label="Knowledge files" value={totalFiles} href="/workspaces/knowledge" />
+        <StatCard icon={Zap} label="Tokens today" value={formatTokens(todayTokens)} tone="#4ade80" href="/workspaces/usage" />
       </div>
 
-      {/* Body */}
-      <div className="mt-6 grid grid-cols-1 gap-4 lg:grid-cols-3">
-        {/* Activity feed */}
-        <div className="lg:col-span-2 rounded-xl border border-[#303036] bg-[#0b0b0c] overflow-hidden">
-          <div className="flex items-center gap-2 border-b border-[#232323] px-5 py-3">
-            <Activity className="h-3.5 w-3.5 text-[#737373]" />
-            <SectionLabel>Activity</SectionLabel>
+      {/* Token usage + Members */}
+      <div className="mt-6 grid grid-cols-1 gap-4 lg:grid-cols-2">
+        <Link
+          href="/workspaces/usage"
+          className="rounded-xl border border-[#303036] bg-[#0b0b0c] p-5 transition-colors hover:border-[#3d3d40]"
+        >
+          <div className="mb-4 flex items-center justify-between">
+            <SectionLabel>Token usage · last 14 days</SectionLabel>
+            <span className="text-[11px] text-[#737373]">View usage →</span>
           </div>
-          {activity.length > 0 ? (
+          <DailyBars daily={usage.dailyTokens} height="h-36" />
+        </Link>
+
+        <div className="rounded-xl border border-[#303036] bg-[#0b0b0c] overflow-hidden">
+          <div className="flex items-center justify-between border-b border-[#232323] px-5 py-3">
+            <SectionLabel>Members</SectionLabel>
+            <Link href="/workspaces/members" className="text-[11px] text-[#737373] hover:text-[#fafafa]">
+              Manage →
+            </Link>
+          </div>
+          {activeWorkspace.members.length > 0 ? (
             <div className="divide-y divide-[#232323]">
-              {activity.map((entry) => {
-                const Icon = entry.icon;
+              {activeWorkspace.members.slice(0, 5).map((member) => {
+                const role = ROLE_CONFIG[member.role];
+                const initial = (member.name ?? member.email).charAt(0).toUpperCase();
                 return (
-                  <div key={entry.id} className="flex items-center gap-3 px-5 py-3">
-                    <span
-                      className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg"
-                      style={{ backgroundColor: entry.color + "15" }}
+                  <div key={member.id} className="flex items-center gap-3 px-5 py-2.5">
+                    <div
+                      className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-[11px] font-semibold"
+                      style={{
+                        backgroundColor: member.status === "pending" ? "#303036" : "#4ade80",
+                        color: member.status === "pending" ? "#737373" : "#111111",
+                      }}
                     >
-                      <Icon className="h-3.5 w-3.5" style={{ color: entry.color }} />
-                    </span>
-                    <p className="min-w-0 flex-1 truncate text-[13px] text-[#a7a7ad]">
-                      {entry.parts.map((part, i) =>
-                        part.strong ? (
-                          <span key={i} className="font-medium text-[#fafafa]">
-                            {part.text}
-                          </span>
-                        ) : (
-                          <span key={i}>{part.text}</span>
-                        )
-                      )}
-                    </p>
-                    <span className="shrink-0 text-[11px] text-[#737373]">
-                      {formatRelativeTime(entry.timestamp)}
-                    </span>
+                      {initial}
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate text-[13px] text-[#fafafa]">
+                        {member.name || member.email}
+                      </p>
+                      <p className="flex items-center gap-1 truncate text-[11px] text-[#737373]">
+                        <Mail className="h-2.5 w-2.5 shrink-0" />
+                        {member.email}
+                      </p>
+                    </div>
+                    <Chip color={role.color} icon={role.icon} bordered>
+                      {role.label}
+                    </Chip>
+                    {member.status === "pending" && <Chip tone="warning">Pending</Chip>}
                   </div>
                 );
               })}
             </div>
           ) : (
             <EmptyState
-              icon={Activity}
-              title="No activity yet"
-              description="Invite members, add agents, and run sessions — it all shows up here."
+              icon={Users}
+              title="No members yet"
               variant="plain"
+              action={
+                <button
+                  onClick={() => setIsInviteModalOpen(true)}
+                  className="text-sm text-[#4ade80] hover:underline"
+                >
+                  Invite the first one
+                </button>
+              }
             />
           )}
         </div>
+      </div>
 
-        {/* Right column */}
-        <div className="space-y-4">
-          {/* Agents */}
-          <div className="rounded-xl border border-[#303036] bg-[#0b0b0c] p-4">
-            <div className="mb-2 flex items-center justify-between px-1">
-              <SectionLabel>Agents</SectionLabel>
-              <span className="text-[11px] text-[#737373]">{activeWorkspace.agents.length}</span>
-            </div>
-            {activeWorkspace.agents.length > 0 ? (
-              <div className="space-y-0.5">
-                {activeWorkspace.agents.map((agent) => (
-                  <Link
-                    key={agent.id}
-                    href={`/agents/${agent.id}`}
-                    onClick={() => selectAgent(agent.id)}
-                    className="flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-[13px] text-[#a7a7ad] transition-colors hover:bg-[#151519] hover:text-[#fafafa]"
-                  >
-                    <div className={`h-2 w-2 shrink-0 rounded-full ${STATUS_DOT[agent.status]}`} />
-                    <span className="min-w-0 flex-1 truncate">{agent.name}</span>
-                    <ChevronRight className="h-3 w-3 shrink-0 text-[#737373]" />
-                  </Link>
-                ))}
-                <button
-                  onClick={() => setIsAgentModalOpen(true)}
-                  className="mt-1.5 inline-flex items-center gap-1.5 rounded-md border border-[#303036] px-2.5 py-1.5 text-[11px] text-[#737373] transition-colors hover:border-[#5a5a5e] hover:text-[#fafafa]"
-                >
-                  <Plus className="h-3 w-3" />
-                  Add agent
-                </button>
-              </div>
-            ) : (
-              <EmptyState
-                icon={Bot}
-                title="No agents yet"
-                variant="dashed"
-                action={
-                  <button
-                    onClick={() => setIsAgentModalOpen(true)}
-                    className="inline-flex items-center gap-2 rounded-lg bg-[#fafafa] px-3.5 py-2 text-[12px] font-medium text-[#111111] transition-opacity hover:opacity-90"
-                  >
-                    <Plus className="h-3.5 w-3.5" />
-                    Add agent
-                  </button>
-                }
-              />
-            )}
-          </div>
-
-          {/* Knowledge */}
-          <div className="rounded-xl border border-[#303036] bg-[#0b0b0c] p-4">
-            <div className="mb-2 flex items-center justify-between px-1">
-              <SectionLabel>Shared knowledge</SectionLabel>
-              <span className="text-[11px] text-[#737373]">
-                {activeWorkspace.knowledgeBases.length}
-              </span>
-            </div>
-            {activeWorkspace.knowledgeBases.length > 0 ? (
-              <div className="space-y-0.5">
-                {activeWorkspace.knowledgeBases.map((kb) => {
-                  const stats = countFiles(kb.items);
-                  return (
-                    <Link
-                      key={kb.id}
-                      href={`/workspaces/knowledge?kb=${kb.id}`}
-                      className="flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-[13px] text-[#a7a7ad] transition-colors hover:bg-[#151519] hover:text-[#fafafa]"
-                    >
-                      <span>{kb.emoji}</span>
-                      <span className="min-w-0 flex-1 truncate">{kb.name}</span>
-                      <span className="shrink-0 text-[10px] text-[#737373]">
-                        {stats.total} files
-                        {stats.pending > 0 && ` · ${stats.pending} pending`}
-                      </span>
-                      <ChevronRight className="h-3 w-3 shrink-0 text-[#737373]" />
-                    </Link>
-                  );
-                })}
-              </div>
-            ) : (
-              <EmptyState
-                icon={HardDrive}
-                title="No shared knowledge yet"
-                variant="dashed"
-                action={
-                  <Link
-                    href="/workspaces/knowledge?new=1"
-                    className="inline-flex items-center gap-2 rounded-lg bg-[#fafafa] px-3.5 py-2 text-[12px] font-medium text-[#111111] transition-opacity hover:opacity-90"
-                  >
-                    <Plus className="h-3.5 w-3.5" />
-                    New knowledge base
-                  </Link>
-                }
-              />
-            )}
-          </div>
+      {/* Agent usage table */}
+      <div className="mt-6 rounded-xl border border-[#303036] bg-[#0b0b0c] overflow-hidden">
+        <div className="border-b border-[#232323] px-5 py-3">
+          <SectionLabel>Agent usage</SectionLabel>
         </div>
+        {activeWorkspace.agents.length > 0 ? (
+          <>
+            <div className="grid grid-cols-[1.4fr_110px_100px_100px_120px] items-center gap-4 border-b border-[#232323] px-5 py-2.5">
+              <SectionLabel>Agent</SectionLabel>
+              <SectionLabel>Status</SectionLabel>
+              <SectionLabel>Sessions</SectionLabel>
+              <SectionLabel>Tokens</SectionLabel>
+              <SectionLabel>Last activity</SectionLabel>
+            </div>
+            <div className="divide-y divide-[#232323]">
+              {activeWorkspace.agents.map((agent) => {
+                const row = agentUsage.get(agent.id);
+                const last = lastActivity(agent);
+                return (
+                  <button
+                    key={agent.id}
+                    onClick={() => openSession(agent.id)}
+                    className="grid w-full grid-cols-[1.4fr_110px_100px_100px_120px] items-center gap-4 px-5 py-3 text-left transition-colors hover:bg-[#151519]"
+                  >
+                    <div className="flex items-center gap-2.5 min-w-0">
+                      <div className={`h-2 w-2 shrink-0 rounded-full ${STATUS_DOT[agent.status]}`} />
+                      <span className="truncate text-[13px] text-[#fafafa]">{agent.name}</span>
+                    </div>
+                    <div>
+                      <AgentStatusChip status={agent.status} />
+                    </div>
+                    <span className="text-[12px] text-[#737373]">{row ? row.sessions : "—"}</span>
+                    <span className="font-mono text-[12px] text-[#fafafa]">
+                      {row ? formatTokens(row.tokens) : "—"}
+                    </span>
+                    <span className="text-[12px] text-[#737373]">
+                      {last ? formatRelativeTime(last) : "—"}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          </>
+        ) : (
+          <EmptyState
+            icon={Bot}
+            title="No agents in this workspace yet"
+            variant="plain"
+            action={
+              <button
+                onClick={() => setIsAgentModalOpen(true)}
+                className="inline-flex items-center gap-2 rounded-lg bg-[#fafafa] px-3.5 py-2 text-[12px] font-medium text-[#111111] transition-opacity hover:opacity-90"
+              >
+                <Plus className="h-3.5 w-3.5" />
+                Add agent
+              </button>
+            }
+          />
+        )}
       </div>
 
       <AgentCreationModal

@@ -341,7 +341,7 @@ export function WorkspaceSettingsSidebar() {
                 active={agent.id === activeAgent?.id}
                 onSelect={() => {
                   selectAgent(agent.id);
-                  router.push(`/agents/${agent.id}`);
+                  router.push("/session/new");
                 }}
               />
             ))}
